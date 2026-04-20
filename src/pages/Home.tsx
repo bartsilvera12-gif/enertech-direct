@@ -1,16 +1,7 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, Zap, Shield, Headphones, Cpu, Sun, Battery, Plug, Wrench, Factory, Sparkles } from "lucide-react";
-import { fetchCategories, fetchProducts } from "@/services/storeService";
-import { ProductCardPremium } from "@/components/store/ProductCardPremium";
-
-const CAT_ICONS: Record<string, typeof Sun> = {
-  "energia-solar": Sun,
-  baterias: Battery,
-  inversores: Plug,
-  accesorios: Wrench,
-  industrial: Factory,
-};
+import { ArrowUpRight, ArrowRight } from "lucide-react";
+import { fetchCategories, fetchProducts, formatPYG } from "@/services/storeService";
 
 const Home = () => {
   const { data: categories = [] } = useQuery({ queryKey: ["categories"], queryFn: fetchCategories });
@@ -21,59 +12,207 @@ const Home = () => {
 
   return (
     <>
-      {/* HERO */}
-      <section className="relative overflow-hidden surface-mesh">
-        {/* Decorative shapes */}
-        <div className="absolute -top-32 -right-32 size-[480px] rounded-full bg-brand/5 blur-3xl pointer-events-none" />
-        <div className="absolute top-40 -left-20 size-[360px] rounded-full bg-accent/10 blur-3xl pointer-events-none animate-float-slow" />
+      {/* HERO — editorial split layout */}
+      <section className="border-b border-foreground/10">
+        <div className="container py-16 lg:py-24">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
+            <div className="lg:col-span-7">
+              <div className="eyebrow mb-6">— Generación 2026</div>
+              <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl font-normal leading-[0.98] tracking-tight text-balance">
+                Architecting tomorrow's energy.
+              </h1>
+              <p className="mt-8 max-w-xl text-base md:text-lg text-foreground/65 leading-relaxed">
+                Sistemas precisión-ingeniería de generación, almacenamiento y conversión.
+                Especificados por ingenieros, entregados con cuidado.
+              </p>
+              <div className="mt-10 flex flex-wrap gap-3">
+                <Link
+                  to="/catalog"
+                  className="group inline-flex items-center gap-2 bg-primary text-primary-foreground px-7 py-3.5 text-sm font-medium rounded-full hover:bg-primary-deep transition-all"
+                >
+                  Explorar catálogo
+                  <ArrowRight className="size-4 group-hover:translate-x-0.5 transition-transform" />
+                </Link>
+                <Link
+                  to="/#por-que"
+                  className="inline-flex items-center gap-2 border border-foreground/20 text-foreground px-7 py-3.5 text-sm font-medium rounded-full hover:bg-foreground hover:text-background transition-all"
+                >
+                  Agendar consulta
+                </Link>
+              </div>
 
-        <div className="container relative pt-16 pb-24 md:pt-28 md:pb-36">
-          <div className="max-w-4xl">
-            <span className="inline-flex items-center gap-2 text-[11px] uppercase tracking-widest text-foreground/70 border border-foreground/15 rounded-full px-3 py-1.5 mb-8 animate-fade-in bg-surface-elevated/80 backdrop-blur">
-              <span className="size-1.5 rounded-full bg-brand animate-pulse-glow" />
-              Generación 2026 · Disponible en stock
-            </span>
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-semibold tracking-tighter leading-[0.92] text-balance animate-reveal-up">
-              Energía e insumos
-              <br />
-              para el{" "}
-              <span className="relative inline-block">
-                <span className="relative z-10">futuro constante</span>
-                <span className="absolute inset-x-0 bottom-1.5 h-3 md:h-4 bg-accent/40 -z-0 -skew-x-3" />
-              </span>
-              <span className="text-brand">.</span>
-            </h1>
-            <p className="mt-8 max-w-xl text-base md:text-lg text-muted-foreground leading-relaxed animate-reveal-up [animation-delay:120ms]">
-              Sistemas premium de generación, almacenamiento y conversión.
-              Diseñados con precisión, respaldados por soporte experto.
-            </p>
-            <div className="mt-10 flex flex-wrap gap-3 animate-reveal-up [animation-delay:200ms]">
-              <Link
-                to="/catalog"
-                className="group inline-flex items-center gap-2 bg-foreground text-background px-7 py-3.5 text-sm font-semibold rounded-full hover:bg-brand transition-all duration-300 shadow-soft hover:shadow-glow"
-              >
-                Explorar catálogo
-                <ArrowRight className="size-4 group-hover:translate-x-0.5 transition-transform" />
-              </Link>
-              <Link
-                to="/catalog?featured=1"
-                className="inline-flex items-center gap-2 bg-surface-elevated hairline-strong px-7 py-3.5 text-sm font-medium rounded-full hover:bg-foreground hover:text-background transition-all"
-              >
-                Ver destacados
-              </Link>
+              {/* Spec strip */}
+              <div className="mt-16 grid grid-cols-3 gap-8 max-w-xl">
+                {[
+                  { k: "25y", v: "Garantía" },
+                  { k: "97.6%", v: "Eficiencia η" },
+                  { k: "1,200+", v: "Sistemas" },
+                ].map((s) => (
+                  <div key={s.v} className="border-t border-foreground/15 pt-3">
+                    <div className="text-2xl md:text-3xl font-serif font-normal spec-num">{s.k}</div>
+                    <div className="eyebrow mt-1">{s.v}</div>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            {/* Trust strip */}
-            <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 animate-fade-in [animation-delay:400ms]">
+            <div className="lg:col-span-5">
+              <div className="relative aspect-[4/5] bg-surface overflow-hidden">
+                <img
+                  src="https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=1000&q=80"
+                  alt="Sistema fotovoltaico Enertech"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-5 left-5 right-5 flex justify-between items-start">
+                  <div className="bg-background/95 backdrop-blur px-2.5 py-1 text-[10px] uppercase tracking-[0.2em] font-medium spec-num">
+                    Spec / 001
+                  </div>
+                  <div className="bg-primary text-primary-foreground px-2.5 py-1 text-[10px] uppercase tracking-[0.2em] font-medium">
+                    Disponible
+                  </div>
+                </div>
+                <div className="absolute bottom-5 left-5 right-5 bg-background/95 backdrop-blur p-4 flex items-center justify-between">
+                  <div>
+                    <div className="eyebrow mb-1">Aura X 450</div>
+                    <div className="font-serif text-lg leading-tight">Panel monocristalino</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs text-foreground/60">Desde</div>
+                    <div className="spec-num font-medium">₲ 1.240.000</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CATEGORIES — editorial index */}
+      <section className="border-b border-foreground/10">
+        <div className="container py-20 lg:py-24">
+          <div className="flex items-end justify-between mb-14">
+            <div>
+              <div className="eyebrow mb-4">— Categorías</div>
+              <h2 className="font-serif text-4xl md:text-5xl font-normal tracking-tight text-balance max-w-xl">
+                Sistemas por dominio técnico.
+              </h2>
+            </div>
+            <Link to="/catalog" className="hidden md:inline-flex items-center gap-2 text-sm border-b border-foreground pb-0.5 hover:border-primary hover:text-primary transition-colors">
+              Ver índice completo <ArrowUpRight className="size-4" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-foreground/10 border border-foreground/10">
+            {categories.map((c, i) => (
+              <Link
+                key={c.id}
+                to={`/catalog?cat=${c.slug}`}
+                className="group relative bg-background p-8 lg:p-10 hover:bg-surface transition-all duration-500 min-h-[260px] flex flex-col justify-between"
+              >
+                <div className="flex items-start justify-between">
+                  <span className="eyebrow spec-num">
+                    {String(i + 1).padStart(2, "0")} / {String(categories.length).padStart(2, "0")}
+                  </span>
+                  <ArrowUpRight className="size-5 text-foreground/30 group-hover:text-primary group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-all" />
+                </div>
+                <div>
+                  <h3 className="font-serif text-2xl lg:text-3xl font-normal tracking-tight leading-tight mb-3">
+                    {c.name}
+                  </h3>
+                  <p className="text-sm text-foreground/60 leading-relaxed line-clamp-2">
+                    {c.description}
+                  </p>
+                </div>
+                <div className="absolute bottom-0 left-0 h-px bg-primary w-0 group-hover:w-full transition-all duration-700" />
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FEATURED — gallery grid */}
+      <section className="border-b border-foreground/10">
+        <div className="container py-20 lg:py-24">
+          <div className="flex items-end justify-between mb-14">
+            <div>
+              <div className="eyebrow mb-4">— Selección curada</div>
+              <h2 className="font-serif text-4xl md:text-5xl font-normal tracking-tight text-balance max-w-xl">
+                Sistemas destacados<br />de la temporada.
+              </h2>
+            </div>
+            <Link to="/catalog?featured=1" className="hidden md:inline-flex items-center gap-2 text-sm border-b border-foreground pb-0.5 hover:border-primary hover:text-primary transition-colors">
+              Ver todos <ArrowUpRight className="size-4" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-14">
+            {featured.slice(0, 6).map((p, i) => (
+              <Link key={p.id} to={`/product/${p.slug}`} className="group block">
+                <div className="relative aspect-[4/5] bg-surface overflow-hidden mb-5">
+                  {p.mainImageUrl && (
+                    <img
+                      src={p.mainImageUrl}
+                      alt={p.name}
+                      loading="lazy"
+                      className="w-full h-full object-cover transition-transform duration-[1200ms] group-hover:scale-105"
+                    />
+                  )}
+                  <div className="absolute top-4 left-4 bg-background/95 backdrop-blur px-2 py-1 text-[10px] uppercase tracking-[0.2em] spec-num font-medium">
+                    {String(i + 1).padStart(3, "0")}
+                  </div>
+                  {p.compareAtPrice && (
+                    <div className="absolute top-4 right-4 bg-primary text-primary-foreground px-2 py-1 text-[10px] uppercase tracking-[0.2em] font-medium">
+                      Oferta
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <div className="eyebrow mb-1.5">{p.category?.name}</div>
+                    <h3 className="font-serif text-xl font-normal tracking-tight leading-tight group-hover:text-primary transition-colors">
+                      {p.name}
+                    </h3>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className="spec-num font-medium">{formatPYG(p.price)}</div>
+                    {p.compareAtPrice && (
+                      <div className="spec-num text-xs text-foreground/40 line-through">
+                        {formatPYG(p.compareAtPrice)}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* WHY — editorial pillars */}
+      <section id="por-que" className="border-b border-foreground/10">
+        <div className="container py-20 lg:py-28">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+            <div className="lg:col-span-5">
+              <div className="eyebrow mb-4">— Filosofía</div>
+              <h2 className="font-serif text-4xl md:text-5xl font-normal tracking-tight text-balance leading-[1.05]">
+                Ingeniería de precisión, sin compromisos.
+              </h2>
+              <p className="mt-6 text-foreground/65 leading-relaxed max-w-md">
+                Cada sistema es seleccionado, especificado y respaldado por ingenieros.
+                No vendemos productos: entregamos infraestructura.
+              </p>
+            </div>
+            <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-px bg-foreground/10 border border-foreground/10">
               {[
-                { k: "25+", v: "Años de garantía" },
-                { k: "97.6%", v: "Eficiencia tier-1" },
-                { k: "24/7", v: "Soporte WhatsApp" },
-                { k: "+1.2k", v: "Sistemas instalados" },
-              ].map((s) => (
-                <div key={s.v} className="border-l-2 border-brand pl-4">
-                  <div className="text-2xl md:text-3xl font-semibold tracking-tight price-tabular">{s.k}</div>
-                  <div className="text-xs uppercase tracking-widest text-muted-foreground mt-1">{s.v}</div>
+                { n: "01", title: "Eficiencia tier-1", desc: "Componentes seleccionados por rendimiento sostenido a 25+ años." },
+                { n: "02", title: "Garantía extendida", desc: "Hasta 25 años en generación, 10 en almacenamiento." },
+                { n: "03", title: "Tecnología avanzada", desc: "Topologías modernas con monitoreo en tiempo real." },
+                { n: "04", title: "Soporte directo", desc: "Atención humana por WhatsApp, antes y después." },
+              ].map((it) => (
+                <div key={it.n} className="bg-background p-7 lg:p-8">
+                  <div className="eyebrow spec-num mb-5">{it.n}</div>
+                  <h3 className="font-serif text-xl font-normal tracking-tight mb-2">{it.title}</h3>
+                  <p className="text-sm text-foreground/60 leading-relaxed">{it.desc}</p>
                 </div>
               ))}
             </div>
@@ -81,162 +220,29 @@ const Home = () => {
         </div>
       </section>
 
-      {/* CATEGORIES */}
-      <section className="container py-24">
-        <div className="flex items-end justify-between mb-12">
-          <div>
-            <span className="inline-flex items-center gap-2 text-[11px] uppercase tracking-widest text-muted-foreground">
-              <span className="size-1 rounded-full bg-brand" />
-              Categorías
-            </span>
-            <h2 className="text-3xl md:text-5xl font-semibold tracking-tighter mt-3 text-balance">
-              Sistemas por dominio
-            </h2>
-          </div>
-          <Link
-            to="/catalog"
-            className="hidden md:inline-flex text-sm text-foreground hover:text-brand transition-colors items-center gap-1 group"
-          >
-            Ver todo
-            <ArrowRight className="size-3.5 group-hover:translate-x-1 transition-transform" />
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          {categories.map((c, i) => {
-            const Icon = CAT_ICONS[c.slug] ?? Sun;
-            return (
-              <Link
-                key={c.id}
-                to={`/catalog?cat=${c.slug}`}
-                style={{ animationDelay: `${i * 80}ms` }}
-                className="group relative aspect-[4/5] rounded-3xl bg-surface-elevated border border-foreground/10 overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-elevated animate-reveal-up"
-              >
-                {/* Gradient on hover */}
-                <div className="absolute inset-0 bg-gradient-ink opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                {/* Decorative ring */}
-                <div className="absolute -top-16 -right-16 size-40 rounded-full bg-brand/10 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                {/* Shimmer */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 animate-shimmer transition-opacity duration-500" />
-
-                <div className="relative h-full flex flex-col justify-between p-5">
-                  <div className="size-12 rounded-2xl bg-surface flex items-center justify-center text-foreground group-hover:bg-brand group-hover:text-brand-foreground transition-all duration-500 group-hover:rotate-[-6deg] group-hover:scale-110">
-                    <Icon className="size-5" />
-                  </div>
-
-                  <div className="text-foreground group-hover:text-background transition-colors duration-500">
-                    <h3 className="text-base md:text-lg font-semibold leading-tight tracking-tight">{c.name}</h3>
-                    <p className="text-xs text-muted-foreground group-hover:text-background/60 mt-1.5 line-clamp-2 transition-colors duration-500">
-                      {c.description}
-                    </p>
-                    <div className="mt-4 inline-flex items-center gap-1 text-xs uppercase tracking-widest text-brand group-hover:text-accent transition-colors">
-                      Explorar
-                      <ArrowRight className="size-3 -translate-x-1 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300" />
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* FEATURED */}
-      <section className="relative py-24 overflow-hidden">
-        <div className="absolute inset-0 bg-surface-tinted/40 pointer-events-none" />
-        <div className="container relative">
-          <div className="flex items-end justify-between mb-12">
-            <div>
-              <span className="inline-flex items-center gap-2 text-[11px] uppercase tracking-widest text-muted-foreground">
-                <Sparkles className="size-3 text-brand" />
-                Destacados
-              </span>
-              <h2 className="text-3xl md:text-5xl font-semibold tracking-tighter mt-3 text-balance">
-                Los más solicitados
+      {/* CTA — minimal */}
+      <section>
+        <div className="container py-20 lg:py-28">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-end">
+            <div className="lg:col-span-8">
+              <div className="eyebrow mb-4">— Cierre asistido</div>
+              <h2 className="font-serif text-4xl md:text-6xl font-normal tracking-tight leading-[1.02] text-balance">
+                Cierre directo por WhatsApp.<br />
+                <span className="text-foreground/40">Sin fricciones.</span>
               </h2>
-              <p className="mt-3 text-sm text-muted-foreground max-w-md">
-                Curados por nuestros ingenieros. Stock confirmado, entrega inmediata.
+            </div>
+            <div className="lg:col-span-4 flex flex-col gap-4">
+              <p className="text-foreground/65 leading-relaxed">
+                Cargá tu pedido, completás tus datos. Un asesor te acompaña por WhatsApp para confirmar disponibilidad, pago y entrega.
               </p>
-            </div>
-            <Link
-              to="/catalog?featured=1"
-              className="hidden md:inline-flex text-sm text-foreground hover:text-brand transition-colors items-center gap-1 group"
-            >
-              Ver todos
-              <ArrowRight className="size-3.5 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featured.slice(0, 6).map((p, i) => (
-              <div
-                key={p.id}
-                style={{ animationDelay: `${i * 90}ms` }}
-                className="animate-reveal-up"
+              <Link
+                to="/catalog"
+                className="inline-flex items-center justify-between gap-2 bg-primary text-primary-foreground px-7 py-4 text-sm font-medium rounded-full hover:bg-primary-deep transition-colors group w-full"
               >
-                <ProductCardPremium product={p} />
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* WHY ENERTECH */}
-      <section id="por-que" className="container py-24">
-        <div className="max-w-2xl mb-14">
-          <span className="text-[11px] uppercase tracking-widest text-muted-foreground">Por qué Enertech</span>
-          <h2 className="text-3xl md:text-5xl font-semibold tracking-tighter mt-3 text-balance">
-            Ingeniería de precisión, sin compromisos.
-          </h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[
-            { icon: Zap, title: "Eficiencia récord", desc: "Componentes seleccionados por su rendimiento sostenido a largo plazo." },
-            { icon: Shield, title: "Garantía extendida", desc: "Hasta 25 años de respaldo en sistemas de generación." },
-            { icon: Cpu, title: "Tecnología tier-1", desc: "Topologías avanzadas con monitoreo en tiempo real." },
-            { icon: Headphones, title: "Soporte directo", desc: "Atención humana por WhatsApp, antes y después de la compra." },
-          ].map(({ icon: Icon, title, desc }, i) => (
-            <div
-              key={title}
-              style={{ animationDelay: `${i * 100}ms` }}
-              className="group rounded-3xl bg-surface-elevated border border-foreground/10 p-7 hover:border-foreground/30 hover:-translate-y-1 transition-all duration-500 animate-reveal-up"
-            >
-              <div className="size-11 rounded-2xl bg-foreground text-background flex items-center justify-center mb-6 group-hover:bg-brand transition-colors duration-300">
-                <Icon className="size-5" />
-              </div>
-              <h3 className="font-semibold mb-2 tracking-tight">{title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
+                <span>Empezar pedido</span>
+                <ArrowRight className="size-4 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* CTA TRUST — Charcoal premium with brand accent */}
-      <section className="container pb-24">
-        <div className="rounded-3xl bg-gradient-ink p-10 md:p-16 relative overflow-hidden shadow-elevated">
-          <div className="absolute -top-32 -right-32 size-96 rounded-full bg-brand/30 blur-3xl pointer-events-none animate-float-slow" />
-          <div className="absolute -bottom-20 -left-20 size-80 rounded-full bg-accent/20 blur-3xl pointer-events-none" />
-          <div className="relative max-w-2xl text-background">
-            <span className="inline-flex items-center gap-2 text-[11px] uppercase tracking-widest text-background/70 border border-background/20 rounded-full px-3 py-1 mb-6">
-              <span className="size-1.5 rounded-full bg-accent animate-pulse-glow" />
-              Cierre asistido
-            </span>
-            <h2 className="text-3xl md:text-5xl font-semibold tracking-tighter text-balance">
-              Cierre directo por WhatsApp.
-              <br />
-              <span className="text-accent">Sin fricciones.</span>
-            </h2>
-            <p className="mt-5 text-background/80 max-w-lg leading-relaxed">
-              Cargá tu pedido, completás tus datos, y un asesor te acompaña por WhatsApp para
-              confirmar disponibilidad, pago y entrega.
-            </p>
-            <Link
-              to="/catalog"
-              className="mt-8 inline-flex items-center gap-2 bg-background text-foreground px-7 py-3.5 text-sm font-semibold rounded-full hover:bg-brand hover:text-brand-foreground transition-all duration-300 group"
-            >
-              Empezar ahora
-              <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
           </div>
         </div>
       </section>

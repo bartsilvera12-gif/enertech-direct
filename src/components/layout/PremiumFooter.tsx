@@ -1,38 +1,53 @@
 import logoOriginal from "@/assets/enertech-logo-original.png";
+import { ArrowUpRight } from "lucide-react";
 
 export const PremiumFooter = () => {
   return (
-    <footer className="border-t border-foreground/10 mt-32 surface-contrast">
-      <div className="container py-16 grid gap-12 md:grid-cols-4">
-        <div className="md:col-span-2">
-          <div className="flex items-center gap-3 mb-5">
-            <img src={logoOriginal} alt="Enertech" className="h-12 w-auto rounded-xl" />
+    <footer className="bg-foreground text-background mt-24">
+      <div className="container pt-20 pb-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-20">
+          <div className="lg:col-span-5">
+            <img src={logoOriginal} alt="Enertech" className="h-11 w-auto rounded-lg mb-8" />
+            <h3 className="font-serif text-3xl lg:text-4xl font-normal tracking-tight leading-tight max-w-md text-balance">
+              Energía e insumos para el futuro constante.
+            </h3>
+            <p className="mt-6 text-sm text-background/60 leading-relaxed max-w-md">
+              Sistemas premium de generación, almacenamiento y conversión, respaldados por soporte experto.
+            </p>
           </div>
-          <p className="text-sm text-contrast-foreground/70 max-w-md leading-relaxed">
-            Energía e insumos para el futuro constante. Sistemas premium de
-            generación, almacenamiento y conversión, respaldados por soporte experto.
-          </p>
+
+          <div className="lg:col-span-7 grid grid-cols-2 md:grid-cols-3 gap-10">
+            <div>
+              <div className="text-[11px] uppercase tracking-[0.2em] text-background/50 mb-5">Tienda</div>
+              <ul className="space-y-3 text-sm">
+                <li><a href="/catalog" className="hover:text-primary transition-colors inline-flex items-center gap-1 group">Catálogo <ArrowUpRight className="size-3 opacity-0 group-hover:opacity-100 transition-opacity" /></a></li>
+                <li><a href="/catalog?featured=1" className="hover:text-primary transition-colors">Destacados</a></li>
+                <li><a href="/cart" className="hover:text-primary transition-colors">Carrito</a></li>
+              </ul>
+            </div>
+            <div>
+              <div className="text-[11px] uppercase tracking-[0.2em] text-background/50 mb-5">Soporte</div>
+              <ul className="space-y-3 text-sm">
+                <li><span className="text-background/80">WhatsApp directo</span></li>
+                <li><span className="text-background/80">Soporte técnico</span></li>
+                <li><span className="text-background/80">Garantías</span></li>
+              </ul>
+            </div>
+            <div>
+              <div className="text-[11px] uppercase tracking-[0.2em] text-background/50 mb-5">Contacto</div>
+              <ul className="space-y-3 text-sm text-background/80">
+                <li>+595 981 000 000</li>
+                <li>hola@enertech.py</li>
+                <li>Asunción, Paraguay</li>
+              </ul>
+            </div>
+          </div>
         </div>
-        <div>
-          <h4 className="text-xs uppercase tracking-widest text-accent mb-4">Tienda</h4>
-          <ul className="space-y-2 text-sm">
-            <li><a href="/catalog" className="text-contrast-foreground/80 hover:text-primary-glow transition-colors">Catálogo</a></li>
-            <li><a href="/catalog?featured=1" className="text-contrast-foreground/80 hover:text-primary-glow transition-colors">Destacados</a></li>
-            <li><a href="/cart" className="text-contrast-foreground/80 hover:text-primary-glow transition-colors">Carrito</a></li>
-          </ul>
+
+        <div className="border-t border-background/15 pt-6 flex flex-col md:flex-row gap-3 justify-between text-[11px] uppercase tracking-[0.2em] text-background/50">
+          <span>© {new Date().getFullYear()} Enertech S.A.</span>
+          <span>Hecho con precisión.</span>
         </div>
-        <div>
-          <h4 className="text-xs uppercase tracking-widest text-accent mb-4">Soporte</h4>
-          <ul className="space-y-2 text-sm">
-            <li><span className="text-contrast-foreground/70">WhatsApp directo</span></li>
-            <li><span className="text-contrast-foreground/70">Soporte técnico</span></li>
-            <li><span className="text-contrast-foreground/70">Garantías</span></li>
-          </ul>
-        </div>
-      </div>
-      <div className="container py-6 border-t border-contrast-foreground/10 flex flex-col md:flex-row gap-2 justify-between text-xs text-contrast-foreground/50">
-        <span>© {new Date().getFullYear()} Enertech. Todos los derechos reservados.</span>
-        <span>Hecho con precisión.</span>
       </div>
     </footer>
   );
