@@ -80,13 +80,13 @@ export const ProductCardPremium = ({ product, className }: Props) => {
         </div>
 
         {/* Price */}
-        <div className="flex items-baseline gap-2 mt-1">
+        <div className="flex flex-col mt-1">
           {product.compareAtPrice && (
-            <span className="text-xs text-foreground/40 line-through spec-num">
+            <span className="text-xs text-foreground/40 line-through spec-num leading-tight">
               {formatPYG(product.compareAtPrice)}
             </span>
           )}
-          <span className="text-lg font-bold text-foreground spec-num">
+          <span className="text-lg font-bold text-foreground spec-num leading-tight">
             {formatPYG(product.price)}
           </span>
         </div>
