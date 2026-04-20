@@ -11,69 +11,69 @@
 
 @layer base {
   :root {
-    /* Surfaces — porcelain premium with charcoal ink */
-    --background: 40 14% 97%;        /* porcelain, warm */
-    --foreground: 220 15% 11%;       /* deep charcoal ink */
+    /* Surfaces — pure white with red as the only chromatic accent */
+    --background: 0 0% 100%;          /* pure white */
+    --foreground: 0 0% 8%;            /* near-black ink for text */
 
-    --surface: 36 18% 95%;           /* sand */
+    --surface: 0 0% 98%;              /* off-white */
     --surface-elevated: 0 0% 100%;
-    --surface-tinted: 84 30% 95%;    /* very faint lime wash */
+    --surface-tinted: 0 80% 98%;      /* very faint red wash */
 
     --card: 0 0% 100%;
-    --card-foreground: 220 15% 11%;
+    --card-foreground: 0 0% 8%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 15% 11%;
+    --popover-foreground: 0 0% 8%;
 
-    /* Primary = deep charcoal — premium ink, used for buttons/CTAs */
-    --primary: 220 15% 11%;
-    --primary-foreground: 40 20% 97%;
-    --primary-deep: 220 18% 6%;
-    --primary-glow: 220 12% 22%;
+    /* Primary = Enertech red — the dominant brand color */
+    --primary: 0 85% 50%;
+    --primary-foreground: 0 0% 100%;
+    --primary-deep: 0 78% 40%;
+    --primary-glow: 0 90% 60%;
 
-    /* Brand red — Enertech signature, used as ACCENT not as flood */
-    --brand: 0 88% 52%;
+    /* Brand red — alias of primary for components that use 'brand' */
+    --brand: 0 85% 50%;
     --brand-foreground: 0 0% 100%;
     --brand-deep: 0 78% 40%;
-    --brand-glow: 0 90% 62%;
+    --brand-glow: 0 90% 60%;
 
-    /* Accent = Lime green from the logo mark */
-    --accent: 84 62% 48%;
-    --accent-foreground: 220 15% 11%;
-    --accent-deep: 84 60% 34%;
+    /* Accent = also red (a deeper red) — keep palette strictly red+white */
+    --accent: 0 78% 42%;
+    --accent-foreground: 0 0% 100%;
+    --accent-deep: 0 80% 32%;
 
-    --secondary: 0 0% 96%;
+    --secondary: 0 0% 97%;
     --secondary-foreground: 0 0% 8%;
 
     --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 42%;
+    --muted-foreground: 0 0% 38%;
 
     --destructive: 0 84% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 15% 11%;           /* used at low opacity for hairlines */
-    --input: 220 10% 90%;
-    --ring: 220 15% 11%;
+    --border: 0 0% 8%;                /* used at low opacity for hairlines */
+    --input: 0 0% 92%;
+    --ring: 0 85% 50%;
 
     --radius: 1rem;
 
-    /* Dark contrast surface for hero/CTA blocks */
+    /* Dark contrast surface — kept neutral near-black for hero/CTA blocks */
     --contrast: 0 0% 8%;
     --contrast-foreground: 0 0% 98%;
 
-    /* Gradients & shadows */
-    --gradient-brand: linear-gradient(135deg, hsl(0 88% 52%) 0%, hsl(0 78% 38%) 100%);
-    --gradient-ink: linear-gradient(135deg, hsl(220 15% 11%) 0%, hsl(220 22% 4%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(84 62% 48%) 0%, hsl(84 60% 34%) 100%);
-    --gradient-warm: linear-gradient(180deg, hsl(40 14% 97%) 0%, hsl(36 22% 93%) 100%);
-    --gradient-mesh: radial-gradient(60% 50% at 15% 10%, hsl(0 88% 52% / 0.10) 0%, transparent 60%), radial-gradient(50% 50% at 85% 30%, hsl(84 62% 48% / 0.14) 0%, transparent 60%), radial-gradient(80% 60% at 50% 100%, hsl(220 15% 11% / 0.06) 0%, transparent 60%);
-    --gradient-radial-brand: radial-gradient(60% 60% at 50% 0%, hsl(0 88% 52% / 0.08) 0%, transparent 70%);
-    --gradient-radial-accent: radial-gradient(60% 60% at 50% 0%, hsl(84 62% 48% / 0.16) 0%, transparent 70%);
+    /* Gradients & shadows — only red + white + neutral ink */
+    --gradient-brand: linear-gradient(135deg, hsl(0 85% 50%) 0%, hsl(0 78% 38%) 100%);
+    --gradient-ink: linear-gradient(135deg, hsl(0 0% 10%) 0%, hsl(0 0% 4%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(0 85% 50%) 0%, hsl(0 78% 38%) 100%);
+    --gradient-warm: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(0 60% 98%) 100%);
+    --gradient-mesh: radial-gradient(60% 50% at 15% 10%, hsl(0 85% 50% / 0.10) 0%, transparent 60%), radial-gradient(50% 50% at 85% 30%, hsl(0 85% 50% / 0.08) 0%, transparent 60%), radial-gradient(80% 60% at 50% 100%, hsl(0 0% 8% / 0.04) 0%, transparent 60%);
+    --gradient-radial-brand: radial-gradient(60% 60% at 50% 0%, hsl(0 85% 50% / 0.10) 0%, transparent 70%);
+    --gradient-radial-accent: radial-gradient(60% 60% at 50% 0%, hsl(0 85% 50% / 0.12) 0%, transparent 70%);
 
-    --shadow-elevated: 0 30px 80px -30px hsl(220 15% 11% / 0.22);
-    --shadow-soft: 0 10px 40px -20px hsl(220 15% 11% / 0.12);
-    --shadow-glow: 0 10px 40px -10px hsl(0 88% 52% / 0.35);
-    --shadow-accent-glow: 0 10px 40px -10px hsl(84 62% 48% / 0.40);
+    --shadow-elevated: 0 30px 80px -30px hsl(0 0% 0% / 0.18);
+    --shadow-soft: 0 10px 40px -20px hsl(0 0% 0% / 0.10);
+    --shadow-glow: 0 10px 40px -10px hsl(0 85% 50% / 0.40);
+    --shadow-accent-glow: 0 10px 40px -10px hsl(0 85% 50% / 0.40);
 
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
