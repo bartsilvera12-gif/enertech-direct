@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { ShoppingBag, Menu, X } from "lucide-react";
+import { ShoppingBag, Menu, X, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useCart } from "@/store/cart";
 import { cn } from "@/lib/utils";
@@ -9,7 +9,7 @@ import logoOriginal from "@/assets/enertech-logo-original.png";
 const navItems = [
   { to: "/catalog", label: "Catálogo" },
   { to: "/catalog?featured=1", label: "Destacados" },
-  { to: "/#por-que", label: "Por qué Enertech" },
+  { to: "/#por-que", label: "Tecnología" },
 ];
 
 export const PremiumHeader = () => {
@@ -17,105 +17,124 @@ export const PremiumHeader = () => {
   const openCart = useCart((s) => s.open);
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
+    const onScroll = () => setScrolled(window.scrollY > 8);
     onScroll();
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   return (
-    <header
-      className={cn(
-        "sticky top-0 z-40 transition-all duration-300",
-        scrolled
-          ? "backdrop-blur-2xl bg-background/80 border-b border-foreground/10 shadow-soft"
-          : "backdrop-blur-md bg-background/50 border-b border-transparent"
-      )}
-    >
-      <div className="container flex items-center gap-6 h-20">
-        <Link to="/" className="flex items-center group flex-shrink-0" aria-label="Enertech — Inicio">
-          <img
-            src={logoOriginal}
-            alt="Enertech — Energía e Insumos"
-            className="h-11 md:h-12 w-auto rounded-xl transition-transform group-hover:scale-[1.03]"
-          />
-        </Link>
-
-        <nav className="hidden lg:flex items-center gap-7">
-          {navItems.map((item) => {
-            const active = location.pathname + location.search === item.to;
-            return (
-              <Link
-                key={item.to}
-                to={item.to}
-                className={cn(
-                  "relative text-sm transition-colors",
-                  active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {item.label}
-                <span
-                  className={cn(
-                    "absolute -bottom-1 left-0 h-px bg-brand transition-all duration-300",
-                    active ? "w-full" : "w-0 group-hover:w-full"
-                  )}
-                />
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div className="flex-1 hidden md:block max-w-md ml-auto">
-          <SmartSearch />
-        </div>
-
-        <div className="flex items-center gap-2 ml-auto md:ml-0">
-          <button
-            onClick={openCart}
-            className="relative inline-flex items-center gap-2 rounded-full bg-foreground text-background px-4 py-2.5 text-xs uppercase tracking-widest hover:bg-brand transition-all duration-300 group"
-            aria-label="Abrir carrito"
-          >
-            <ShoppingBag className="size-4" />
-            <span className="hidden sm:inline">Carrito</span>
-            <span className="price-tabular">({count})</span>
-            {count > 0 && (
-              <span className="absolute -top-1 -right-1 size-2.5 rounded-full bg-brand animate-pulse-glow" />
-            )}
-          </button>
-          <button
-            className="lg:hidden p-2 rounded-full hairline-strong hover:bg-surface transition-colors"
-            onClick={() => setMobileOpen((v) => !v)}
-            aria-label="Menú"
-          >
-            {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile search row */}
-      <div className="md:hidden container pb-3">
-        <SmartSearch />
-      </div>
-
-      {mobileOpen && (
-        <div className="lg:hidden border-t border-foreground/10 animate-fade-in bg-background/95 backdrop-blur-xl">
-          <div className="container py-4 flex flex-col gap-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                onClick={() => setMobileOpen(false)}
-                className="text-sm text-foreground/80 hover:text-foreground py-2.5 px-3 rounded-lg hover:bg-surface transition-colors"
-              >
-                {item.label}
-              </Link>
-            ))}
+    <>
+      {/* Top utility strip */}
+      <div className="hidden md:block bg-foreground text-background">
+        <div className="container flex items-center justify-between h-8 text-[11px] tracking-wide">
+          <span className="opacity-70">Envíos a todo Paraguay · Asesoría técnica gratuita</span>
+          <div className="flex items-center gap-6 opacity-80">
+            <span>+595 981 000 000</span>
+            <span className="opacity-50">|</span>
+            <span>L–V 8:00–18:00</span>
           </div>
         </div>
-      )}
-    </header>
+      </div>
+
+      <header
+        className={cn(
+          "sticky top-0 z-40 transition-all duration-300 bg-background",
+          scrolled ? "border-b border-foreground/10" : "border-b border-foreground/5"
+        )}
+      >
+        <div className="container flex items-center gap-10 h-20">
+          <Link to="/" className="flex items-center flex-shrink-0" aria-label="Enertech">
+            <img
+              src={logoOriginal}
+              alt="Enertech"
+              className="h-10 w-auto rounded-lg"
+            />
+          </Link>
+
+          <nav className="hidden lg:flex items-center gap-9 ml-2">
+            {navItems.map((item) => {
+              const active = location.pathname + location.search === item.to;
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className={cn(
+                    "relative text-[13px] font-medium transition-colors py-2",
+                    active ? "text-foreground" : "text-foreground/60 hover:text-foreground"
+                  )}
+                >
+                  {item.label}
+                  {active && (
+                    <span className="absolute -bottom-px left-0 right-0 h-px bg-foreground" />
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
+
+          <div className="ml-auto flex items-center gap-1">
+            <button
+              onClick={() => setSearchOpen((v) => !v)}
+              className="size-10 inline-flex items-center justify-center rounded-full hover:bg-surface transition-colors"
+              aria-label="Buscar"
+            >
+              <Search className="size-[18px]" />
+            </button>
+
+            <button
+              onClick={openCart}
+              className="relative size-10 inline-flex items-center justify-center rounded-full hover:bg-surface transition-colors"
+              aria-label="Carrito"
+            >
+              <ShoppingBag className="size-[18px]" />
+              {count > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold flex items-center justify-center spec-num">
+                  {count}
+                </span>
+              )}
+            </button>
+
+            <button
+              className="lg:hidden size-10 inline-flex items-center justify-center rounded-full hover:bg-surface transition-colors"
+              onClick={() => setMobileOpen((v) => !v)}
+              aria-label="Menú"
+            >
+              {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+            </button>
+          </div>
+        </div>
+
+        {/* Search panel */}
+        {searchOpen && (
+          <div className="border-t border-foreground/10 bg-background animate-fade-in">
+            <div className="container py-5">
+              <SmartSearch />
+            </div>
+          </div>
+        )}
+
+        {mobileOpen && (
+          <div className="lg:hidden border-t border-foreground/10 animate-fade-in bg-background">
+            <div className="container py-5 flex flex-col gap-1">
+              {navItems.map((item) => (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  onClick={() => setMobileOpen(false)}
+                  className="text-sm text-foreground/80 hover:text-foreground py-3 border-b border-foreground/5"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+      </header>
+    </>
   );
 };
