@@ -25,6 +25,11 @@ export default {
         surface: {
           DEFAULT: "hsl(var(--surface))",
           elevated: "hsl(var(--surface-elevated))",
+          tinted: "hsl(var(--surface-tinted))",
+        },
+        contrast: {
+          DEFAULT: "hsl(var(--contrast))",
+          foreground: "hsl(var(--contrast-foreground))",
         },
         primary: {
           DEFAULT: "hsl(var(--primary))",
@@ -47,6 +52,7 @@ export default {
         accent: {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
+          deep: "hsl(var(--accent-deep))",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",
@@ -68,13 +74,16 @@ export default {
         },
       },
       backgroundImage: {
-        "gradient-energy": "var(--gradient-energy)",
-        "gradient-surface": "var(--gradient-surface)",
-        "gradient-radial-glow": "var(--gradient-radial-glow)",
+        "gradient-brand": "var(--gradient-brand)",
+        "gradient-accent": "var(--gradient-accent)",
+        "gradient-warm": "var(--gradient-warm)",
+        "gradient-radial-brand": "var(--gradient-radial-brand)",
+        "gradient-radial-accent": "var(--gradient-radial-accent)",
       },
       boxShadow: {
         elevated: "var(--shadow-elevated)",
         glow: "var(--shadow-glow)",
+        "accent-glow": "var(--shadow-accent-glow)",
       },
       borderRadius: {
         lg: "var(--radius)",
