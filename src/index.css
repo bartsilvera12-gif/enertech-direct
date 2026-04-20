@@ -100,17 +100,30 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    font-feature-settings: 'cv11', 'ss01';
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    font-feature-settings: 'ss01';
+    -webkit-font-smoothing: antialiased;
   }
 
   ::selection {
-    background-color: hsl(var(--primary) / 0.25);
+    background-color: hsl(var(--primary) / 0.18);
     color: hsl(var(--foreground));
   }
 
   h1, h2, h3, h4, h5 {
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
+  }
+  .font-serif {
+    font-family: 'Source Serif 4', Georgia, serif;
+    letter-spacing: -0.025em;
+    font-feature-settings: 'ss01';
+  }
+  .eyebrow {
+    @apply text-[11px] uppercase tracking-[0.2em] text-foreground/60 font-medium;
+  }
+  .spec-num {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.05em;
   }
 }
 
