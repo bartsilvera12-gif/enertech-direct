@@ -54,6 +54,12 @@ export default {
           foreground: "hsl(var(--accent-foreground))",
           deep: "hsl(var(--accent-deep))",
         },
+        brand: {
+          DEFAULT: "hsl(var(--brand))",
+          foreground: "hsl(var(--brand-foreground))",
+          deep: "hsl(var(--brand-deep))",
+          glow: "hsl(var(--brand-glow))",
+        },
         popover: {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",
@@ -75,8 +81,10 @@ export default {
       },
       backgroundImage: {
         "gradient-brand": "var(--gradient-brand)",
+        "gradient-ink": "var(--gradient-ink)",
         "gradient-accent": "var(--gradient-accent)",
         "gradient-warm": "var(--gradient-warm)",
+        "gradient-mesh": "var(--gradient-mesh)",
         "gradient-radial-brand": "var(--gradient-radial-brand)",
         "gradient-radial-accent": "var(--gradient-radial-accent)",
       },
