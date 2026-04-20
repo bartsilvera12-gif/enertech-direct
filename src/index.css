@@ -11,30 +11,36 @@
 
 @layer base {
   :root {
-    /* Surfaces — light, premium retail */
-    --background: 0 0% 100%;
-    --foreground: 0 0% 8%;
+    /* Surfaces — porcelain premium with charcoal ink */
+    --background: 40 14% 97%;        /* porcelain, warm */
+    --foreground: 220 15% 11%;       /* deep charcoal ink */
 
-    --surface: 30 20% 98%;          /* warm soft white */
+    --surface: 36 18% 95%;           /* sand */
     --surface-elevated: 0 0% 100%;
-    --surface-tinted: 0 90% 97%;    /* very faint red wash for sections */
+    --surface-tinted: 84 30% 95%;    /* very faint lime wash */
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 8%;
+    --card-foreground: 220 15% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 8%;
+    --popover-foreground: 220 15% 11%;
 
-    /* Primary = Enertech red */
-    --primary: 0 90% 54%;            /* matches logo background */
-    --primary-foreground: 0 0% 100%;
-    --primary-deep: 0 80% 42%;
-    --primary-glow: 0 90% 60%;
+    /* Primary = deep charcoal — premium ink, used for buttons/CTAs */
+    --primary: 220 15% 11%;
+    --primary-foreground: 40 20% 97%;
+    --primary-deep: 220 18% 6%;
+    --primary-glow: 220 12% 22%;
+
+    /* Brand red — Enertech signature, used as ACCENT not as flood */
+    --brand: 0 88% 52%;
+    --brand-foreground: 0 0% 100%;
+    --brand-deep: 0 78% 40%;
+    --brand-glow: 0 90% 62%;
 
     /* Accent = Lime green from the logo mark */
-    --accent: 84 65% 53%;            /* #9BCC3D-ish lime */
-    --accent-foreground: 0 0% 8%;
-    --accent-deep: 84 60% 38%;
+    --accent: 84 62% 48%;
+    --accent-foreground: 220 15% 11%;
+    --accent-deep: 84 60% 34%;
 
     --secondary: 0 0% 96%;
     --secondary-foreground: 0 0% 8%;
@@ -45,9 +51,9 @@
     --destructive: 0 84% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 0%;               /* used at low opacity for hairlines */
-    --input: 0 0% 92%;
-    --ring: 0 90% 54%;
+    --border: 220 15% 11%;           /* used at low opacity for hairlines */
+    --input: 220 10% 90%;
+    --ring: 220 15% 11%;
 
     --radius: 1rem;
 
@@ -56,15 +62,18 @@
     --contrast-foreground: 0 0% 98%;
 
     /* Gradients & shadows */
-    --gradient-brand: linear-gradient(135deg, hsl(0 90% 54%) 0%, hsl(0 80% 45%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(84 65% 53%) 0%, hsl(84 60% 42%) 100%);
-    --gradient-warm: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(0 90% 98%) 100%);
-    --gradient-radial-brand: radial-gradient(60% 60% at 50% 0%, hsl(0 90% 54% / 0.10) 0%, transparent 70%);
-    --gradient-radial-accent: radial-gradient(60% 60% at 50% 0%, hsl(84 65% 53% / 0.18) 0%, transparent 70%);
+    --gradient-brand: linear-gradient(135deg, hsl(0 88% 52%) 0%, hsl(0 78% 38%) 100%);
+    --gradient-ink: linear-gradient(135deg, hsl(220 15% 11%) 0%, hsl(220 22% 4%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(84 62% 48%) 0%, hsl(84 60% 34%) 100%);
+    --gradient-warm: linear-gradient(180deg, hsl(40 14% 97%) 0%, hsl(36 22% 93%) 100%);
+    --gradient-mesh: radial-gradient(60% 50% at 15% 10%, hsl(0 88% 52% / 0.10) 0%, transparent 60%), radial-gradient(50% 50% at 85% 30%, hsl(84 62% 48% / 0.14) 0%, transparent 60%), radial-gradient(80% 60% at 50% 100%, hsl(220 15% 11% / 0.06) 0%, transparent 60%);
+    --gradient-radial-brand: radial-gradient(60% 60% at 50% 0%, hsl(0 88% 52% / 0.08) 0%, transparent 70%);
+    --gradient-radial-accent: radial-gradient(60% 60% at 50% 0%, hsl(84 62% 48% / 0.16) 0%, transparent 70%);
 
-    --shadow-elevated: 0 20px 60px -25px hsl(0 0% 0% / 0.18);
-    --shadow-glow: 0 10px 40px -10px hsl(0 90% 54% / 0.45);
-    --shadow-accent-glow: 0 10px 40px -10px hsl(84 65% 53% / 0.45);
+    --shadow-elevated: 0 30px 80px -30px hsl(220 15% 11% / 0.22);
+    --shadow-soft: 0 10px 40px -20px hsl(220 15% 11% / 0.12);
+    --shadow-glow: 0 10px 40px -10px hsl(0 88% 52% / 0.35);
+    --shadow-accent-glow: 0 10px 40px -10px hsl(84 62% 48% / 0.40);
 
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
@@ -119,6 +128,10 @@
   .surface-warm {
     background: var(--gradient-warm);
   }
+  .surface-mesh {
+    background-color: hsl(var(--background));
+    background-image: var(--gradient-mesh);
+  }
   .glow-radial-brand {
     background: var(--gradient-radial-brand);
   }
@@ -129,9 +142,57 @@
     background-color: hsl(var(--contrast));
     color: hsl(var(--contrast-foreground));
   }
+  .text-brand {
+    color: hsl(var(--brand));
+  }
+  .bg-brand {
+    background-color: hsl(var(--brand));
+    color: hsl(var(--brand-foreground));
+  }
+  .ink-accent-bar {
+    position: relative;
+  }
+  .ink-accent-bar::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 50%;
+    transform: translateY(-50%);
+    width: 3px; height: 1.1em;
+    background: hsl(var(--brand));
+    border-radius: 2px;
+  }
 }
 
 @layer utilities {
   .text-balance { text-wrap: balance; }
   .text-pretty { text-wrap: pretty; }
+  .mask-fade-r {
+    mask-image: linear-gradient(to right, black 70%, transparent 100%);
+  }
 }
+
+/* Custom keyframes for premium motion */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes reveal-up {
+  0% { opacity: 0; transform: translateY(28px) scale(0.98); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, hsl(var(--brand) / 0.15), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2.4s linear infinite;
+}
+.animate-float-slow { animation: float-slow 6s ease-in-out infinite; }
+.animate-marquee { animation: marquee 40s linear infinite; }
+.animate-reveal-up { animation: reveal-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
