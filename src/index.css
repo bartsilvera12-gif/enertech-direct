@@ -2,71 +2,81 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Enertech — Obsidian Precisionist design system.
- * Premium tech brand. Dark, precise, with green energy accent.
+/* Enertech — Brand-true design system.
+ * Primary: Enertech red (logo background).
+ * Accent: Lime green (logo mark).
+ * Surface: Soft white / cream for premium retail feel.
  * All colors MUST be HSL.
  */
 
 @layer base {
   :root {
-    /* Core surfaces (dark by default — this is a premium dark brand) */
-    --background: 0 0% 4.3%;          /* #0B0B0B core */
-    --foreground: 0 0% 96.1%;         /* #F5F5F5 soft white */
+    /* Surfaces — light, premium retail */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 8%;
 
-    --surface: 0 0% 9%;               /* #171717 */
-    --surface-elevated: 0 0% 11%;
-    --hairline: 0 0% 100%;            /* used at low opacity for borders */
+    --surface: 30 20% 98%;          /* warm soft white */
+    --surface-elevated: 0 0% 100%;
+    --surface-tinted: 0 90% 97%;    /* very faint red wash for sections */
 
-    --card: 0 0% 9%;
-    --card-foreground: 0 0% 96.1%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 8%;
 
-    --popover: 0 0% 7%;
-    --popover-foreground: 0 0% 96.1%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 8%;
 
-    /* Primary = Energy green */
-    --primary: 99 64% 60%;            /* #7ED957 */
-    --primary-foreground: 0 0% 4.3%;
+    /* Primary = Enertech red */
+    --primary: 0 90% 54%;            /* matches logo background */
+    --primary-foreground: 0 0% 100%;
+    --primary-deep: 0 80% 42%;
+    --primary-glow: 0 90% 60%;
 
-    --primary-glow: 99 64% 60%;
-    --primary-deep: 142 34% 23%;      /* #274D36 dark green */
+    /* Accent = Lime green from the logo mark */
+    --accent: 84 65% 53%;            /* #9BCC3D-ish lime */
+    --accent-foreground: 0 0% 8%;
+    --accent-deep: 84 60% 38%;
 
-    --secondary: 0 0% 9%;
-    --secondary-foreground: 0 0% 96.1%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 8%;
 
-    --muted: 0 0% 9%;
-    --muted-foreground: 0 0% 60%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 42%;
 
-    --accent: 99 64% 60%;
-    --accent-foreground: 0 0% 4.3%;
+    --destructive: 0 84% 51%;
+    --destructive-foreground: 0 0% 100%;
 
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 96.1%;
-
-    --border: 0 0% 100%;              /* use with /5 /10 utility */
-    --input: 0 0% 14%;
-    --ring: 99 64% 60%;
+    --border: 0 0% 0%;               /* used at low opacity for hairlines */
+    --input: 0 0% 92%;
+    --ring: 0 90% 54%;
 
     --radius: 1rem;
 
-    /* Gradients & shadows */
-    --gradient-energy: linear-gradient(135deg, hsl(99 64% 60%) 0%, hsl(99 64% 45%) 100%);
-    --gradient-surface: linear-gradient(180deg, hsl(0 0% 9%) 0%, hsl(0 0% 6%) 100%);
-    --gradient-radial-glow: radial-gradient(60% 60% at 50% 0%, hsl(99 64% 60% / 0.12) 0%, transparent 70%);
+    /* Dark contrast surface for hero/CTA blocks */
+    --contrast: 0 0% 8%;
+    --contrast-foreground: 0 0% 98%;
 
-    --shadow-elevated: 0 20px 60px -20px hsl(0 0% 0% / 0.6);
-    --shadow-glow: 0 0 40px -10px hsl(99 64% 60% / 0.35);
+    /* Gradients & shadows */
+    --gradient-brand: linear-gradient(135deg, hsl(0 90% 54%) 0%, hsl(0 80% 45%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(84 65% 53%) 0%, hsl(84 60% 42%) 100%);
+    --gradient-warm: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(0 90% 98%) 100%);
+    --gradient-radial-brand: radial-gradient(60% 60% at 50% 0%, hsl(0 90% 54% / 0.10) 0%, transparent 70%);
+    --gradient-radial-accent: radial-gradient(60% 60% at 50% 0%, hsl(84 65% 53% / 0.18) 0%, transparent 70%);
+
+    --shadow-elevated: 0 20px 60px -25px hsl(0 0% 0% / 0.18);
+    --shadow-glow: 0 10px 40px -10px hsl(0 90% 54% / 0.45);
+    --shadow-accent-glow: 0 10px 40px -10px hsl(84 65% 53% / 0.45);
 
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     /* Sidebar (admin, future) */
-    --sidebar-background: 0 0% 6%;
+    --sidebar-background: 0 0% 8%;
     --sidebar-foreground: 0 0% 80%;
-    --sidebar-primary: 99 64% 60%;
-    --sidebar-primary-foreground: 0 0% 4.3%;
-    --sidebar-accent: 0 0% 10%;
-    --sidebar-accent-foreground: 0 0% 96.1%;
-    --sidebar-border: 0 0% 14%;
-    --sidebar-ring: 99 64% 60%;
+    --sidebar-primary: 0 90% 54%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 14%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 18%;
+    --sidebar-ring: 0 90% 54%;
   }
 }
 
@@ -86,7 +96,7 @@
   }
 
   ::selection {
-    background-color: hsl(var(--primary) / 0.3);
+    background-color: hsl(var(--primary) / 0.25);
     color: hsl(var(--foreground));
   }
 
@@ -97,20 +107,27 @@
 
 @layer components {
   .hairline {
-    @apply border border-white/5;
+    @apply border border-foreground/10;
   }
   .hairline-strong {
-    @apply border border-white/10;
+    @apply border border-foreground/15;
   }
   .price-tabular {
     font-variant-numeric: tabular-nums;
     letter-spacing: 0.01em;
   }
-  .surface {
-    background: var(--gradient-surface);
+  .surface-warm {
+    background: var(--gradient-warm);
   }
-  .glow-radial {
-    background: var(--gradient-radial-glow);
+  .glow-radial-brand {
+    background: var(--gradient-radial-brand);
+  }
+  .glow-radial-accent {
+    background: var(--gradient-radial-accent);
+  }
+  .surface-contrast {
+    background-color: hsl(var(--contrast));
+    color: hsl(var(--contrast-foreground));
   }
 }
 
