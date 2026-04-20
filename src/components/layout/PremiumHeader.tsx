@@ -3,6 +3,7 @@ import { ShoppingBag, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { useCart } from "@/store/cart";
 import { cn } from "@/lib/utils";
+import logoOriginal from "@/assets/enertech-logo-original.png";
 
 const navItems = [
   { to: "/catalog", label: "Catálogo" },
@@ -18,12 +19,13 @@ export const PremiumHeader = () => {
 
   return (
     <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/70 border-b border-white/5">
-      <div className="container flex items-center justify-between h-16">
-        <Link to="/" className="flex items-center gap-2 group">
-          <div className="size-7 rounded-md bg-gradient-energy flex items-center justify-center shadow-glow">
-            <span className="text-primary-foreground font-bold text-sm">E</span>
-          </div>
-          <span className="text-base font-semibold tracking-tight">ENERTECH</span>
+      <div className="container flex items-center justify-between h-20">
+        <Link to="/" className="flex items-center group" aria-label="Enertech — Inicio">
+          <img
+            src={logoOriginal}
+            alt="Enertech — Energía e Insumos"
+            className="h-12 md:h-14 w-auto rounded-xl"
+          />
         </Link>
 
         <nav className="hidden md:flex items-center gap-8">

@@ -14,16 +14,16 @@ const Home = () => {
   return (
     <>
       {/* HERO */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 glow-radial pointer-events-none" />
+      <section className="relative overflow-hidden surface-warm">
+        <div className="absolute inset-0 glow-radial-brand pointer-events-none" />
         <div className="container relative pt-20 pb-28 md:pt-32 md:pb-40">
           <div className="max-w-4xl">
-            <span className="inline-flex items-center gap-2 text-[11px] uppercase tracking-widest text-muted-foreground border border-white/10 rounded-full px-3 py-1 mb-8 animate-fade-in">
+            <span className="inline-flex items-center gap-2 text-[11px] uppercase tracking-widest text-muted-foreground border border-foreground/10 rounded-full px-3 py-1 mb-8 animate-fade-in bg-background/60 backdrop-blur">
               <span className="size-1.5 rounded-full bg-primary animate-pulse-glow" />
               Nueva generación 2026
             </span>
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-semibold tracking-tighter leading-[0.92] text-balance animate-fade-up">
-              Energía sintetizada<br />
+              Energía e insumos<br />
               para el <span className="text-primary">futuro constante</span>.
             </h1>
             <p className="mt-8 max-w-xl text-base md:text-lg text-muted-foreground leading-relaxed animate-fade-up [animation-delay:120ms]">
@@ -40,7 +40,7 @@ const Home = () => {
               </Link>
               <Link
                 to="/catalog?featured=1"
-                className="inline-flex items-center gap-2 bg-surface hairline-strong px-7 py-3.5 text-sm font-medium rounded-full hover:bg-surface-elevated transition-colors"
+                className="inline-flex items-center gap-2 bg-background hairline-strong px-7 py-3.5 text-sm font-medium rounded-full hover:bg-surface transition-colors"
               >
                 Ver destacados
               </Link>
@@ -65,11 +65,11 @@ const Home = () => {
             <Link
               key={c.id}
               to={`/catalog?cat=${c.slug}`}
-              className="group relative aspect-[4/5] rounded-2xl bg-surface hairline overflow-hidden hover:bg-surface-elevated transition-all hover:-translate-y-1"
+              className="group relative aspect-[4/5] rounded-2xl bg-surface hairline overflow-hidden hover:shadow-elevated transition-all hover:-translate-y-1"
             >
-              <div className="absolute inset-0 bg-gradient-radial-glow opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute inset-0 glow-radial-accent opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="absolute inset-0 flex flex-col justify-end p-5">
-                <h3 className="text-base font-medium leading-tight">{c.name}</h3>
+                <h3 className="text-base font-semibold leading-tight">{c.name}</h3>
                 <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{c.description}</p>
                 <ArrowRight className="size-4 mt-3 text-primary opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
               </div>
@@ -121,20 +121,20 @@ const Home = () => {
 
       {/* CTA TRUST */}
       <section className="container py-20">
-        <div className="rounded-3xl bg-surface hairline p-10 md:p-16 relative overflow-hidden">
-          <div className="absolute inset-0 glow-radial opacity-60 pointer-events-none" />
-          <div className="relative max-w-2xl">
+        <div className="rounded-3xl bg-gradient-brand p-10 md:p-16 relative overflow-hidden shadow-glow">
+          <div className="absolute -top-20 -right-20 size-80 rounded-full bg-accent/30 blur-3xl pointer-events-none" />
+          <div className="relative max-w-2xl text-primary-foreground">
             <h2 className="text-3xl md:text-5xl font-semibold tracking-tight text-balance">
               Cierre directo por WhatsApp.<br />
-              <span className="text-primary">Sin fricciones.</span>
+              <span className="text-accent">Sin fricciones.</span>
             </h2>
-            <p className="mt-5 text-muted-foreground max-w-lg leading-relaxed">
+            <p className="mt-5 text-primary-foreground/85 max-w-lg leading-relaxed">
               Cargá tu pedido, completás tus datos, y un asesor te acompaña por WhatsApp para
               confirmar disponibilidad, pago y entrega.
             </p>
             <Link
               to="/catalog"
-              className="mt-8 inline-flex items-center gap-2 bg-primary text-primary-foreground px-7 py-3.5 text-sm font-semibold rounded-full hover:shadow-glow transition-all"
+              className="mt-8 inline-flex items-center gap-2 bg-background text-foreground px-7 py-3.5 text-sm font-semibold rounded-full hover:bg-accent hover:text-accent-foreground transition-colors"
             >
               Empezar ahora <ArrowRight className="size-4" />
             </Link>
