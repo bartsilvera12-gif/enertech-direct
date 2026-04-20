@@ -104,4 +104,15 @@ export async function createWhatsAppOrder(
   };
 }
 
+export function buildProductWhatsAppUrl(product: Product): string {
+  const lines = [
+    "Hola Enertech, me interesa este producto:",
+    `- ${product.name}`,
+    product.sku ? `- SKU: ${product.sku}` : null,
+    `- Precio: ${formatPYG(product.price)}`,
+    `${window.location.origin}/product/${product.slug}`,
+  ].filter(Boolean);
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(lines.join("\n"))}`;
+}
+
 export { formatPYG };
