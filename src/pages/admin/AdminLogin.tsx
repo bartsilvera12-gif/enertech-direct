@@ -78,7 +78,8 @@ export default function AdminLogin() {
         </div>
         {!isSupabaseConfigured() ? (
           <p className="text-sm text-destructive text-center mb-6">
-            Variables de entorno Supabase ausentes. Añade VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY en .env.local
+            Definí <code className="text-xs">VITE_SUPABASE_URL</code> y <code className="text-xs">VITE_SUPABASE_ANON_KEY</code> en{" "}
+            <code className="text-xs">.env.local</code> y reiniciá <code className="text-xs">npm run dev</code>.
           </p>
         ) : null}
         <form onSubmit={handleLogin} className="space-y-5">
@@ -108,7 +109,7 @@ export default function AdminLogin() {
               required
             />
           </div>
-          <Button type="submit" className="w-full" size="lg" disabled={submitting || !isSupabaseConfigured()}>
+          <Button type="submit" className="w-full" size="lg" disabled={submitting}>
             {submitting ? "Entrando…" : "Iniciar sesión"}
           </Button>
         </form>
