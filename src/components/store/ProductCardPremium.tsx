@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
+import { useMemo } from "react";
 import { ShoppingBag, MessageCircle } from "lucide-react";
 import { useCart } from "@/store/cart";
 import type { Product } from "@/types";
-import { buildProductWhatsAppUrl, formatPYG } from "@/services/storeService";
+import { formatPYG, formatProductWhatsAppHref } from "@/services/storeService";
+import { useStoreWhatsappDigits } from "@/hooks/useStoreWhatsappHref";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -12,6 +14,11 @@ interface Props {
 
 export const ProductCardPremium = ({ product, className }: Props) => {
   const add = useCart((s) => s.add);
+  const { data: waDigits } = useStoreWhatsappDigits();
+  const whatsappHref = useMemo(
+    () => (waDigits ? formatProductWhatsAppHref(product, waDigits) : undefined),
+    [product, waDigits],
+  );
   const lowStock = product.stock > 0 && product.stock <= 5;
   const outOfStock = product.stock === 0;
   const discount = product.compareAtPrice
@@ -94,10 +101,14 @@ export const ProductCardPremium = ({ product, className }: Props) => {
         {/* Actions */}
         <div className="mt-auto pt-3 grid grid-cols-[1fr_auto] gap-2">
           <a
-            href={buildProductWhatsAppUrl(product)}
+            href={whatsappHref ?? "#"}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-1.5 bg-[#25D366] text-white px-3 py-2.5 rounded-full text-xs font-semibold hover:bg-[#1ebe5a] transition-colors"
+            onClick={(e) => {
+              if (!whatsappHref) e.preventDefault();
+            }}
+            className="inline-flex items-center justify-center gap-1.5 bg-[#25D366] text-white px-3 py-2.5 rounded-full text-xs font-semibold hover:bg-[#1ebe5a] transition-colors disabled:opacity-50"
+            aria-disabled={!whatsappHref}
           >
             <MessageCircle className="size-3.5 fill-current" />
             WhatsApp
