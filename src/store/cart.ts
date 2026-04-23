@@ -16,6 +16,11 @@ interface CartState {
   count: () => number;
 }
 
+function safeItems(get: () => CartState): CartItem[] {
+  const raw = get().items;
+  return Array.isArray(raw) ? raw : [];
+}
+
 export const useCart = create<CartState>()(
   persist(
     (set, get) => ({
@@ -25,7 +30,7 @@ export const useCart = create<CartState>()(
       close: () => set({ isOpen: false }),
       toggle: () => set({ isOpen: !get().isOpen }),
       add: (product, quantity = 1) => {
-        const items = [...get().items];
+        const items = [...safeItems(get)];
         const idx = items.findIndex((i) => i.productId === product.id);
         if (idx >= 0) {
           const next = Math.min(items[idx].quantity + quantity, product.stock);
@@ -43,19 +48,28 @@ export const useCart = create<CartState>()(
         }
         set({ items, isOpen: true });
       },
-      remove: (productId) => set({ items: get().items.filter((i) => i.productId !== productId) }),
+      remove: (productId) =>
+        set({ items: safeItems(get).filter((i) => i.productId !== productId) }),
       setQuantity: (productId, quantity) => {
-        const items = get().items.map((i) =>
-          i.productId === productId
-            ? { ...i, quantity: Math.max(1, Math.min(quantity, i.stock)) }
-            : i
+        const items = safeItems(get).map((i) =>
+          i.productId === productId ? { ...i, quantity: Math.max(1, Math.min(quantity, i.stock)) } : i,
         );
         set({ items });
       },
       clear: () => set({ items: [] }),
-      subtotal: () => get().items.reduce((s, i) => s + i.price * i.quantity, 0),
-      count: () => get().items.reduce((s, i) => s + i.quantity, 0),
+      subtotal: () => safeItems(get).reduce((s, i) => s + i.price * i.quantity, 0),
+      count: () => safeItems(get).reduce((s, i) => s + i.quantity, 0),
     }),
-    { name: "enertech-cart" }
-  )
+    {
+      name: "enertech-cart-v3",
+      merge: (persisted, current) => {
+        const p = persisted as Partial<Pick<CartState, "items" | "isOpen">> | undefined;
+        return {
+          ...current,
+          items: Array.isArray(p?.items) ? p.items : [],
+          isOpen: Boolean(p?.isOpen),
+        };
+      },
+    },
+  ),
 );

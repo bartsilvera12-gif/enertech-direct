@@ -12,6 +12,7 @@ export {
   rootCategories,
   childrenOfParentSlug,
   PRODUCT_EMBED,
+  HERO_SLIDER_SELECT,
   type CatalogFacets,
   type CatalogFilters,
   type CatalogSort,
@@ -21,6 +22,8 @@ export { createWhatsAppOrder } from "@/services/orderService";
 export function formatPYG(amount: number): string {
   return new Intl.NumberFormat("es-PY", { style: "currency", currency: "PYG", maximumFractionDigits: 0 }).format(amount);
 }
+
+export { deriveDiscountPercent } from "@/lib/pricing";
 
 /** Consulta por WhatsApp — mensaje según briefing comercial. */
 export function formatProductWhatsAppHref(product: Product, whatsappDigits: string): string {

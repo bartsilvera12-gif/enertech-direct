@@ -7,7 +7,7 @@ export function ProtectedAdminRoute() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-background text-muted-foreground">
+      <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-background surface-mesh text-muted-foreground">
         <Loader2 className="size-8 animate-spin text-primary" />
         <span className="text-sm">Verificando acceso…</span>
       </div>

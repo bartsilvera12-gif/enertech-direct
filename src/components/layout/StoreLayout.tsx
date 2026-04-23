@@ -1,7 +1,6 @@
 import { Outlet } from "react-router-dom";
 import { PremiumHeader } from "@/components/layout/PremiumHeader";
 import { PremiumFooter } from "@/components/layout/PremiumFooter";
-import { CartDrawer } from "@/components/store/CartDrawer";
 
 export const StoreLayout = () => {
   return (
@@ -11,7 +10,6 @@ export const StoreLayout = () => {
         <Outlet />
       </main>
       <PremiumFooter />
-      <CartDrawer />
     </div>
   );
 };

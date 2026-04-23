@@ -1,13 +1,30 @@
 import { isSupabaseConfigured, supabase, assertSupabaseConfigured } from "@/lib/supabase";
 import { mapCategory, mapProduct, type CategoryRow, type ProductRow } from "@/lib/mapEnertech";
 import type { Category, Product } from "@/types";
+import {
+  rootCategoriesSorted,
+  childrenOfParentSlug as nestedChildrenOfRootSlug,
+} from "@/lib/categoryHierarchy";
 
-/** FK explícitos: mismo origen `categories` para categoría y subcategoría. */
+/** Catálogo + categoría/subcategoría + filas en product_images (tras migración 09). */
 export const PRODUCT_EMBED = `
   *,
   category:categories!category_id (*),
   subcategory:categories!subcategory_id (*),
   product_images (*)
+`;
+
+/** Hero: featured + orden carrusel + imágenes. */
+export const HERO_SLIDER_SELECT = `
+  id,
+  name,
+  slug,
+  is_featured,
+  created_at,
+  image_url,
+  gallery,
+  hero_slide_order,
+  product_images ( url, sort_order, alt )
 `;
 
 export type CatalogSort = "newest" | "price_asc" | "price_desc" | "name_asc" | "code_asc";
@@ -20,6 +37,8 @@ export type CatalogFilters = {
   warehouse?: string;
   articleType?: string;
   situation?: string;
+  /** Rango / etiqueta comercial (`range_label`). */
+  rangeLabel?: string;
   search?: string;
   featuredOnly?: boolean;
   sort?: CatalogSort;
@@ -32,21 +51,20 @@ export async function fetchCategories(): Promise<Category[]> {
     .from("categories")
     .select("*")
     .eq("is_active", true)
-    .order("sort_order", { ascending: true });
+    .order("sort_order", { ascending: true })
+    .order("name", { ascending: true });
   if (error) throw error;
   return (data as CategoryRow[]).map(mapCategory);
 }
 
-/** Categorías raíz (sin padre). */
+/** Categorías principales (sin padre), ordenadas por sort_order y nombre. */
 export function rootCategories(all: Category[]): Category[] {
-  return all.filter((c) => !c.parentId);
+  return rootCategoriesSorted(all);
 }
 
-/** Subcategorías de un padre (por slug de padre). */
-export function childrenOfParentSlug(all: Category[], parentSlug: string): Category[] {
-  const parent = all.find((c) => c.slug === parentSlug);
-  if (!parent) return [];
-  return all.filter((c) => c.parentId === parent.id);
+/** Subcategorías directas de una categoría principal (slug de raíz obligatorio). */
+export function childrenOfParentSlug(all: Category[], rootSlug: string): Category[] {
+  return nestedChildrenOfRootSlug(all, rootSlug);
 }
 
 export type CatalogFacets = {
@@ -55,16 +73,17 @@ export type CatalogFacets = {
   warehouses: string[];
   situations: string[];
   articleTypes: string[];
+  rangeLabels: string[];
 };
 
 export async function fetchCatalogFacets(): Promise<CatalogFacets> {
   if (!isSupabaseConfigured()) {
-    return { brands: [], suppliers: [], warehouses: [], situations: [], articleTypes: [] };
+    return { brands: [], suppliers: [], warehouses: [], situations: [], articleTypes: [], rangeLabels: [] };
   }
   assertSupabaseConfigured();
   const { data, error } = await supabase
     .from("products")
-    .select("brand,supplier,warehouse,situation,article_type")
+    .select("brand,supplier,warehouse,situation,article_type,range_label")
     .eq("is_active", true);
   if (error) throw error;
   const brands = new Set<string>();
@@ -72,6 +91,7 @@ export async function fetchCatalogFacets(): Promise<CatalogFacets> {
   const warehouses = new Set<string>();
   const situations = new Set<string>();
   const articleTypes = new Set<string>();
+  const rangeLabels = new Set<string>();
   for (const row of data ?? []) {
     const r = row as Record<string, string | null>;
     if (r.brand?.trim()) brands.add(r.brand.trim());
@@ -79,6 +99,7 @@ export async function fetchCatalogFacets(): Promise<CatalogFacets> {
     if (r.warehouse?.trim()) warehouses.add(r.warehouse.trim());
     if (r.situation?.trim()) situations.add(r.situation.trim());
     if (r.article_type?.trim()) articleTypes.add(r.article_type.trim());
+    if (r.range_label?.trim()) rangeLabels.add(r.range_label.trim());
   }
   const sortSet = (s: Set<string>) => [...s].sort((a, b) => a.localeCompare(b, "es"));
   return {
@@ -87,6 +108,7 @@ export async function fetchCatalogFacets(): Promise<CatalogFacets> {
     warehouses: sortSet(warehouses),
     situations: sortSet(situations),
     articleTypes: sortSet(articleTypes),
+    rangeLabels: sortSet(rangeLabels),
   };
 }
 
@@ -96,7 +118,7 @@ export async function fetchProducts(opts?: CatalogFilters): Promise<Product[]> {
 
   let q = supabase.from("products").select(PRODUCT_EMBED).eq("is_active", true);
 
-  if (opts?.featuredOnly) q = q.eq("featured", true);
+  if (opts?.featuredOnly) q = q.eq("is_featured", true);
 
   let categoryId: string | undefined;
   let subcategoryId: string | undefined;
@@ -104,23 +126,24 @@ export async function fetchProducts(opts?: CatalogFilters): Promise<Product[]> {
   if (opts?.categorySlug) {
     const { data: cat } = await supabase
       .from("categories")
-      .select("id")
+      .select("id,parent_id")
       .eq("slug", opts.categorySlug)
       .eq("is_active", true)
       .maybeSingle();
-    if (cat?.id) categoryId = cat.id;
-    else return [];
+    if (!cat?.id || cat.parent_id != null) return [];
+    categoryId = cat.id;
   }
 
   if (opts?.subcategorySlug) {
     const { data: sub } = await supabase
       .from("categories")
-      .select("id")
+      .select("id,parent_id")
       .eq("slug", opts.subcategorySlug)
       .eq("is_active", true)
       .maybeSingle();
-    if (sub?.id) subcategoryId = sub.id;
-    else return [];
+    if (!sub?.id || sub.parent_id == null) return [];
+    if (categoryId && sub.parent_id !== categoryId) return [];
+    subcategoryId = sub.id;
   }
 
   if (categoryId) q = q.eq("category_id", categoryId);
@@ -131,6 +154,7 @@ export async function fetchProducts(opts?: CatalogFilters): Promise<Product[]> {
   if (opts?.warehouse) q = q.eq("warehouse", opts.warehouse);
   if (opts?.articleType) q = q.eq("article_type", opts.articleType);
   if (opts?.situation) q = q.eq("situation", opts.situation);
+  if (opts?.rangeLabel) q = q.eq("range_label", opts.rangeLabel);
 
   const sort = opts?.sort ?? "newest";
   if (sort === "price_asc") q = q.order("price", { ascending: true });
@@ -145,14 +169,28 @@ export async function fetchProducts(opts?: CatalogFilters): Promise<Product[]> {
 
   if (opts?.search) {
     const s = opts.search.toLowerCase().trim();
-    list = list.filter(
-      (p) =>
-        p.name.toLowerCase().includes(s) ||
-        p.slug.toLowerCase().includes(s) ||
-        (p.sku?.toLowerCase().includes(s) ?? false) ||
-        (p.code?.toLowerCase().includes(s) ?? false) ||
-        (p.brand?.toLowerCase().includes(s) ?? false),
-    );
+    list = list.filter((p) => {
+      const hay = [
+        p.name,
+        p.slug,
+        p.sku,
+        p.code,
+        p.brand,
+        p.supplier,
+        p.warehouse,
+        p.articleType,
+        p.situation,
+        p.rangeLabel,
+        p.shortDescription,
+        p.description,
+        p.category?.name,
+        p.subcategory?.name,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return hay.includes(s);
+    });
   }
 
   return list;
@@ -193,21 +231,24 @@ export async function fetchRelatedProducts(product: Product, limit = 4): Promise
   return (data as ProductRow[]).map(mapProduct);
 }
 
-const withImage = (p: Product) => Boolean(p.mainImageUrl);
+const withImage = (p: Product) => Boolean(p.mainImageUrl?.trim());
 
 /**
- * Hasta `limit` productos con imagen: prioriza destacados, completa con los más recientes.
- * Debe alimentar el carrusel del hero (siempre datos reales, no hardcode).
+ * Hasta `limit` productos activos con imagen válida (`image_url` y/o primera `product_images`).
+ * Prioridad: `is_featured = true`; orden por `hero_slide_order` si existe en fila, luego `created_at` DESC.
+ * Si no alcanza, completa con no destacados por `created_at` DESC.
+ * Ignora filas sin URL de imagen. No falla si hay menos de `limit` resultados.
  */
 export async function fetchHeroSliderProducts(limit = 5): Promise<Product[]> {
   if (!isSupabaseConfigured()) return [];
   assertSupabaseConfigured();
-  const cap = 50;
+  const cap = Math.max(limit * 10, 40);
   const { data: feat, error: e1 } = await supabase
     .from("products")
-    .select(PRODUCT_EMBED)
+    .select(HERO_SLIDER_SELECT)
     .eq("is_active", true)
-    .eq("featured", true)
+    .eq("is_featured", true)
+    .order("hero_slide_order", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: false })
     .limit(cap);
   if (e1) throw e1;
@@ -217,7 +258,7 @@ export async function fetchHeroSliderProducts(limit = 5): Promise<Product[]> {
 
   const { data: recent, error: e2 } = await supabase
     .from("products")
-    .select(PRODUCT_EMBED)
+    .select(HERO_SLIDER_SELECT)
     .eq("is_active", true)
     .order("created_at", { ascending: false })
     .limit(cap);

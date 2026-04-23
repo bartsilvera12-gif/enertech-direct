@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Search, ArrowUpRight, Sparkles, Command } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchProducts, fetchCategories, formatPYG } from "@/services/storeService";
+import { recordProductEvent } from "@/services/productEventService";
 import { cn } from "@/lib/utils";
 
 interface SmartSearchProps {
@@ -61,7 +62,12 @@ export const SmartSearch = ({
   const flatItems = useMemo(
     () => [
       ...categoryMatches.map((c) => ({ type: "cat" as const, id: c.id, label: c.name, to: `/catalog?cat=${c.slug}` })),
-      ...productMatches.map((p) => ({ type: "prod" as const, id: p.id, label: p.name, to: `/p/${p.slug}` })),
+      ...productMatches.map((p) => ({
+        type: "prod" as const,
+        id: p.id,
+        label: p.name,
+        to: `/product/${p.slug}`,
+      })),
     ],
     [categoryMatches, productMatches]
   );
@@ -91,6 +97,10 @@ export const SmartSearch = ({
   }, []);
 
   const submit = () => {
+    const sel = flatItems[activeIndex];
+    if (sel?.type === "prod") {
+      void recordProductEvent(sel.id, "search_click", q.trim() || undefined);
+    }
     if (flatItems[activeIndex]) {
       navigate(flatItems[activeIndex].to);
       setOpen(false);
@@ -212,8 +222,9 @@ export const SmartSearch = ({
                 return (
                   <Link
                     key={p.id}
-                    to={`/p/${p.slug}`}
+                    to={`/product/${p.slug}`}
                     onClick={() => {
+                      void recordProductEvent(p.id, "search_click", q.trim() || undefined);
                       setOpen(false);
                       setQuery("");
                     }}

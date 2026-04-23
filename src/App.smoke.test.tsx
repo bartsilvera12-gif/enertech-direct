@@ -15,6 +15,7 @@ vi.mock("@/services/storeService", async (importOriginal) => {
       warehouses: [],
       situations: [],
       articleTypes: [],
+      rangeLabels: [],
     }),
   };
 });

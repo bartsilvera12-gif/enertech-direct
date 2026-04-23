@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from "lucide-react";
 import { useCart } from "@/store/cart";
 import { formatPYG } from "@/services/storeService";
+import { recordProductEvent } from "@/services/productEventService";
 
 const Cart = () => {
   const { items, setQuantity, remove, subtotal, clear } = useCart();
@@ -33,12 +34,24 @@ const Cart = () => {
         <div className="lg:col-span-2 rounded-3xl bg-surface hairline divide-y divide-white/5 overflow-hidden">
           {items.map((item) => (
             <div key={item.productId} className="p-5 flex gap-5">
-              <Link to={`/product/${item.slug}`} className="size-24 rounded-xl bg-background overflow-hidden hairline shrink-0">
+              <Link
+                to={`/product/${item.slug}`}
+                className="size-24 rounded-xl bg-background overflow-hidden hairline shrink-0"
+                onClick={() => {
+                  void recordProductEvent(item.productId, "click");
+                }}
+              >
                 {item.imageUrl && <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />}
               </Link>
               <div className="flex-1 min-w-0 flex flex-col">
                 <div className="flex justify-between gap-2">
-                  <Link to={`/product/${item.slug}`} className="font-medium leading-tight hover:text-primary truncate">
+                  <Link
+                    to={`/product/${item.slug}`}
+                    className="font-medium leading-tight hover:text-primary truncate"
+                    onClick={() => {
+                      void recordProductEvent(item.productId, "click");
+                    }}
+                  >
                     {item.name}
                   </Link>
                   <button onClick={() => remove(item.productId)} className="text-muted-foreground hover:text-destructive shrink-0" aria-label="Quitar">

@@ -14,7 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["DM Sans", "system-ui", "sans-serif"],
+        sans: ["Inter", "Poppins", "system-ui", "sans-serif"],
         serif: ["Source Serif 4", "Georgia", "serif"],
       },
       colors: {
@@ -64,6 +64,10 @@ export default {
         popover: {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",
+        },
+        strategic: {
+          DEFAULT: "hsl(var(--strategic))",
+          foreground: "hsl(var(--strategic-foreground))",
         },
         card: {
           DEFAULT: "hsl(var(--card))",
@@ -116,6 +120,10 @@ export default {
           "0%, 100%": { opacity: "0.6" },
           "50%": { opacity: "1" },
         },
+        "marquee-left": {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-50%)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -123,6 +131,7 @@ export default {
         "fade-up": "fade-up 0.6s cubic-bezier(0.4, 0, 0.2, 1) both",
         "fade-in": "fade-in 0.5s ease-out both",
         "pulse-glow": "pulse-glow 3s ease-in-out infinite",
+        "marquee-left": "marquee-left var(--marquee-duration,35s) linear infinite",
       },
       transitionTimingFunction: {
         smooth: "cubic-bezier(0.4, 0, 0.2, 1)",

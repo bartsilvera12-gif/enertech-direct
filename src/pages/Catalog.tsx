@@ -1,121 +1,266 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Search } from "lucide-react";
-import { fetchCategories, fetchProducts } from "@/services/storeService";
+import { Filter, Search, SlidersHorizontal } from "lucide-react";
+import {
+  fetchCategories,
+  fetchProducts,
+  fetchCatalogFacets,
+  rootCategories,
+  childrenOfParentSlug,
+  type CatalogSort,
+} from "@/services/storeService";
 import { ProductCardPremium } from "@/components/store/ProductCardPremium";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 const Catalog = () => {
   const [params, setParams] = useSearchParams();
-  const catSlug = params.get("cat") ?? undefined;
-  const featuredOnly = params.get("featured") === "1";
-  const [search, setSearch] = useState("");
-  const [sort, setSort] = useState<"newest" | "price_asc" | "price_desc">("newest");
 
-  useEffect(() => { document.title = "Catálogo — Enertech"; }, []);
+  const catSlug = params.get("cat") ?? undefined;
+  const subSlug = params.get("sub") ?? undefined;
+  const brand = params.get("brand") ?? undefined;
+  const supplier = params.get("supplier") ?? undefined;
+  const warehouse = params.get("warehouse") ?? undefined;
+  const situation = params.get("situation") ?? undefined;
+  const articleType = params.get("tipo") ?? undefined;
+  const rangeLabel = params.get("rango") ?? undefined;
+
+  const [search, setSearch] = useState(params.get("q") ?? "");
+  const [debouncedSearch, setDebouncedSearch] = useState(params.get("q") ?? "");
+  const [sort, setSort] = useState<CatalogSort>((params.get("sort") as CatalogSort) || "newest");
+
+  useEffect(() => {
+    document.title = "Catálogo — Enertech";
+  }, []);
+
+  useEffect(() => {
+    setSearch(params.get("q") ?? "");
+    setDebouncedSearch(params.get("q") ?? "");
+  }, [params]);
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search), 400);
+    return () => clearTimeout(t);
+  }, [search]);
 
   const { data: categories = [] } = useQuery({ queryKey: ["categories"], queryFn: fetchCategories });
-  const { data: products = [], isLoading } = useQuery({
-    queryKey: ["products", catSlug, featuredOnly, search, sort],
-    queryFn: () => fetchProducts({ categorySlug: catSlug, featuredOnly, search, sort }),
+  const roots = rootCategories(categories);
+
+  const subOptions = useMemo(() => {
+    if (!catSlug) return [];
+    return childrenOfParentSlug(categories, catSlug);
+  }, [categories, catSlug]);
+
+  const { data: facets } = useQuery({
+    queryKey: ["catalog-facets"],
+    queryFn: fetchCatalogFacets,
   });
 
-  const setCat = (slug?: string) => {
+  const { data: products = [], isLoading } = useQuery({
+    queryKey: [
+      "products",
+      "catalog",
+      catSlug,
+      subSlug,
+      brand,
+      supplier,
+      warehouse,
+      situation,
+      articleType,
+      rangeLabel,
+      debouncedSearch,
+      sort,
+    ],
+    queryFn: () =>
+      fetchProducts({
+        categorySlug: catSlug,
+        subcategorySlug: subSlug,
+        brand,
+        supplier,
+        warehouse,
+        situation,
+        articleType,
+        rangeLabel,
+        search: debouncedSearch,
+        sort,
+      }),
+  });
+
+  const setParam = (key: string, value: string | undefined) => {
     const next = new URLSearchParams(params);
-    if (slug) next.set("cat", slug); else next.delete("cat");
-    setParams(next);
-  };
-  const toggleFeatured = () => {
-    const next = new URLSearchParams(params);
-    if (featuredOnly) next.delete("featured"); else next.set("featured", "1");
+    if (value) next.set(key, value);
+    else next.delete(key);
     setParams(next);
   };
 
-  const activeCat = useMemo(() => categories.find((c) => c.slug === catSlug), [categories, catSlug]);
+  const clearFilters = () => {
+    setParams(new URLSearchParams());
+    setSearch("");
+    setSort("newest");
+  };
 
   return (
-    <div className="container py-12 md:py-16">
+    <div className="container py-10 md:py-14">
       <header className="mb-10">
-        <span className="text-[11px] uppercase tracking-widest text-muted-foreground">Catálogo</span>
-        <h1 className="text-4xl md:text-5xl font-semibold tracking-tight mt-2">
-          {activeCat ? activeCat.name : featuredOnly ? "Productos destacados" : "Todos los sistemas"}
-        </h1>
+        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-2">Catálogo corporativo</p>
+        <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">Productos</h1>
+        <p className="text-muted-foreground mt-2 max-w-2xl text-sm">
+          Filtrá por categoría, marca, depósito y más. Consultá disponibilidad por WhatsApp en cada ficha.
+        </p>
       </header>
 
-      {/* Filters */}
-      <div className="flex flex-col lg:flex-row gap-4 mb-10">
-        <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar producto..."
-            className="w-full bg-surface hairline rounded-full pl-11 pr-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
-          />
-        </div>
-        <select
-          value={sort}
-          onChange={(e) => setSort(e.target.value as typeof sort)}
-          className="bg-surface hairline rounded-full px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
-        >
-          <option value="newest">Más recientes</option>
-          <option value="price_asc">Precio: menor a mayor</option>
-          <option value="price_desc">Precio: mayor a menor</option>
-        </select>
-      </div>
+      <div className="flex flex-col lg:flex-row gap-10">
+        {/* Sidebar filtros */}
+        <aside className="lg:w-72 shrink-0 space-y-6">
+          <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+            <div className="flex items-center gap-2 text-sm font-semibold mb-4">
+              <Filter className="size-4 text-primary" />
+              Filtros
+            </div>
 
-      <div className="flex flex-wrap gap-2 mb-10">
-        <button
-          onClick={() => setCat(undefined)}
-          className={cn(
-            "text-xs uppercase tracking-widest px-4 py-2 rounded-full hairline transition-colors",
-            !catSlug ? "bg-primary text-primary-foreground border-primary" : "bg-surface hover:bg-surface-elevated"
-          )}
-        >
-          Todas
-        </button>
-        {categories.map((c) => (
-          <button
-            key={c.id}
-            onClick={() => setCat(c.slug)}
-            className={cn(
-              "text-xs uppercase tracking-widest px-4 py-2 rounded-full hairline transition-colors",
-              catSlug === c.slug ? "bg-primary text-primary-foreground border-primary" : "bg-surface hover:bg-surface-elevated"
-            )}
-          >
-            {c.name}
-          </button>
-        ))}
-        <button
-          onClick={toggleFeatured}
-          className={cn(
-            "text-xs uppercase tracking-widest px-4 py-2 rounded-full hairline transition-colors ml-auto",
-            featuredOnly ? "bg-primary text-primary-foreground border-primary" : "bg-surface hover:bg-surface-elevated"
-          )}
-        >
-          ★ Solo destacados
-        </button>
-      </div>
+            <div className="space-y-4 text-sm">
+              <div>
+                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Categoría</label>
+                <select
+                  className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2"
+                  value={catSlug ?? ""}
+                  onChange={(e) => {
+                    const v = e.target.value || undefined;
+                    const next = new URLSearchParams(params);
+                    if (v) next.set("cat", v);
+                    else next.delete("cat");
+                    next.delete("sub");
+                    setParams(next);
+                  }}
+                >
+                  <option value="">Todas</option>
+                  {roots.map((c) => (
+                    <option key={c.id} value={c.slug}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-      {/* Grid */}
-      {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="aspect-[3/4] rounded-2xl bg-surface animate-pulse" />
-          ))}
+              <div>
+                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Subcategoría</label>
+                <select
+                  className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2"
+                  value={subSlug ?? ""}
+                  disabled={!catSlug || subOptions.length === 0}
+                  onChange={(e) => setParam("sub", e.target.value || undefined)}
+                >
+                  <option value="">—</option>
+                  {subOptions.map((s) => (
+                    <option key={s.id} value={s.slug}>
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <FacetSelect label="Marca" value={brand} options={facets?.brands ?? []} onChange={(v) => setParam("brand", v)} />
+              <FacetSelect label="Proveedor" value={supplier} options={facets?.suppliers ?? []} onChange={(v) => setParam("supplier", v)} />
+              <FacetSelect label="Depósito" value={warehouse} options={facets?.warehouses ?? []} onChange={(v) => setParam("warehouse", v)} />
+              <FacetSelect label="Tipo de artículo" value={articleType} options={facets?.articleTypes ?? []} onChange={(v) => setParam("tipo", v)} />
+              <FacetSelect label="Situación" value={situation} options={facets?.situations ?? []} onChange={(v) => setParam("situation", v)} />
+              <FacetSelect label="Rango" value={rangeLabel} options={facets?.rangeLabels ?? []} onChange={(v) => setParam("rango", v)} />
+
+              <Button type="button" variant="outline" size="sm" className="w-full" onClick={() => clearFilters()}>
+                Limpiar filtros
+              </Button>
+            </div>
+          </div>
+        </aside>
+
+        {/* Main */}
+        <div className="flex-1 min-w-0 space-y-6">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") setParam("q", search.trim() || undefined);
+                }}
+                onBlur={() => setParam("q", search.trim() || undefined)}
+                placeholder="Buscar por nombre, código o marca…"
+                className="w-full rounded-xl border border-border bg-card pl-10 pr-4 py-3 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/25"
+              />
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <SlidersHorizontal className="size-4 text-muted-foreground hidden sm:block" />
+              <select
+                value={sort}
+                onChange={(e) => {
+                  const v = e.target.value as CatalogSort;
+                  setSort(v);
+                  setParam("sort", v === "newest" ? undefined : v);
+                }}
+                className="rounded-xl border border-border bg-card px-4 py-3 text-sm shadow-sm"
+              >
+                <option value="newest">Más recientes</option>
+                <option value="name_asc">Por descripción (A-Z)</option>
+                <option value="code_asc">Por código</option>
+                <option value="price_asc">Precio: menor</option>
+                <option value="price_desc">Precio: mayor</option>
+              </select>
+            </div>
+          </div>
+
+          {isLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="aspect-[3/4] rounded-xl bg-muted animate-pulse" />
+              ))}
+            </div>
+          ) : products.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-border py-24 text-center text-muted-foreground">
+              No hay productos con estos filtros.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+              {products.map((p) => (
+                <ProductCardPremium key={p.id} product={p} />
+              ))}
+            </div>
+          )}
         </div>
-      ) : products.length === 0 ? (
-        <div className="text-center py-24 text-muted-foreground">No encontramos productos con ese criterio.</div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {products.map((p) => (
-            <ProductCardPremium key={p.id} product={p} />
-          ))}
-        </div>
-      )}
+      </div>
     </div>
   );
 };
+
+function FacetSelect({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: string | undefined;
+  options: string[];
+  onChange: (v: string | undefined) => void;
+}) {
+  if (options.length === 0) return null;
+  return (
+    <div>
+      <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{label}</label>
+      <select
+        className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2"
+        value={value ?? ""}
+        onChange={(e) => onChange(e.target.value || undefined)}
+      >
+        <option value="">Todos</option>
+        {options.map((o) => (
+          <option key={o} value={o}>
+            {o}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
 
 export default Catalog;

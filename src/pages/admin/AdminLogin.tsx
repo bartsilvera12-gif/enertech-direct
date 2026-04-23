@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 import { useAdminGate } from "@/hooks/useAdminGate";
+
+const LOGIN_BRAND_ISOTYPE_URL =
+  "https://res.cloudinary.com/dfxz2hxgr/image/upload/v1776878281/WhatsApp_Image_2026-04-20_at_12.37.03_PM_qvvqam.png";
 
 export default function AdminLogin() {
   const gate = useAdminGate();
@@ -17,7 +20,7 @@ export default function AdminLogin() {
 
   if (gate.loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-background text-muted-foreground">
+      <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-background surface-mesh text-muted-foreground">
         <Loader2 className="size-8 animate-spin text-primary" />
       </div>
     );
@@ -70,52 +73,90 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-6 surface-mesh">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-10">
-          <h1 className="font-serif text-3xl tracking-[0.2em] font-light text-foreground mb-2">Enertech Direct</h1>
-          <p className="text-xs tracking-[0.2em] uppercase text-muted-foreground">Panel de administración</p>
-        </div>
-        {!isSupabaseConfigured() ? (
-          <p className="text-sm text-destructive text-center mb-6">
-            Definí <code className="text-xs">VITE_SUPABASE_URL</code> y <code className="text-xs">VITE_SUPABASE_ANON_KEY</code> en{" "}
-            <code className="text-xs">.env.local</code> y reiniciá <code className="text-xs">npm run dev</code>.
+    <div className="min-h-screen flex flex-col bg-background">
+      <section className="relative bg-strategic text-strategic-foreground pt-10 pb-24 sm:pb-28 px-6 overflow-hidden">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.14]"
+          style={{
+            backgroundImage: `
+              repeating-linear-gradient(
+                -18deg,
+                transparent 0,
+                transparent 38px,
+                hsl(0 0% 100% / 0.07) 38px,
+                hsl(0 0% 100% / 0.07) 39px
+              )
+            `,
+          }}
+          aria-hidden
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-black/[0.12] via-transparent to-black/[0.18] pointer-events-none" aria-hidden />
+        <div className="relative z-10 max-w-lg mx-auto text-center">
+          <img
+            src={LOGIN_BRAND_ISOTYPE_URL}
+            alt="Enertech"
+            className="h-16 w-16 sm:h-[4.5rem] sm:w-[4.5rem] object-contain mx-auto drop-shadow-lg"
+            width={72}
+            height={72}
+            decoding="async"
+          />
+          <h1 className="mt-6 text-2xl sm:text-3xl font-semibold tracking-tight text-white text-balance">Panel de administración</h1>
+          <p className="mt-3 text-sm text-white/78">
+            <span className="font-semibold text-primary-glow">Enertech</span>
+            <span className="text-white/70"> · Informática e insumos</span>
           </p>
-        ) : null}
-        <form onSubmit={handleLogin} className="space-y-5">
-          <div className="space-y-2">
-            <Label htmlFor="admin-email">Email</Label>
-            <Input
-              id="admin-email"
-              type="email"
-              autoComplete="username"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="tu@email.com"
-              className="bg-card"
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="admin-password">Contraseña</Label>
-            <Input
-              id="admin-password"
-              type="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="bg-card"
-              required
-            />
-          </div>
-          <Button type="submit" className="w-full" size="lg" disabled={submitting}>
-            {submitting ? "Entrando…" : "Iniciar sesión"}
-          </Button>
-        </form>
-        <p className="text-xs text-muted-foreground text-center mt-8 leading-relaxed">
-          Acceso con Supabase Auth. El usuario debe existir en <code className="text-foreground/80">admin_profiles</code>.
-        </p>
+        </div>
+      </section>
+
+      <div className="flex-1 flex justify-center px-4 sm:px-6 pb-12 sm:pb-16 -mt-14 sm:-mt-16 relative z-10 surface-mesh">
+        <div className="w-full max-w-md rounded-2xl border border-border/50 bg-card shadow-elevated p-8 sm:p-10">
+          {!isSupabaseConfigured() ? (
+            <p className="text-sm text-destructive text-center mb-6">
+              Definí <code className="text-xs bg-muted px-1 rounded">VITE_SUPABASE_URL</code> y{" "}
+              <code className="text-xs bg-muted px-1 rounded">VITE_SUPABASE_ANON_KEY</code> en{" "}
+              <code className="text-xs bg-muted px-1 rounded">.env.local</code> y reiniciá <code className="text-xs bg-muted px-1 rounded">npm run dev</code>.
+            </p>
+          ) : null}
+          <form onSubmit={handleLogin} className="space-y-5">
+            <div className="space-y-2">
+              <Label htmlFor="admin-email">Email</Label>
+              <Input
+                id="admin-email"
+                type="email"
+                autoComplete="username"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="tu@email.com"
+                className="bg-background border-border/80 focus-visible:ring-primary/30"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="admin-password">Contraseña</Label>
+              <Input
+                id="admin-password"
+                type="password"
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="bg-background border-border/80 focus-visible:ring-primary/30"
+                required
+              />
+            </div>
+            <Button type="submit" className="w-full rounded-xl shadow-md shadow-primary/20" size="lg" disabled={submitting}>
+              {submitting ? "Entrando…" : "Iniciar sesión"}
+            </Button>
+          </form>
+          <p className="text-xs text-muted-foreground text-center mt-8 leading-relaxed">
+            Acceso con Supabase Auth. El usuario debe existir en <code className="text-foreground/80 bg-muted/60 px-1 rounded">admin_profiles</code>.
+          </p>
+          <p className="text-center mt-6">
+            <Link to="/" className="text-sm font-medium text-primary hover:underline underline-offset-4">
+              Volver a la tienda
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -1,10 +1,10 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil } from "lucide-react";
+import { Plus, Pencil, Search } from "lucide-react";
 import { toast } from "sonner";
 import { formatPYG } from "@/services/storeService";
-import { fetchCategoriesAdmin, fetchProductsAdmin, updateProductAdmin } from "@/services/adminProductService";
+import { fetchCategoriesAdmin } from "@/services/adminCategoryService";
+import { fetchProductsAdmin, updateProductAdmin } from "@/services/adminProductService";
 import type { Product } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,21 +20,71 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { AdminProductDialog } from "@/components/admin/AdminProductDialog";
+import { formatPostgrestError } from "@/lib/postgrestError";
+
+function productSearchHaystack(p: Product): string {
+  const parts: (string | number | null | undefined)[] = [
+    p.name,
+    p.slug,
+    p.sku,
+    p.code,
+    p.brand,
+    p.supplier,
+    p.warehouse,
+    p.articleType,
+    p.situation,
+    p.rangeLabel,
+    p.shortDescription,
+    p.description,
+    p.seoTitle,
+    p.seoDescription,
+    p.category?.name,
+    p.subcategory?.name,
+    p.price,
+    p.stock,
+    p.compareAtPrice,
+    ...Object.values(p.specs ?? {}),
+  ];
+  return parts
+    .filter((x) => x !== null && x !== undefined && String(x).trim() !== "")
+    .map((x) => String(x))
+    .join(" ")
+    .toLowerCase();
+}
 
 export default function AdminProducts() {
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { data: categories = [] } = useQuery({
     queryKey: ["admin", "categories"],
     queryFn: fetchCategoriesAdmin,
   });
 
-  const { data: rows = [], isLoading } = useQuery({
+  const {
+    data: rows = [],
+    isLoading,
+    isError,
+    error: productsError,
+  } = useQuery({
     queryKey: ["admin", "products"],
     queryFn: fetchProductsAdmin,
+    retry: 1,
   });
+
+  useEffect(() => {
+    if (isError && productsError) {
+      toast.error(`No se pudo cargar el inventario: ${formatPostgrestError(productsError)}`);
+    }
+  }, [isError, productsError]);
+
+  const filteredRows = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return rows;
+    return rows.filter((p) => productSearchHaystack(p).includes(q));
+  }, [rows, searchQuery]);
 
   const invalidateStore = () => {
     queryClient.invalidateQueries({ queryKey: ["admin"] });
@@ -48,7 +98,7 @@ export default function AdminProducts() {
     onSuccess: () => {
       invalidateStore();
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Error al actualizar"),
+    onError: (e) => toast.error(formatPostgrestError(e)),
   });
 
   const openCreate = () => {
@@ -62,7 +112,7 @@ export default function AdminProducts() {
   };
 
   return (
-    <div className="space-y-8 max-w-6xl">
+    <div className="space-y-8 max-w-7xl">
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
           <p className="eyebrow mb-2">Catálogo</p>
@@ -76,33 +126,76 @@ export default function AdminProducts() {
       </div>
 
       <Card className="border-border/15">
-        <CardHeader>
-          <CardTitle className="text-base">Inventario</CardTitle>
-          <CardDescription>
-            {isLoading ? "Cargando…" : `${rows.length} referencias · PYG`}
-          </CardDescription>
+        <CardHeader className="space-y-4">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div className="min-w-0">
+              <CardTitle className="text-base">Inventario</CardTitle>
+              <CardDescription>
+                {isLoading
+                  ? "Cargando…"
+                  : isError
+                    ? "Error al cargar datos · revisá consola / permisos API"
+                    : searchQuery.trim()
+                      ? `${filteredRows.length} de ${rows.length} referencias · PYG`
+                      : `${rows.length} referencias · PYG`}
+              </CardDescription>
+            </div>
+            <div className="relative w-full lg:max-w-sm shrink-0">
+              <Search
+                className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground pointer-events-none"
+                aria-hidden
+              />
+              <Input
+                type="search"
+                placeholder="Buscar por nombre, SKU, código, categoría, marca…"
+                className="pl-9"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                disabled={isLoading}
+                aria-label="Buscar productos en el inventario cargado"
+              />
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="overflow-x-auto">
+          {isError && (
+            <div className="mb-4 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+              <p className="font-medium">Error al obtener productos</p>
+              <p className="mt-1 text-destructive/90 font-mono text-xs break-all">
+                {formatPostgrestError(productsError)}
+              </p>
+            </div>
+          )}
           {isLoading ? (
             <div className="py-12 text-center text-muted-foreground text-sm">Cargando productos…</div>
+          ) : filteredRows.length === 0 ? (
+            <div className="py-12 text-center text-muted-foreground text-sm">
+              {rows.length === 0
+                ? "No hay productos todavía."
+                : "Ningún producto coincide con la búsqueda."}
+            </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-11 text-muted-foreground font-normal">Nº</TableHead>
                   <TableHead>Producto</TableHead>
-                  <TableHead>SKU</TableHead>
+                  <TableHead className="hidden sm:table-cell">SKU</TableHead>
                   <TableHead>Categoría</TableHead>
+                  <TableHead className="hidden md:table-cell">Sub</TableHead>
+                  <TableHead className="hidden md:table-cell text-right w-[72px]">Dto.</TableHead>
                   <TableHead className="text-right">Precio</TableHead>
-                  <TableHead className="w-[100px] text-right">Stock</TableHead>
-                  <TableHead>Activo</TableHead>
-                  <TableHead>Destacado</TableHead>
-                  <TableHead className="w-[100px]" />
+                  <TableHead className="w-[92px] text-right">Stock</TableHead>
+                  <TableHead className="w-[72px]">Act.</TableHead>
+                  <TableHead className="w-[72px]">Dest.</TableHead>
+                  <TableHead className="w-[88px]" />
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {rows.map((p) => (
+                {filteredRows.map((p, idx) => (
                   <TableRow key={p.id}>
-                    <TableCell className="font-medium max-w-[200px]">
+                    <TableCell className="tabular-nums text-muted-foreground text-sm">{idx + 1}</TableCell>
+                    <TableCell className="font-medium max-w-[min(280px,40vw)]">
                       <button
                         type="button"
                         className="text-left hover:underline text-primary"
@@ -111,9 +204,26 @@ export default function AdminProducts() {
                         {p.name}
                       </button>
                     </TableCell>
-                    <TableCell className="text-muted-foreground tabular-nums text-sm">{p.sku ?? "—"}</TableCell>
-                    <TableCell className="text-sm">{p.category?.name ?? "—"}</TableCell>
-                    <TableCell className="text-right tabular-nums">{formatPYG(p.price)}</TableCell>
+                    <TableCell className="hidden sm:table-cell text-muted-foreground tabular-nums text-xs">{p.sku ?? "—"}</TableCell>
+                    <TableCell className="text-sm">
+                      <span className="line-clamp-2">{p.category?.name ?? "—"}</span>
+                      <span className="md:hidden mt-0.5 block text-[11px] text-muted-foreground">
+                        {p.subcategory?.name ? `↳ ${p.subcategory.name}` : ""}
+                      </span>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell text-sm text-muted-foreground max-w-[140px]">
+                      <span className="line-clamp-2" title={p.subcategory?.name ?? undefined}>
+                        {p.subcategory?.name ?? "—"}
+                      </span>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell text-right tabular-nums text-sm text-muted-foreground">
+                      {p.discountPercent != null ? (
+                        <span className="text-destructive font-medium">−{p.discountPercent}%</span>
+                      ) : (
+                        "—"
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums text-sm">{formatPYG(p.price)}</TableCell>
                     <TableCell className="text-right">
                       <Input
                         className="h-8 text-right tabular-nums"

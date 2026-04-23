@@ -2,90 +2,86 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Enertech — Brand-true design system.
- * Primary: Enertech red (logo background).
- * Accent: Lime green (logo mark).
- * Surface: Soft white / cream for premium retail feel.
- * All colors MUST be HSL.
+/* ENERTECH — informática & insumos
+ * Primary: verde marca (isotipo)
+ * Acento estratégico: rojo (CTA puntuales, NO dominante)
  */
 
 @layer base {
   :root {
-    /* Surfaces — pure white with red as the only chromatic accent */
-    --background: 0 0% 100%;          /* pure white */
-    --foreground: 0 0% 8%;            /* near-black ink for text */
+    --background: 0 0% 99%;
+    --foreground: 220 15% 12%;
 
-    --surface: 0 0% 98%;              /* off-white */
+    --surface: 210 20% 97%;
     --surface-elevated: 0 0% 100%;
-    --surface-tinted: 0 80% 98%;      /* very faint red wash */
+    --surface-tinted: 78 40% 97%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 8%;
+    --card-foreground: 220 15% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 8%;
+    --popover-foreground: 220 15% 12%;
 
-    /* Primary = Enertech red — the dominant brand color */
-    --primary: 0 85% 50%;
+    /* Verde principal */
+    --primary: 78 72% 44%;
     --primary-foreground: 0 0% 100%;
-    --primary-deep: 0 78% 40%;
-    --primary-glow: 0 90% 60%;
+    --primary-deep: 78 65% 32%;
+    --primary-glow: 78 80% 55%;
 
-    /* Brand red — alias of primary for components that use 'brand' */
-    --brand: 0 85% 50%;
+    --brand: 78 72% 44%;
     --brand-foreground: 0 0% 100%;
-    --brand-deep: 0 78% 40%;
-    --brand-glow: 0 90% 60%;
+    --brand-deep: 78 65% 32%;
+    --brand-glow: 78 80% 55%;
 
-    /* Accent = also red (a deeper red) — keep palette strictly red+white */
-    --accent: 0 78% 42%;
+    /* Rojo acento (headers, botones secundarios fuertes) */
+    --accent: 0 78% 48%;
     --accent-foreground: 0 0% 100%;
-    --accent-deep: 0 80% 32%;
+    --accent-deep: 0 72% 38%;
 
-    --secondary: 0 0% 97%;
-    --secondary-foreground: 0 0% 8%;
+    --secondary: 210 16% 96%;
+    --secondary-foreground: 220 15% 12%;
 
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 38%;
+    --muted: 210 14% 94%;
+    --muted-foreground: 220 9% 40%;
 
-    --destructive: 0 84% 51%;
+    --destructive: 0 78% 48%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 8%;                /* used at low opacity for hairlines */
-    --input: 0 0% 92%;
-    --ring: 0 85% 50%;
+    --border: 220 12% 88%;
+    --input: 220 12% 90%;
+    --ring: 78 72% 44%;
 
-    --radius: 1rem;
+    --radius: 0.75rem;
 
-    /* Dark contrast surface — kept neutral near-black for hero/CTA blocks */
-    --contrast: 0 0% 8%;
-    --contrast-foreground: 0 0% 98%;
+    --contrast: 220 18% 10%;
+    --contrast-foreground: 210 30% 98%;
 
-    /* Gradients & shadows — only red + white + neutral ink */
-    --gradient-brand: linear-gradient(135deg, hsl(0 85% 50%) 0%, hsl(0 78% 38%) 100%);
-    --gradient-ink: linear-gradient(135deg, hsl(0 0% 10%) 0%, hsl(0 0% 4%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(0 85% 50%) 0%, hsl(0 78% 38%) 100%);
-    --gradient-warm: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(0 60% 98%) 100%);
-    --gradient-mesh: radial-gradient(60% 50% at 15% 10%, hsl(0 85% 50% / 0.10) 0%, transparent 60%), radial-gradient(50% 50% at 85% 30%, hsl(0 85% 50% / 0.08) 0%, transparent 60%), radial-gradient(80% 60% at 50% 100%, hsl(0 0% 8% / 0.04) 0%, transparent 60%);
-    --gradient-radial-brand: radial-gradient(60% 60% at 50% 0%, hsl(0 85% 50% / 0.10) 0%, transparent 70%);
-    --gradient-radial-accent: radial-gradient(60% 60% at 50% 0%, hsl(0 85% 50% / 0.12) 0%, transparent 70%);
+    --strategic: 0 82% 50%;
+    --strategic-foreground: 0 0% 100%;
 
-    --shadow-elevated: 0 30px 80px -30px hsl(0 0% 0% / 0.18);
-    --shadow-soft: 0 10px 40px -20px hsl(0 0% 0% / 0.10);
-    --shadow-glow: 0 10px 40px -10px hsl(0 85% 50% / 0.40);
-    --shadow-accent-glow: 0 10px 40px -10px hsl(0 85% 50% / 0.40);
+    --gradient-brand: linear-gradient(135deg, hsl(78 72% 44%) 0%, hsl(78 58% 30%) 100%);
+    --gradient-ink: linear-gradient(135deg, hsl(220 18% 14%) 0%, hsl(220 24% 6%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(0 82% 50%) 0%, hsl(0 72% 38%) 100%);
+    --gradient-warm: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(210 25% 97%) 100%);
+    --gradient-mesh: radial-gradient(60% 50% at 15% 10%, hsl(78 72% 44% / 0.08) 0%, transparent 60%), radial-gradient(50% 50% at 85% 30%, hsl(0 82% 50% / 0.06) 0%, transparent 60%), radial-gradient(80% 60% at 50% 100%, hsl(220 18% 10% / 0.03) 0%, transparent 60%);
+    --gradient-radial-brand: radial-gradient(60% 60% at 50% 0%, hsl(78 72% 44% / 0.12) 0%, transparent 70%);
+    --gradient-radial-accent: radial-gradient(60% 60% at 50% 0%, hsl(0 82% 50% / 0.10) 0%, transparent 70%);
+
+    --shadow-elevated: 0 24px 60px -28px hsl(220 30% 10% / 0.14);
+    --shadow-soft: 0 10px 36px -18px hsl(220 25% 10% / 0.08);
+    --shadow-glow: 0 12px 40px -12px hsl(78 72% 44% / 0.35);
+    --shadow-accent-glow: 0 12px 40px -12px hsl(0 82% 50% / 0.28);
 
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
-    /* Sidebar (admin, future) */
-    --sidebar-background: 0 0% 8%;
-    --sidebar-foreground: 0 0% 80%;
-    --sidebar-primary: 0 90% 54%;
+    --sidebar-background: 220 18% 10%;
+    --sidebar-foreground: 210 15% 85%;
+    --sidebar-primary: 78 72% 48%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 14%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 0 0% 18%;
-    --sidebar-ring: 0 90% 54%;
+    --sidebar-accent: 220 16% 16%;
+    --sidebar-accent-foreground: 210 20% 96%;
+    --sidebar-border: 220 14% 20%;
+    --sidebar-ring: 78 72% 48%;
   }
 }
 
@@ -100,7 +96,7 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    font-family: "Inter", "Poppins", system-ui, -apple-system, sans-serif;
     font-feature-settings: 'ss01';
     -webkit-font-smoothing: antialiased;
   }

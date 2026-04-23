@@ -1,0 +1,14 @@
+---
+description: Tareas DBA contra PostgreSQL self-hosted — conexión directa, multi-schema, DDL sin REST
+alwaysApply: true
+---
+
+# Base de datos (DBA)
+
+- Para **DDL** (CREATE/ALTER/DROP), **índices**, **FK**, **funciones SQL**, **datos sensibles**: usar **conexión PostgreSQL directa**, no REST de Supabase ni anon/service role.
+- URI en variable **`DIRECT_POSTGRES_URL`** (definida en `.env.local`, ver `.env.example`). No versionar secretos.
+- Pooler Supavisor: usuario **`postgres.<tenant-id>`** — no usar solo `postgres`.
+- **Multi-schema**: no asumir `public`; inspeccionar antes (`npm run db:schemas`, `SCHEMA=nombre npm run db:tables`). Proyecto Enertech típicamente **`enertech`**.
+- Secuencia obligatoria: **inspeccionar → validar existencia → SQL idempotente cuando aplique → ejecutar → validar resultado → resumir**.
+- **DROP** tabla/columna/datos destructivos: advertir antes y esperar confirmación explícita.
+- Detalle operativo: `docs/DBA.md`.

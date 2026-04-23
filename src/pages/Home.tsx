@@ -4,11 +4,16 @@ import { ArrowRight, Package, Truck, Headphones } from "lucide-react";
 import { fetchCategories, fetchProducts, rootCategories } from "@/services/storeService";
 import { ProductCardPremium } from "@/components/store/ProductCardPremium";
 import { HomeHero } from "@/components/home/HomeHero";
+import type { BrandLogoItem } from "@/components/home/BrandsMarquee";
+import { BrandsMarquee } from "@/components/home/BrandsMarquee";
 
-const BRAND_LOGOS = [
-  "https://res.cloudinary.com/dfxz2hxgr/image/upload/v1776880417/11251b4a-3374-4004-8324-67bd2f6d6862.png",
-  "https://res.cloudinary.com/dfxz2hxgr/image/upload/v1776880445/64c472b7-09e5-4940-9a19-12b53681c232.png",
-  "https://res.cloudinary.com/dfxz2hxgr/image/upload/v1776880495/e3082295-13ae-4a1f-bfa1-baf906a43573.png",
+const BRAND_LOGOS: BrandLogoItem[] = [
+  { src: "https://res.cloudinary.com/dfxz2hxgr/image/upload/v1776880417/11251b4a-3374-4004-8324-67bd2f6d6862.png", alt: "HP" },
+  { src: "https://res.cloudinary.com/dfxz2hxgr/image/upload/v1776880445/64c472b7-09e5-4940-9a19-12b53681c232.png", alt: "Samsung" },
+  { src: "https://res.cloudinary.com/dfxz2hxgr/image/upload/v1776880495/e3082295-13ae-4a1f-bfa1-baf906a43573.png", alt: "Brother" },
+  { src: "https://res.cloudinary.com/dfxz2hxgr/image/upload/v1776952642/27ca76f9-0610-43d2-b045-029f64362638.png", alt: "Epson" },
+  { src: "https://res.cloudinary.com/dfxz2hxgr/image/upload/v1776953399/5a835952-42e4-4846-9ded-6b7060efe9ac.png", alt: "SATE" },
+  { src: "https://res.cloudinary.com/dfxz2hxgr/image/upload/v1776953396/ea686df1-13f3-448e-9d30-a0c5a84d5fef.png", alt: "Acer" },
 ];
 
 const TILE_FALLBACK = [
@@ -39,7 +44,7 @@ const Home = () => {
     <>
       <HomeHero />
 
-      <section id="categorias" className="scroll-mt-28 py-16 md:py-20 border-b border-border/50">
+      <section id="categorias" className="relative z-10 scroll-mt-28 -mt-[clamp(2rem,7vw,4rem)] pt-[clamp(2rem,7vw,4rem)] pb-16 md:pb-20 bg-background border-b border-border/50 rounded-t-[2rem] md:rounded-t-[2.25rem] shadow-[0_-12px_40px_-24px_rgba(0,0,0,0.08)]">
         <div className="container">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
             <div>
@@ -90,16 +95,16 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="py-16 md:py-20 border-b border-border/50">
-        <div className="container text-center max-w-3xl mx-auto mb-12">
-          <p className="text-xs uppercase tracking-[0.2em] text-primary font-semibold mb-2">Marcas</p>
-          <h2 className="text-3xl font-semibold tracking-tight">Representaciones y partners</h2>
+      <section className="py-16 md:py-24 border-b border-border/50 bg-background">
+        <div className="container text-center max-w-4xl mx-auto mb-14 md:mb-16">
+          <p className="text-base sm:text-lg md:text-xl uppercase tracking-[0.28em] text-primary font-bold mb-4 md:mb-5">
+            Marcas
+          </p>
+          <h2 className="text-4xl md:text-5xl font-semibold tracking-tight text-foreground">
+            Representaciones y partners
+          </h2>
         </div>
-        <div className="container flex flex-wrap justify-center items-center gap-12 md:gap-20 opacity-90">
-          {BRAND_LOGOS.map((src) => (
-            <img key={src} src={src} alt="" className="h-12 md:h-14 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300" />
-          ))}
-        </div>
+        <BrandsMarquee brands={BRAND_LOGOS} />
       </section>
 
       <section className="py-16 md:py-24">

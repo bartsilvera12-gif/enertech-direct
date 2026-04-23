@@ -2,7 +2,7 @@
 
 INSERT INTO enertech.store_settings (key, value)
 VALUES
-  ('whatsapp_e164', to_jsonb('595981000000'::text)),
+  ('whatsapp_e164', to_jsonb('595971472716'::text)),
   ('currency', to_jsonb('PYG'::text)),
   ('store_name', to_jsonb('Enertech Direct'::text))
 ON CONFLICT (key) DO NOTHING;
