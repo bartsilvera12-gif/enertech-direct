@@ -39,7 +39,7 @@ export function HomeHero() {
 
   return (
     <section
-      className="relative overflow-hidden text-white"
+      className="relative flex min-h-[calc(100vh-112px)] flex-col overflow-hidden text-white"
       style={{
         backgroundColor: heroRed,
         clipPath: HERO_CLIP,
@@ -88,32 +88,32 @@ export function HomeHero() {
         aria-hidden
       />
 
-      <div className="relative container pb-[clamp(5rem,14vw,8.5rem)] pt-12 md:pt-16 lg:pt-[4.75rem]">
-        <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 xl:gap-16 items-center">
+      <div className="relative container flex flex-1 flex-col justify-center py-6 md:py-8">
+        <div className="grid w-full lg:grid-cols-12 gap-6 lg:gap-10 xl:gap-12 items-center">
           {/* Texto: ~42% — legible; carrusel pasa a ~58% para más protagonismo visual */}
           <div className="lg:col-span-5 xl:col-span-5 max-w-xl lg:max-w-[min(100%,36rem)]">
-            <div className="mb-10 md:mb-12">
+            <div className="mb-5 md:mb-6">
               <img
                 src={ENERTECH_BRAND_LOCKUP_URL}
                 alt="Enertech — Energía e insumos"
-                className="h-[5.75rem] sm:h-[7rem] md:h-[8.25rem] lg:h-[9rem] xl:h-[9.75rem] w-auto max-w-[min(100%,640px)] xl:max-w-[min(100%,760px)] object-contain object-left drop-shadow-[0_6px_32px_rgba(0,0,0,0.28)]"
-                width={760}
-                height={152}
+                className="h-[4.5rem] sm:h-[5.75rem] md:h-[6.75rem] lg:h-[7.25rem] xl:h-[7.75rem] w-auto max-w-[min(100%,560px)] xl:max-w-[min(100%,640px)] object-contain object-left drop-shadow-[0_6px_28px_rgba(0,0,0,0.26)]"
+                width={640}
+                height={130}
                 decoding="async"
               />
             </div>
 
-            <h1 className="text-[1.65rem] sm:text-4xl md:text-[2.45rem] lg:text-[2.85rem] font-semibold tracking-tight leading-[1.12] text-balance text-white">
+            <h1 className="text-[1.45rem] sm:text-[1.85rem] md:text-[2.05rem] lg:text-[2.35rem] xl:text-[2.55rem] font-semibold tracking-tight leading-[1.14] text-balance text-white">
               Soluciones en informática e insumos para tu empresa
             </h1>
-            <p className="mt-5 md:mt-6 text-base md:text-lg leading-relaxed max-w-[46ch] text-white/85">
+            <p className="mt-3 md:mt-4 text-sm md:text-[0.9375rem] leading-snug max-w-[42ch] text-white/84">
               Impresoras, consumibles, computación y accesorios con soporte técnico. Consultá disponibilidad por WhatsApp.
             </p>
 
-            <div className="mt-8 md:mt-10 flex flex-wrap gap-3 sm:gap-4">
+            <div className="mt-5 md:mt-6 flex flex-wrap gap-3 sm:gap-3">
               <Link
                 to="/catalog"
-                className="inline-flex items-center gap-2 rounded-xl bg-primary text-primary-foreground px-7 py-3.5 text-sm font-semibold shadow-[0_12px_36px_-8px_rgba(0,0,0,0.35)] hover:bg-primary-deep transition-colors"
+                className="inline-flex items-center gap-2 rounded-xl bg-primary text-primary-foreground px-6 py-3 text-sm font-semibold shadow-[0_12px_36px_-8px_rgba(0,0,0,0.35)] hover:bg-primary-deep transition-colors"
               >
                 Ver productos
                 <ArrowRight className="size-4" />
@@ -122,7 +122,7 @@ export function HomeHero() {
                 href="https://wa.me/595971472716"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-xl bg-white px-7 py-3.5 text-sm font-semibold text-[hsl(var(--strategic))] shadow-[0_8px_28px_-10px_rgba(0,0,0,0.35)] hover:bg-white/95 transition-colors border border-white/90"
+                className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-[hsl(var(--strategic))] shadow-[0_8px_28px_-10px_rgba(0,0,0,0.35)] hover:bg-white/95 transition-colors border border-white/90"
               >
                 <MessageCircle className="size-4 shrink-0 text-[hsl(var(--strategic))]" />
                 WhatsApp
@@ -130,8 +130,8 @@ export function HomeHero() {
             </div>
           </div>
 
-          <div className="lg:col-span-7 xl:col-span-7 flex justify-center lg:justify-end lg:self-stretch lg:pt-0">
-            <div className="relative w-full max-w-[min(100%,420px)] sm:max-w-[min(100%,480px)] md:max-w-[min(100%,520px)] lg:max-w-none flex flex-col items-center lg:items-stretch gap-3">
+          <div className="lg:col-span-7 xl:col-span-7 flex justify-center lg:justify-end">
+            <div className="relative flex w-full max-w-[min(100%,420px)] flex-col items-center gap-3 sm:max-w-[min(100%,480px)] md:max-w-[min(100%,520px)] lg:max-w-none lg:items-stretch">
               <HeroProductCarousel slides={slides} autoplayMs={HERO_AUTOPLAY_MS} className="lg:w-full" />
               {hasDbSlides ? (
                 <p className="text-[11px] text-white/55 text-center lg:text-right max-w-none lg:ml-auto hidden sm:block">

@@ -6,6 +6,7 @@ import { ProductCardPremium } from "@/components/store/ProductCardPremium";
 import { HomeHero } from "@/components/home/HomeHero";
 import type { BrandLogoItem } from "@/components/home/BrandsMarquee";
 import { BrandsMarquee } from "@/components/home/BrandsMarquee";
+import { UpsTechnicalServiceSection } from "@/components/home/UpsTechnicalServiceSection";
 
 const BRAND_LOGOS: BrandLogoItem[] = [
   { src: "https://res.cloudinary.com/dfxz2hxgr/image/upload/v1776880417/11251b4a-3374-4004-8324-67bd2f6d6862.png", alt: "HP" },
@@ -106,6 +107,8 @@ const Home = () => {
         </div>
         <BrandsMarquee brands={BRAND_LOGOS} />
       </section>
+
+      <UpsTechnicalServiceSection />
 
       <section className="py-16 md:py-24">
         <div className="container">

@@ -37,12 +37,14 @@ export function HeroProductCarousel({ slides, autoplayMs = 4000, className }: Pr
 
   if (validSlides.length === 0) return null;
 
+  const showDots = validSlides.length > 1;
+
   return (
     <div
       className={cn(
-        "relative mx-auto w-full",
+        "relative mx-auto flex w-full max-h-[380px] flex-col overflow-hidden",
         "max-w-[min(100%,360px)] sm:max-w-[min(100%,420px)] md:max-w-[min(100%,480px)] lg:max-w-none",
-        "rounded-3xl border border-white/45 bg-white/[0.97] shadow-[0_32px_70px_-28px_rgba(0,0,0,0.55),0_0_0_1px_rgba(255,255,255,0.12)_inset] overflow-hidden",
+        "rounded-3xl border border-white/45 bg-white/[0.97] shadow-[0_32px_70px_-28px_rgba(0,0,0,0.55),0_0_0_1px_rgba(255,255,255,0.12)_inset]",
         "ring-1 ring-black/[0.08] ring-offset-2 ring-offset-transparent",
         "backdrop-blur-[2px]",
         className,
@@ -50,14 +52,20 @@ export function HeroProductCarousel({ slides, autoplayMs = 4000, className }: Pr
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      <div className="relative aspect-[4/3] lg:aspect-[5/4] bg-gradient-to-b from-white via-muted/25 to-muted/35">
+      <div
+        className={cn(
+          "relative mx-auto w-full overflow-hidden bg-gradient-to-b from-white via-muted/25 to-muted/35",
+          "aspect-[4/3] lg:aspect-[5/4]",
+          showDots ? "max-h-[calc(380px-3.25rem)]" : "max-h-[380px]",
+        )}
+      >
         {validSlides.map((slide, i) => (
           <img
             key={slide.key}
             src={slide.url}
             alt={slide.alt}
             className={cn(
-              "absolute inset-0 size-full object-contain object-center p-4 sm:p-5 lg:p-7 transition-opacity duration-700 ease-out",
+              "absolute inset-0 h-full w-full object-contain object-center p-4 sm:p-5 lg:p-7 transition-opacity duration-700 ease-out",
               i === index ? "opacity-100 z-[1]" : "opacity-0 z-0 pointer-events-none",
             )}
             loading={i === 0 ? "eager" : "lazy"}
@@ -66,7 +74,7 @@ export function HeroProductCarousel({ slides, autoplayMs = 4000, className }: Pr
         ))}
         <div className="absolute inset-0 bg-gradient-to-t from-black/[0.04] via-transparent to-white/[0.06] pointer-events-none z-[2]" aria-hidden />
 
-        {validSlides.length > 1 && (
+        {showDots && (
           <>
             <button
               type="button"
@@ -88,8 +96,8 @@ export function HeroProductCarousel({ slides, autoplayMs = 4000, className }: Pr
         )}
       </div>
 
-      {validSlides.length > 1 && (
-        <div className="flex items-center justify-center gap-2 py-3 lg:py-3.5 bg-white/98 border-t border-black/[0.07]">
+      {showDots && (
+        <div className="flex shrink-0 items-center justify-center gap-2 border-t border-black/[0.07] bg-white/98 py-3 lg:py-3.5">
           {validSlides.map((_, i) => (
             <button
               key={i}
