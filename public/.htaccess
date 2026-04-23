@@ -1,0 +1,16 @@
+# Hostinger (Apache): fallback de rutas para SPA (Vite + React Router).
+# Cualquier ruta que no corresponda a un archivo o carpeta real se entrega index.html
+# para que el cliente resuelva /admin/login, /product/..., /catalog, etc.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # Si el sitio vive en un subdirectorio, descomentá y ajustá, p. ej. RewriteBase /miapp/
+  RewriteBase /
+
+  # Dejar index.html tal cual
+  RewriteRule ^index\.html$ - [L]
+
+  # No tocar archivos estáticos existentes (js, css, imágenes, fuentes, etc.)
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>
