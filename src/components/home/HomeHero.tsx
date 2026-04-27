@@ -111,7 +111,7 @@ export function HomeHero() {
             </div>
 
             {/* Escena (servidor + monitores) — apoyada sobre el horizonte */}
-            <div className="relative mt-4 w-full max-w-[460px] lg:mt-5">
+            <div className="relative mt-3 w-full max-w-[360px] lg:mt-4 lg:max-w-[400px]">
               {/* Sombra de contacto */}
               <div
                 className="pointer-events-none absolute -bottom-1 left-1/2 h-7 w-[78%] -translate-x-1/2 rounded-[50%]"
