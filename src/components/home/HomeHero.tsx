@@ -78,7 +78,7 @@ export function HomeHero() {
             className="relative flex h-full items-center justify-center lg:col-span-7 lg:justify-end"
             style={{ perspective: "1400px" }}
           >
-            <div className="group relative w-full max-w-[640px] lg:max-w-[820px]">
+            <div className="group relative w-full max-w-[720px] lg:max-w-[980px] xl:max-w-[1100px]">
               {/* Halo verde de fondo (profundidad) */}
               <div
                 className="pointer-events-none absolute inset-0 -z-10"
@@ -107,7 +107,7 @@ export function HomeHero() {
                 alt="Equipamiento informático corporativo — Enertech"
                 width={1400}
                 height={900}
-                className="relative mx-auto block h-auto max-h-[min(78vh,720px)] w-full object-contain transition-transform duration-700 ease-out will-change-transform group-hover:scale-[1.02]"
+                className="relative mx-auto block h-auto max-h-[min(90vh,860px)] w-full object-contain transition-transform duration-700 ease-out will-change-transform group-hover:scale-[1.02]"
                 style={{
                   transform: "rotateY(-8deg) rotateX(4deg) scale(1.06)",
                   transformOrigin: "60% 60%",
