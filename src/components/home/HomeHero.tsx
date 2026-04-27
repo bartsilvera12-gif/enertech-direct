@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, MessageCircle, Cpu, Server, Network, Activity } from "lucide-react";
-import heroSceneImage from "@/assets/hero-it-scene-green.png";
+import { ArrowRight, MessageCircle } from "lucide-react";
+import heroSceneImage from "@/assets/hero-it-scene-transparent.png";
 
 const HERO_LOGO_URL =
   "https://res.cloudinary.com/dfxz2hxgr/image/upload/v1777286692/WhatsApp_Image_2026-04-20_at_12.37.03_PM_1_1_btnvc0.png";
@@ -17,21 +17,23 @@ export function HomeHero() {
       className="relative flex min-h-[calc(100vh-112px)] flex-col overflow-hidden"
       style={{ background: HERO_GRADIENT }}
     >
-      {/* Imagen de escena IT como fondo integrado */}
-      <img
-        src={HERO_SCENE_IMAGE}
-        alt="Infraestructura IT corporativa Enertech: servidores, monitores y soluciones tecnológicas"
-        className="absolute inset-0 w-full h-full object-cover object-right z-0 select-none pointer-events-none"
-        draggable={false}
-        decoding="async"
-        fetchPriority="high"
-      />
+      {/* Imagen de escena IT (PNG transparente) integrada al fondo verde */}
+      <div className="absolute inset-0 z-0 pointer-events-none" aria-hidden>
+        <img
+          src={HERO_SCENE_IMAGE}
+          alt=""
+          className="absolute inset-y-0 right-0 h-full w-full lg:w-[62%] object-contain object-right-bottom select-none drop-shadow-[0_30px_60px_rgba(15,55,15,0.35)]"
+          draggable={false}
+          decoding="async"
+          fetchPriority="high"
+        />
+      </div>
       {/* Vignette para asegurar legibilidad del texto a la izquierda */}
       <div
         className="absolute inset-0 pointer-events-none z-[1]"
         style={{
           background:
-            "linear-gradient(90deg, hsl(95 75% 50% / 0.92) 0%, hsl(95 75% 50% / 0.65) 28%, hsl(95 75% 50% / 0.15) 50%, transparent 70%)",
+            "linear-gradient(90deg, hsl(95 75% 50% / 0.85) 0%, hsl(95 75% 50% / 0.45) 35%, hsl(95 75% 50% / 0.05) 60%, transparent 75%)",
         }}
         aria-hidden
       />
