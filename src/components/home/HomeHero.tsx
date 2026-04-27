@@ -121,68 +121,85 @@ export function HomeHero() {
             </div>
           </div>
 
-          {/* RIGHT: Escena tecnológica integrada — sin contenedor */}
-          <div className="lg:col-span-6 relative min-h-[360px] md:min-h-[460px] lg:min-h-[560px]">
-            {/* Glow verde difuso detrás de la escena */}
-            <div
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                background:
-                  "radial-gradient(ellipse 70% 60% at 55% 45%, hsl(95 90% 50% / 0.32) 0%, hsl(120 70% 30% / 0.18) 35%, transparent 70%)",
-                filter: "blur(40px)",
-              }}
-              aria-hidden
-            />
-            {/* Light spot superior */}
-            <div
-              className="absolute -top-10 right-[10%] size-72 pointer-events-none"
-              style={{
-                background:
-                  "radial-gradient(circle, hsl(82 95% 60% / 0.35) 0%, transparent 70%)",
-                filter: "blur(50px)",
-              }}
-              aria-hidden
-            />
+          {/* Spacer derecho — la imagen real está absoluta sobre la <section> */}
+          <div className="hidden lg:block lg:col-span-6" aria-hidden />
+        </div>
+      </div>
 
-            {/* Imagen escena — sin caja, full bleed, overflow hacia los bordes */}
-            <img
-              src={HERO_SCENE_IMAGE}
-              alt="Escena tecnológica Enertech: servidores corporativos sobre mesa con iluminación verde"
-              className="relative z-10 w-[115%] md:w-[120%] lg:w-[128%] xl:w-[132%] max-w-none -mr-[10%] md:-mr-[14%] lg:-mr-[20%] xl:-mr-[24%] ml-auto block select-none pointer-events-none"
-              style={{
-                filter:
-                  "drop-shadow(0 50px 60px rgba(0,0,0,0.55)) drop-shadow(0 20px 30px rgba(0,0,0,0.4)) drop-shadow(0 0 80px hsl(95 90% 45% / 0.25))",
-                transform: "perspective(1600px) rotateY(-3deg) rotateX(1deg)",
-                transformOrigin: "center center",
-              }}
-              width={1600}
-              height={1200}
-              fetchPriority="high"
-              decoding="async"
-              draggable={false}
-            />
+      {/* ESCENA tecnológica — anclada al borde derecho del hero, sin caja */}
+      <div
+        className="pointer-events-none absolute inset-y-0 right-0 w-full lg:w-[62%] xl:w-[58%] 2xl:w-[55%] z-[2] hidden md:block"
+        aria-hidden
+      >
+        {/* Glow verde radial detrás */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse 60% 55% at 55% 50%, hsl(95 95% 55% / 0.30) 0%, hsl(120 70% 30% / 0.15) 40%, transparent 72%)",
+            filter: "blur(30px)",
+          }}
+        />
+        {/* Light spot superior */}
+        <div
+          className="absolute -top-16 right-[12%] w-[420px] h-[420px]"
+          style={{
+            background:
+              "radial-gradient(circle, hsl(82 95% 60% / 0.32) 0%, transparent 70%)",
+            filter: "blur(60px)",
+          }}
+        />
 
-            {/* Reflejo / sombra difusa debajo (piso de vidrio) */}
-            <div
-              className="absolute left-[8%] right-[-10%] bottom-[4%] h-16 md:h-24 pointer-events-none z-[5]"
-              style={{
-                background:
-                  "radial-gradient(ellipse at center, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.25) 40%, transparent 75%)",
-                filter: "blur(18px)",
-              }}
-              aria-hidden
-            />
+        {/* Imagen — full bleed, fundida con el fondo via mask */}
+        <img
+          src={HERO_SCENE_IMAGE}
+          alt=""
+          className="absolute right-0 bottom-0 h-[92%] lg:h-[96%] xl:h-full w-auto max-w-none object-contain object-right-bottom select-none"
+          style={{
+            filter:
+              "drop-shadow(0 40px 50px rgba(0,0,0,0.55)) drop-shadow(0 12px 24px rgba(0,0,0,0.45)) drop-shadow(0 0 70px hsl(95 90% 45% / 0.28))",
+            WebkitMaskImage:
+              "linear-gradient(to right, transparent 0%, black 18%, black 100%), linear-gradient(to bottom, black 70%, transparent 98%)",
+            maskImage:
+              "linear-gradient(to right, transparent 0%, black 18%, black 100%), linear-gradient(to bottom, black 70%, transparent 98%)",
+            WebkitMaskComposite: "source-in",
+            maskComposite: "intersect",
+          }}
+          draggable={false}
+          decoding="async"
+          fetchPriority="high"
+        />
 
-            {/* Noise sutil sobre la zona de la escena */}
-            <div
-              className="absolute inset-0 pointer-events-none opacity-[0.06] mix-blend-overlay z-[11]"
-              style={{
-                backgroundImage:
-                  "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.6'/></svg>\")",
-              }}
-              aria-hidden
-            />
-          </div>
+        {/* Sombra de piso difusa */}
+        <div
+          className="absolute bottom-[2%] left-[10%] right-[6%] h-20"
+          style={{
+            background:
+              "radial-gradient(ellipse at center, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.2) 45%, transparent 75%)",
+            filter: "blur(22px)",
+          }}
+        />
+      </div>
+
+      {/* Versión mobile — imagen suave debajo del texto */}
+      <div className="md:hidden relative z-[2] -mt-4 mb-2 px-4 pointer-events-none">
+        <img
+          src={HERO_SCENE_IMAGE}
+          alt=""
+          className="w-full h-auto object-contain"
+          style={{
+            filter:
+              "drop-shadow(0 24px 30px rgba(0,0,0,0.5)) drop-shadow(0 0 50px hsl(95 90% 45% / 0.25))",
+            WebkitMaskImage:
+              "linear-gradient(to bottom, black 75%, transparent 100%)",
+            maskImage: "linear-gradient(to bottom, black 75%, transparent 100%)",
+          }}
+          draggable={false}
+          decoding="async"
+        />
+      </div>
+
+      <div style={{ display: "none" }}>{/* spacer placeholder */}</div>
         </div>
       </div>
 
