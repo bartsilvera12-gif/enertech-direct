@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, MessageCircle, Cpu, Server, Network, Activity } from "lucide-react";
-import heroSceneImage from "@/assets/hero-it-scene-green.png";
+import { ArrowRight, MessageCircle } from "lucide-react";
+import heroSceneImage from "@/assets/hero-it-scene-transparent.png";
 
 const HERO_LOGO_URL =
   "https://res.cloudinary.com/dfxz2hxgr/image/upload/v1777286692/WhatsApp_Image_2026-04-20_at_12.37.03_PM_1_1_btnvc0.png";
