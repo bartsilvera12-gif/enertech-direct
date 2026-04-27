@@ -24,7 +24,7 @@ describe("App smoke", () => {
   it("monta la home con el hero Enertech", async () => {
     render(<App />);
     expect(
-      await screen.findByRole("heading", { name: /Soluciones en informática/i }, { timeout: 12_000 }),
+      await screen.findByRole("heading", { name: /Ventas de informática corporativa/i }, { timeout: 12_000 }),
     ).toBeInTheDocument();
   });
 });
