@@ -112,11 +112,11 @@ export function HomeHero() {
             </p>
           </div>
 
-          {/* Derecha — escena integrada (misma lógica de capas; solo cambia el PNG arriba) */}
+          {/* Derecha — escena integrada (PNG más grande + perspectiva 3D tipo referencia) */}
           <div className="relative z-0 lg:col-span-7 xl:col-span-7">
-            <div className="relative mx-auto min-h-[min(72vw,420px)] sm:min-h-[380px] md:min-h-[440px] lg:mx-0 lg:mr-[-4vw] lg:min-h-[min(58vh,640px)] xl:mr-[-6vw] xl:min-h-[600px]">
+            <div className="relative mx-auto min-h-[min(78vw,480px)] sm:min-h-[440px] md:min-h-[520px] lg:mx-0 lg:mr-[-6vw] lg:min-h-[min(72vh,760px)] xl:mr-[-8vw] xl:min-h-[min(76vh,820px)]">
               <div
-                className="pointer-events-none absolute left-[42%] top-[46%] z-0 h-[min(78vw,520px)] w-[min(110vw,720px)] max-w-none -translate-x-1/2 -translate-y-1/2 rounded-full opacity-95"
+                className="pointer-events-none absolute left-[42%] top-[44%] z-0 h-[min(92vw,620px)] w-[min(125vw,820px)] max-w-none -translate-x-1/2 -translate-y-1/2 rounded-full opacity-95"
                 style={{
                   background:
                     "radial-gradient(circle, hsl(142 78% 52% / 0.5) 0%, hsl(150 65% 40% / 0.15) 48%, transparent 70%)",
@@ -134,16 +134,16 @@ export function HomeHero() {
               />
 
               <div
-                className="pointer-events-none absolute bottom-[6%] left-1/2 z-[5] h-[18%] w-[92%] max-w-[640px] -translate-x-1/2 rounded-[50%]"
+                className="pointer-events-none absolute bottom-[5%] left-1/2 z-[5] h-[22%] w-[98%] max-w-[720px] -translate-x-1/2 rounded-[50%]"
                 style={{
-                  background: "radial-gradient(ellipse at center, hsl(0 0% 0% / 0.5) 0%, hsl(0 0% 0% / 0.2) 45%, transparent 72%)",
-                  filter: "blur(24px)",
+                  background: "radial-gradient(ellipse at center, hsl(0 0% 0% / 0.55) 0%, hsl(0 0% 0% / 0.22) 42%, transparent 74%)",
+                  filter: "blur(28px)",
                 }}
                 aria-hidden
               />
 
               <div
-                className="pointer-events-none absolute bottom-0 left-[-8%] right-[-14%] z-[6] h-[32%] min-h-[120px] rounded-t-[3px]"
+                className="pointer-events-none absolute bottom-0 left-[-10%] right-[-16%] z-[6] h-[36%] min-h-[140px] rounded-t-[3px]"
                 style={{
                   background: `
                     linear-gradient(10deg,
@@ -170,39 +170,56 @@ export function HomeHero() {
               />
 
               <div
-                className="pointer-events-none absolute bottom-[4%] left-[4%] right-[-6%] z-[8] h-[26%] overflow-hidden opacity-[0.22]"
+                className="pointer-events-none absolute bottom-[2%] left-[2%] right-[-10%] z-[8] h-[32%] overflow-hidden opacity-[0.3]"
                 style={{
-                  maskImage: "linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.15) 52%, transparent 100%)",
+                  maskImage: "linear-gradient(to bottom, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.18) 55%, transparent 100%)",
                 }}
                 aria-hidden
               >
                 <div
-                  className="absolute inset-0 flex items-start justify-center lg:justify-end pr-[4%]"
-                  style={{ transform: "scaleY(-1)" }}
+                  className="absolute inset-0 flex items-start justify-center lg:justify-end pr-[2%]"
+                  style={{
+                    transform: "scaleY(-1)",
+                    filter: "blur(0.6px)",
+                  }}
                 >
                   <img
                     src={HERO_SCENE_IMAGE_URL}
                     alt=""
-                    className="max-h-[min(52vh,420px)] w-auto max-w-[118%] object-contain object-bottom scale-[1.07]"
+                    className="max-h-[min(62vh,520px)] w-auto max-w-[135%] object-contain object-bottom scale-[1.12] sm:scale-[1.14] lg:max-h-[min(58vh,560px)]"
                     decoding="async"
                   />
                 </div>
               </div>
 
-              <div className="pointer-events-none absolute inset-x-[-6%] bottom-[10%] top-[2%] z-[9] flex items-end justify-center overflow-visible lg:justify-end lg:pr-[2%]">
-                <img
-                  src={HERO_SCENE_IMAGE_URL}
-                  alt="Equipamiento informático corporativo — Enertech"
-                  width={1200}
-                  height={900}
-                  className="relative h-auto max-h-[min(78vh,640px)] w-auto max-w-[122%] translate-x-[2%] scale-[1.06] object-contain object-bottom drop-shadow-[0_28px_60px_rgba(0,0,0,0.45)] sm:scale-[1.07] lg:max-h-[min(72vh,680px)] lg:translate-x-[4%] lg:scale-[1.09]"
+              {/* Perspectiva 3/4: volumen + escala mayor (referencia “producto en escena”) */}
+              <div
+                className="pointer-events-none absolute inset-x-[-14%] bottom-[6%] top-[-4%] z-[9] flex items-end justify-center overflow-visible lg:justify-end lg:pr-0"
+                style={{ perspective: "1400px" }}
+              >
+                <div
+                  className="relative flex w-full max-w-none items-end justify-center lg:justify-end"
                   style={{
-                    filter:
-                      "drop-shadow(0 0 80px hsl(142 72% 52% / 0.42)) drop-shadow(0 52px 95px hsl(0 0% 0% / 0.45))",
+                    transformStyle: "preserve-3d",
                   }}
-                  decoding="async"
-                  fetchpriority="high"
-                />
+                >
+                  <img
+                    src={HERO_SCENE_IMAGE_URL}
+                    alt="Equipamiento informático corporativo — Enertech"
+                    width={1400}
+                    height={1050}
+                    className="relative h-auto max-h-[min(88vh,720px)] w-auto max-w-[145%] object-contain object-bottom sm:max-h-[min(86vh,760px)] lg:max-h-[min(84vh,820px)] lg:max-w-[150%]"
+                    style={{
+                      transform:
+                        "rotateY(-5deg) rotateX(2deg) scale(1.12) translateX(5%) translateZ(42px)",
+                      transformOrigin: "55% 92%",
+                      filter:
+                        "drop-shadow(0 0 100px hsl(142 75% 52% / 0.48)) drop-shadow(0 64px 110px hsl(0 0% 0% / 0.5)) drop-shadow(-20px 40px 50px hsl(0 0% 0% / 0.22))",
+                    }}
+                    decoding="async"
+                    fetchpriority="high"
+                  />
+                </div>
               </div>
 
               <div
