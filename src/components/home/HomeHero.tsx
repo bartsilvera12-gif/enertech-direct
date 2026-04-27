@@ -78,7 +78,7 @@ export function HomeHero() {
             className="relative flex h-full items-center justify-center lg:col-span-7 lg:justify-end"
             style={{ perspective: "1400px" }}
           >
-            <div className="group relative w-full max-w-[560px] lg:max-w-[760px] xl:max-w-[860px]">
+            <div className="group relative w-[78%] max-w-[480px] lg:w-[80%] lg:max-w-[640px] xl:max-w-[720px]">
               {/* Halo verde de fondo (profundidad) */}
               <div
                 className="pointer-events-none absolute inset-0 -z-10"
