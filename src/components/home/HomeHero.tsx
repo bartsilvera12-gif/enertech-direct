@@ -26,58 +26,56 @@ export function HomeHero() {
       />
 
       <div className="container relative px-4 sm:px-6">
-        <div className="grid grid-cols-1 items-center gap-6 py-10 md:py-12 lg:grid-cols-12 lg:gap-6 lg:py-14">
-          {/* IZQUIERDA — Logo grande + descripción debajo */}
-          <div className="flex flex-col items-center justify-center text-center lg:col-span-5 lg:items-end lg:text-right lg:pr-4">
+        <div className="grid h-[calc(100vh-112px)] max-h-[760px] min-h-[480px] grid-cols-1 items-center gap-4 py-4 lg:grid-cols-12 lg:gap-6 lg:py-6">
+          {/* IZQUIERDA — Logo arriba + título + subtítulo + CTAs */}
+          <div className="flex flex-col items-center justify-center text-center lg:col-span-5 lg:items-start lg:text-left">
             <img
               src={ENERTECH_BRAND_LOCKUP_URL}
               alt="Enertech — Energía e insumos"
-              className="h-auto w-[min(72%,340px)] object-contain drop-shadow-[0_8px_28px_rgba(0,0,0,0.25)] lg:w-[min(100%,380px)]"
+              className="h-auto w-[min(72%,300px)] object-contain drop-shadow-[0_8px_28px_rgba(0,0,0,0.25)] lg:w-[min(100%,360px)]"
               width={520}
               height={160}
               decoding="async"
               fetchPriority="high"
             />
-            <p className="mt-4 max-w-xs text-sm font-semibold text-white/95 drop-shadow-[0_1px_6px_rgba(0,40,15,0.35)] md:text-base lg:max-w-[360px]">
+
+            <h1 className="mt-4 max-w-md text-base font-extrabold uppercase leading-[1.2] tracking-[0.04em] text-white drop-shadow-[0_2px_10px_rgba(0,40,15,0.35)] sm:text-lg md:text-xl lg:max-w-[420px]">
+              Ventas de informática corporativa:
+              <br />
+              Potenciando su éxito empresarial
+            </h1>
+
+            <p className="mt-2 text-sm font-semibold text-white/95 drop-shadow-[0_1px_6px_rgba(0,40,15,0.35)] md:text-base">
               Equipos, Soporte y Soluciones Integrales
+            </p>
+
+            <div className="mt-5 flex flex-wrap justify-center gap-2.5 lg:justify-start">
+              <Link
+                to="/catalog"
+                className="inline-flex items-center gap-2 rounded-lg bg-white px-5 py-2.5 text-xs font-bold text-neutral-900 shadow-[0_10px_28px_-10px_rgba(0,0,0,0.4)] hover:bg-white/95 md:text-sm"
+              >
+                Ver productos
+                <ArrowRight className="size-3.5" strokeWidth={2.5} />
+              </Link>
+              <a
+                href="https://wa.me/595971472716"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-lg bg-[#25D366] px-5 py-2.5 text-xs font-bold text-white shadow-[0_10px_28px_-10px_rgba(37,211,102,0.55)] hover:bg-[#1ebe5a] md:text-sm"
+              >
+                <MessageCircle className="size-3.5 shrink-0" />
+                WhatsApp
+              </a>
+            </div>
+
+            <p className="mt-3 text-[10px] tracking-wide text-white/85">
+              www.enertechsolutions.com
             </p>
           </div>
 
-          {/* DERECHA — Texto + CTAs arriba, escena grande debajo */}
-          <div className="relative flex flex-col items-center lg:col-span-7 lg:items-end">
-            <div className="text-center lg:text-right">
-              <h1 className="mx-auto max-w-md text-base font-extrabold uppercase leading-[1.2] tracking-[0.04em] text-white drop-shadow-[0_2px_10px_rgba(0,40,15,0.35)] sm:text-lg md:text-xl lg:mx-0 lg:ml-auto">
-                Ventas de informática corporativa:
-                <br />
-                Potenciando su éxito empresarial
-              </h1>
-
-              <div className="mt-4 flex flex-wrap justify-center gap-2.5 lg:justify-end">
-                <Link
-                  to="/catalog"
-                  className="inline-flex items-center gap-2 rounded-lg bg-white px-5 py-2.5 text-xs font-bold text-neutral-900 shadow-[0_10px_28px_-10px_rgba(0,0,0,0.4)] hover:bg-white/95 md:text-sm"
-                >
-                  Ver productos
-                  <ArrowRight className="size-3.5" strokeWidth={2.5} />
-                </Link>
-                <a
-                  href="https://wa.me/595971472716"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-lg bg-[#25D366] px-5 py-2.5 text-xs font-bold text-white shadow-[0_10px_28px_-10px_rgba(37,211,102,0.55)] hover:bg-[#1ebe5a] md:text-sm"
-                >
-                  <MessageCircle className="size-3.5 shrink-0" />
-                  WhatsApp
-                </a>
-              </div>
-
-              <p className="mt-3 text-[10px] tracking-wide text-white/85">
-                www.enertechsolutions.com
-              </p>
-            </div>
-
-            {/* Escena (servidor + monitores) — más grande */}
-            <div className="relative mt-5 w-full max-w-[520px] lg:mt-6 lg:max-w-[600px]">
+          {/* DERECHA — Escena de equipos grande */}
+          <div className="relative flex h-full items-center justify-center lg:col-span-7 lg:justify-end">
+            <div className="relative w-full max-w-[480px] lg:max-w-[640px]">
               {/* Sombra de contacto sobre el verde */}
               <div
                 className="pointer-events-none absolute -bottom-2 left-1/2 h-10 w-[80%] -translate-x-1/2 rounded-[50%]"
@@ -93,7 +91,7 @@ export function HomeHero() {
                 alt="Equipamiento informático corporativo — Enertech"
                 width={1400}
                 height={900}
-                className="relative mx-auto block h-auto w-full object-contain"
+                className="relative mx-auto block h-auto max-h-[min(72vh,620px)] w-full object-contain"
                 style={{
                   filter:
                     "drop-shadow(0 22px 26px hsl(0 0% 0% / 0.34)) drop-shadow(0 0 60px hsl(140 70% 45% / 0.2))",
