@@ -52,19 +52,19 @@ export function HomeHero() {
             </div>
 
             {/* Eyebrow */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/[0.07] backdrop-blur-sm px-3 py-1.5 mb-5">
-              <span className="size-1.5 rounded-full bg-primary-glow animate-pulse" />
-              <span className="text-[11px] uppercase tracking-[0.22em] font-semibold text-white/85">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/20 backdrop-blur-md px-3 py-1.5 mb-5 shadow-sm">
+              <span className="size-1.5 rounded-full bg-white animate-pulse" />
+              <span className="text-[11px] uppercase tracking-[0.22em] font-semibold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]">
                 Soluciones IT corporativas
               </span>
             </div>
 
-            <h1 className="text-[1.75rem] sm:text-[2.15rem] md:text-[2.45rem] lg:text-[2.75rem] xl:text-[3.1rem] font-bold tracking-tight leading-[1.08] text-balance text-white">
+            <h1 className="text-[1.75rem] sm:text-[2.15rem] md:text-[2.45rem] lg:text-[2.75rem] xl:text-[3.1rem] font-bold tracking-tight leading-[1.08] text-balance text-white drop-shadow-[0_3px_12px_rgba(15,55,15,0.45)]">
               VENTAS DE INFORMÁTICA<br className="hidden sm:inline" /> CORPORATIVA:{" "}
-              <span className="text-primary-glow">POTENCIANDO</span> SU ÉXITO EMPRESARIAL
+              <span className="text-[hsl(60_95%_88%)] drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]">POTENCIANDO</span> SU ÉXITO EMPRESARIAL
             </h1>
 
-            <p className="mt-5 md:mt-6 text-base md:text-lg leading-relaxed max-w-[52ch] text-white/85">
+            <p className="mt-5 md:mt-6 text-base md:text-lg leading-relaxed max-w-[52ch] text-white drop-shadow-[0_2px_6px_rgba(15,55,15,0.4)]">
               Equipos, soporte y soluciones integrales para empresas. Infraestructura, redes y
               tecnología corporativa con respaldo profesional.
             </p>
