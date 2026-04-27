@@ -32,7 +32,7 @@ export function HomeHero() {
             <img
               src={ENERTECH_BRAND_LOCKUP_URL}
               alt="Enertech — Energía e insumos"
-              className="h-auto w-[min(72%,300px)] object-contain drop-shadow-[0_8px_28px_rgba(0,0,0,0.25)] lg:w-[min(100%,360px)]"
+              className="h-auto w-[min(92%,460px)] object-contain drop-shadow-[0_10px_32px_rgba(0,0,0,0.28)] lg:w-[min(100%,560px)] xl:w-[min(100%,620px)]"
               width={520}
               height={160}
               decoding="async"
