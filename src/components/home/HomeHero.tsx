@@ -1,11 +1,11 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, MessageCircle, Cpu, Server, Network, Activity } from "lucide-react";
+import heroSceneImage from "@/assets/hero-it-scene-cutout.png";
 
 const HERO_LOGO_URL =
   "https://res.cloudinary.com/dfxz2hxgr/image/upload/v1777286692/WhatsApp_Image_2026-04-20_at_12.37.03_PM_1_1_btnvc0.png";
 
-const HERO_SCENE_IMAGE =
-  "https://res.cloudinary.com/dfxz2hxgr/image/upload/v1777287977/ChatGPT_Image_27_abr_2026_08_05_59_a.m._fmiie6.png";
+const HERO_SCENE_IMAGE = heroSceneImage;
 
 /** Degradado corporativo verde tecnológico, más profundo para integración de escena. */
 const HERO_GRADIENT =
