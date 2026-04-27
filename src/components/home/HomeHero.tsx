@@ -9,9 +9,9 @@ import { ENERTECH_BRAND_LOCKUP_URL } from "@/lib/brandAssets";
 const HERO_SCENE_IMAGE_URL =
   "https://res.cloudinary.com/dfxz2hxgr/image/upload/v1777289473/Dise%C3%B1o_sin_t%C3%ADtulo_16_zpkyb0.png";
 
-/** Muro verde estudio: centro más claro (lima) → borde bosque (referencia tipo #4CAF50 / radial). */
+/** Muro verde estudio; fulgor centrado hacia la izquierda donde vive la escena 3D. */
 const BG_STUDIO_WALL = `
-  radial-gradient(ellipse 120% 95% at 50% 22%,
+  radial-gradient(ellipse 110% 90% at 32% 38%,
     hsl(88 72% 58%) 0%,
     hsl(92 68% 50%) 18%,
     hsl(105 55% 42%) 42%,
@@ -62,61 +62,11 @@ export function HomeHero() {
 
       <div className="relative z-0 container flex flex-1 flex-col justify-center py-10 md:py-12 lg:py-14">
         <div className="grid w-full items-center gap-10 lg:grid-cols-12 lg:gap-10 xl:gap-14">
-          {/* Izquierda — logo + titulares exactos referencia */}
-          <div className="relative z-10 lg:col-span-5 xl:col-span-5 max-w-xl lg:max-w-[min(100%,38rem)]">
-            <div className="mb-6 md:mb-8">
-              <img
-                src={ENERTECH_BRAND_LOCKUP_URL}
-                alt="Enertech — Energía e insumos"
-                className="h-[4.5rem] sm:h-[5.75rem] md:h-[6.75rem] lg:h-[7.25rem] xl:h-[7.75rem] w-auto max-w-[min(100%,560px)] xl:max-w-[min(100%,640px)] object-contain object-left drop-shadow-[0_4px_24px_rgba(0,0,0,0.25)]"
-                width={640}
-                height={130}
-                decoding="async"
-                fetchpriority="high"
-              />
-            </div>
-
-            <h1 className="text-[1.05rem] sm:text-[1.25rem] md:text-[1.45rem] lg:text-[1.65rem] xl:text-[1.85rem] font-bold uppercase tracking-[0.06em] leading-[1.2] text-white text-balance drop-shadow-[0_2px_12px_rgba(0,35,20,0.35)]">
-              Ventas de informática corporativa:{" "}
-              <span className="text-[hsl(62_95%_92%)] drop-shadow-[0_1px_8px_rgba(0,0,0,0.2)]">
-                Potenciando su éxito empresarial
-              </span>
-            </h1>
-
-            <p className="mt-4 md:mt-5 text-base md:text-lg font-medium leading-snug text-white/95 max-w-[46ch] drop-shadow-[0_1px_6px_rgba(0,35,15,0.35)]">
-              Equipos, Soporte y Soluciones Integrales
-            </p>
-
-            {/* CTAs referencia: primario blanco + texto verde; WhatsApp verde marca */}
-            <div className="mt-7 md:mt-9 flex flex-wrap gap-3 sm:gap-4">
-              <Link
-                to="/catalog"
-                className="inline-flex items-center gap-2 rounded-xl bg-white px-7 py-3.5 text-sm md:text-[15px] font-bold text-[hsl(142_55%_32%)] shadow-[0_14px_40px_-12px_rgba(0,0,0,0.35)] hover:bg-white/95 transition-colors"
-              >
-                Ver productos
-                <ArrowRight className="size-4" strokeWidth={2.5} />
-              </Link>
-              <a
-                href="https://wa.me/595971472716"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-xl bg-[#25D366] px-7 py-3.5 text-sm md:text-[15px] font-bold text-white shadow-[0_14px_40px_-12px_rgba(37,211,102,0.55)] hover:bg-[#1ebe5a] transition-colors"
-              >
-                <MessageCircle className="size-4 shrink-0" />
-                WhatsApp
-              </a>
-            </div>
-
-            <p className="mt-8 text-[11px] sm:text-xs tracking-wide text-white/75">
-              <span className="opacity-90">www.enertechsolutions.com</span>
-            </p>
-          </div>
-
-          {/* Derecha — escena integrada (PNG más grande + perspectiva 3D tipo referencia) */}
-          <div className="relative z-0 lg:col-span-7 xl:col-span-7">
-            <div className="relative mx-auto min-h-[min(78vw,480px)] sm:min-h-[440px] md:min-h-[520px] lg:mx-0 lg:mr-[-6vw] lg:min-h-[min(72vh,760px)] xl:mr-[-8vw] xl:min-h-[min(76vh,820px)]">
+          {/* Izquierda — escena 3D (referencia: el producto participa a la izquierda) */}
+          <div className="relative z-0 order-1 lg:col-span-7 xl:col-span-7 lg:order-1">
+            <div className="relative mx-auto min-h-[min(78vw,480px)] sm:min-h-[440px] md:min-h-[520px] lg:mx-0 lg:ml-[-6vw] lg:mr-0 lg:min-h-[min(72vh,760px)] xl:ml-[-8vw] xl:min-h-[min(76vh,820px)]">
               <div
-                className="pointer-events-none absolute left-[42%] top-[44%] z-0 h-[min(92vw,620px)] w-[min(125vw,820px)] max-w-none -translate-x-1/2 -translate-y-1/2 rounded-full opacity-95"
+                className="pointer-events-none absolute left-[32%] top-[44%] z-0 h-[min(92vw,620px)] w-[min(125vw,820px)] max-w-none -translate-x-1/2 -translate-y-1/2 rounded-full opacity-95"
                 style={{
                   background:
                     "radial-gradient(circle, hsl(142 78% 52% / 0.5) 0%, hsl(150 65% 40% / 0.15) 48%, transparent 70%)",
@@ -125,7 +75,7 @@ export function HomeHero() {
                 aria-hidden
               />
               <div
-                className="pointer-events-none absolute left-[52%] top-[58%] z-0 h-[40%] w-[70%] max-w-[520px] -translate-x-1/2 rounded-full opacity-75"
+                className="pointer-events-none absolute left-[38%] top-[58%] z-0 h-[40%] w-[70%] max-w-[520px] -translate-x-1/2 rounded-full opacity-75"
                 style={{
                   background: "radial-gradient(ellipse, hsl(88 70% 55% / 0.4) 0%, transparent 72%)",
                   filter: "blur(32px)",
@@ -177,7 +127,7 @@ export function HomeHero() {
                 aria-hidden
               >
                 <div
-                  className="absolute inset-0 flex items-start justify-center lg:justify-end pr-[2%]"
+                  className="absolute inset-0 flex items-start justify-center pl-[1%] lg:justify-start lg:pl-[2%]"
                   style={{
                     transform: "scaleY(-1)",
                     filter: "blur(0.6px)",
@@ -186,19 +136,19 @@ export function HomeHero() {
                   <img
                     src={HERO_SCENE_IMAGE_URL}
                     alt=""
-                    className="max-h-[min(62vh,520px)] w-auto max-w-[135%] object-contain object-bottom scale-[1.12] sm:scale-[1.14] lg:max-h-[min(58vh,560px)]"
+                    className="max-h-[min(62vh,520px)] w-auto max-w-[135%] object-contain object-bottom object-left scale-[1.12] sm:scale-[1.14] lg:max-h-[min(58vh,560px)]"
                     decoding="async"
                   />
                 </div>
               </div>
 
-              {/* Perspectiva 3/4: volumen + escala mayor (referencia “producto en escena”) */}
+              {/* Perspectiva 3/4 hacia el centro (imagen izquierda → rotateY positivo) */}
               <div
-                className="pointer-events-none absolute inset-x-[-14%] bottom-[6%] top-[-4%] z-[9] flex items-end justify-center overflow-visible lg:justify-end lg:pr-0"
+                className="pointer-events-none absolute inset-x-[-14%] bottom-[6%] top-[-4%] z-[9] flex items-end justify-center overflow-visible lg:justify-start lg:pl-0"
                 style={{ perspective: "1400px" }}
               >
                 <div
-                  className="relative flex w-full max-w-none items-end justify-center lg:justify-end"
+                  className="relative flex w-full max-w-none items-end justify-center lg:justify-start"
                   style={{
                     transformStyle: "preserve-3d",
                   }}
@@ -208,13 +158,13 @@ export function HomeHero() {
                     alt="Equipamiento informático corporativo — Enertech"
                     width={1400}
                     height={1050}
-                    className="relative h-auto max-h-[min(88vh,720px)] w-auto max-w-[145%] object-contain object-bottom sm:max-h-[min(86vh,760px)] lg:max-h-[min(84vh,820px)] lg:max-w-[150%]"
+                    className="relative h-auto max-h-[min(88vh,720px)] w-auto max-w-[145%] object-contain object-bottom object-left sm:max-h-[min(86vh,760px)] lg:max-h-[min(84vh,820px)] lg:max-w-[150%]"
                     style={{
                       transform:
-                        "rotateY(-5deg) rotateX(2deg) scale(1.12) translateX(5%) translateZ(42px)",
-                      transformOrigin: "55% 92%",
+                        "rotateY(6deg) rotateX(2deg) scale(1.12) translateX(-6%) translateZ(42px)",
+                      transformOrigin: "42% 92%",
                       filter:
-                        "drop-shadow(0 0 100px hsl(142 75% 52% / 0.48)) drop-shadow(0 64px 110px hsl(0 0% 0% / 0.5)) drop-shadow(-20px 40px 50px hsl(0 0% 0% / 0.22))",
+                        "drop-shadow(0 0 100px hsl(142 75% 52% / 0.48)) drop-shadow(0 64px 110px hsl(0 0% 0% / 0.5)) drop-shadow(20px 40px 50px hsl(0 0% 0% / 0.22))",
                     }}
                     decoding="async"
                     fetchpriority="high"
@@ -226,11 +176,60 @@ export function HomeHero() {
                 className="pointer-events-none absolute inset-[-4%] z-[10] mix-blend-soft-light opacity-70"
                 style={{
                   background:
-                    "radial-gradient(ellipse 78% 58% at 58% 36%, hsl(85 60% 96% / 0.16) 0%, transparent 54%)",
+                    "radial-gradient(ellipse 78% 58% at 38% 36%, hsl(85 60% 96% / 0.16) 0%, transparent 54%)",
                 }}
                 aria-hidden
               />
             </div>
+          </div>
+
+          {/* Derecha — logo + titulares (referencia: copy junto al bloque visual a la derecha) */}
+          <div className="relative z-10 order-2 lg:col-span-5 xl:col-span-5 lg:order-2 lg:justify-self-end w-full max-w-xl lg:max-w-[min(100%,38rem)]">
+            <div className="mb-6 md:mb-8">
+              <img
+                src={ENERTECH_BRAND_LOCKUP_URL}
+                alt="Enertech — Energía e insumos"
+                className="h-[4.5rem] sm:h-[5.75rem] md:h-[6.75rem] lg:h-[7.25rem] xl:h-[7.75rem] w-auto max-w-[min(100%,560px)] xl:max-w-[min(100%,640px)] object-contain object-left lg:object-right drop-shadow-[0_4px_24px_rgba(0,0,0,0.25)] lg:ml-auto"
+                width={640}
+                height={130}
+                decoding="async"
+                fetchpriority="high"
+              />
+            </div>
+
+            <h1 className="text-[1.05rem] sm:text-[1.25rem] md:text-[1.45rem] lg:text-[1.65rem] xl:text-[1.85rem] font-bold uppercase tracking-[0.06em] leading-[1.2] text-white text-balance lg:text-right drop-shadow-[0_2px_12px_rgba(0,35,20,0.35)]">
+              Ventas de informática corporativa:{" "}
+              <span className="text-[hsl(62_95%_92%)] drop-shadow-[0_1px_8px_rgba(0,0,0,0.2)]">
+                Potenciando su éxito empresarial
+              </span>
+            </h1>
+
+            <p className="mt-4 md:mt-5 text-base md:text-lg font-medium leading-snug text-white/95 max-w-[46ch] lg:ml-auto lg:text-right drop-shadow-[0_1px_6px_rgba(0,35,15,0.35)]">
+              Equipos, Soporte y Soluciones Integrales
+            </p>
+
+            <div className="mt-7 md:mt-9 flex flex-wrap gap-3 sm:gap-4 lg:justify-end">
+              <Link
+                to="/catalog"
+                className="inline-flex items-center gap-2 rounded-xl bg-white px-7 py-3.5 text-sm md:text-[15px] font-bold text-[hsl(142_55%_32%)] shadow-[0_14px_40px_-12px_rgba(0,0,0,0.35)] hover:bg-white/95 transition-colors"
+              >
+                Ver productos
+                <ArrowRight className="size-4" strokeWidth={2.5} />
+              </Link>
+              <a
+                href="https://wa.me/595971472716"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-xl bg-[#25D366] px-7 py-3.5 text-sm md:text-[15px] font-bold text-white shadow-[0_14px_40px_-12px_rgba(37,211,102,0.55)] hover:bg-[#1ebe5a] transition-colors"
+              >
+                <MessageCircle className="size-4 shrink-0" />
+                WhatsApp
+              </a>
+            </div>
+
+            <p className="mt-8 text-[11px] sm:text-xs tracking-wide text-white/75 lg:text-right">
+              <span className="opacity-90">www.enertechsolutions.com</span>
+            </p>
           </div>
         </div>
       </div>
