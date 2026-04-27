@@ -27,7 +27,7 @@ linear-gradient(165deg,
 
 export function HomeHero() {
   return (
-    <section className="relative isolate flex min-h-[calc(100vh-112px)] flex-col overflow-x-clip overflow-y-visible text-white">
+    <section className="relative isolate flex min-h-[calc(100vh-112px)] flex-col overflow-x-visible overflow-y-visible text-white">
       {/* Capa 1 — pared verde corporativa (no plano): radial + diagonal */}
       <div className="pointer-events-none absolute inset-0 -z-20" style={{ background: BG_STUDIO_WALL }} aria-hidden />
 
@@ -61,10 +61,10 @@ export function HomeHero() {
       />
 
       <div className="relative z-0 container flex flex-1 flex-col justify-center py-10 md:py-12 lg:py-14">
-        <div className="grid w-full items-center gap-10 lg:grid-cols-12 lg:gap-10 xl:gap-14">
+        <div className="grid w-full items-center gap-8 lg:grid-cols-12 lg:gap-5 xl:gap-6 lg:items-center">
           {/* Columnas 1–7: SOLO escena (forzado; no depende del orden visual del navegador) */}
           <div className="relative z-0 order-1 lg:order-1 lg:col-span-7 lg:col-start-1 xl:col-span-7 xl:col-start-1">
-            <div className="relative mx-auto min-h-[min(78vw,480px)] sm:min-h-[440px] md:min-h-[520px] lg:mx-0 lg:ml-[-6vw] lg:mr-0 lg:min-h-[min(72vh,760px)] xl:ml-[-8vw] xl:min-h-[min(76vh,820px)]">
+            <div className="relative mx-auto min-h-[min(82vw,520px)] sm:min-h-[460px] md:min-h-[560px] lg:mx-0 lg:ml-0 lg:mr-0 lg:min-h-[min(78vh,840px)] xl:min-h-[min(80vh,880px)]">
               <div
                 className="pointer-events-none absolute left-[32%] top-[44%] z-0 h-[min(92vw,620px)] w-[min(125vw,820px)] max-w-none -translate-x-1/2 -translate-y-1/2 rounded-full opacity-95"
                 style={{
@@ -136,7 +136,7 @@ export function HomeHero() {
                   <img
                     src={HERO_SCENE_IMAGE_URL}
                     alt=""
-                    className="max-h-[min(62vh,520px)] w-auto max-w-[135%] object-contain object-bottom object-left scale-[1.12] sm:scale-[1.14] lg:max-h-[min(58vh,560px)]"
+                    className="max-h-[min(70vh,600px)] w-auto max-w-[150%] object-contain object-bottom object-left scale-[1.18] sm:scale-[1.2] lg:max-h-[min(66vh,640px)]"
                     decoding="async"
                   />
                 </div>
@@ -158,11 +158,11 @@ export function HomeHero() {
                     alt="Equipamiento informático corporativo — Enertech"
                     width={1400}
                     height={1050}
-                    className="relative -ml-[2%] h-auto max-h-[min(88vh,720px)] w-auto max-w-[155%] object-contain object-bottom object-left sm:max-h-[min(86vh,760px)] lg:-ml-[4%] lg:max-h-[min(84vh,820px)] lg:max-w-[160%]"
+                    className="relative h-auto max-h-[min(92vh,800px)] w-auto max-w-[175%] object-contain object-bottom object-left sm:max-h-[min(90vh,840px)] lg:max-h-[min(88vh,900px)] lg:max-w-[185%]"
                     style={{
                       transform:
-                        "rotateY(5deg) rotateX(2deg) scale(1.12) translateX(-8%) translateZ(42px)",
-                      transformOrigin: "28% 92%",
+                        "rotateY(4deg) rotateX(1.5deg) scale(1.2) translateX(-2%) translateZ(48px)",
+                      transformOrigin: "32% 94%",
                       filter:
                         "drop-shadow(0 0 100px hsl(142 75% 52% / 0.48)) drop-shadow(0 64px 110px hsl(0 0% 0% / 0.5)) drop-shadow(20px 40px 50px hsl(0 0% 0% / 0.22))",
                     }}
