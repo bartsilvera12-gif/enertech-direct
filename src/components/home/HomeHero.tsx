@@ -150,18 +150,18 @@ export function HomeHero() {
           }}
         />
 
-        {/* Imagen — full bleed, fundida con el fondo via mask */}
+        {/* Imagen — fondo negro fusionado con el verde via screen blend */}
         <img
           src={HERO_SCENE_IMAGE}
           alt=""
           className="absolute right-0 bottom-0 h-[92%] lg:h-[96%] xl:h-full w-auto max-w-none object-contain object-right-bottom select-none"
           style={{
-            filter:
-              "drop-shadow(0 40px 50px rgba(0,0,0,0.55)) drop-shadow(0 12px 24px rgba(0,0,0,0.45)) drop-shadow(0 0 70px hsl(95 90% 45% / 0.28))",
+            mixBlendMode: "screen",
+            filter: "brightness(1.05) contrast(1.08) saturate(1.15)",
             WebkitMaskImage:
-              "linear-gradient(100deg, transparent 0%, black 22%, black 100%)",
+              "linear-gradient(100deg, transparent 0%, black 20%, black 100%)",
             maskImage:
-              "linear-gradient(100deg, transparent 0%, black 22%, black 100%)",
+              "linear-gradient(100deg, transparent 0%, black 20%, black 100%)",
           }}
           draggable={false}
           decoding="async"
