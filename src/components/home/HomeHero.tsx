@@ -186,11 +186,11 @@ export function HomeHero() {
           alt=""
           className="w-full h-auto object-contain"
           style={{
-            filter:
-              "drop-shadow(0 24px 30px rgba(0,0,0,0.5)) drop-shadow(0 0 50px hsl(95 90% 45% / 0.25))",
+            mixBlendMode: "screen",
+            filter: "brightness(1.05) contrast(1.08) saturate(1.15)",
             WebkitMaskImage:
-              "linear-gradient(to bottom, black 75%, transparent 100%)",
-            maskImage: "linear-gradient(to bottom, black 75%, transparent 100%)",
+              "linear-gradient(to bottom, black 70%, transparent 100%)",
+            maskImage: "linear-gradient(to bottom, black 70%, transparent 100%)",
           }}
           draggable={false}
           decoding="async"
