@@ -89,13 +89,13 @@ export function HomeHero() {
             </div>
 
             {/* Mini trust strip */}
-            <div className="mt-9 md:mt-12 flex flex-wrap items-center gap-x-6 gap-y-3 text-[11px] uppercase tracking-[0.18em] text-white/65 font-medium">
+            <div className="mt-9 md:mt-12 flex flex-wrap items-center gap-x-6 gap-y-3 text-[11px] uppercase tracking-[0.18em] text-white/95 font-semibold drop-shadow-[0_1px_3px_rgba(15,55,15,0.4)]">
               <span>Servidores</span>
-              <span className="size-1 rounded-full bg-white/30" aria-hidden />
+              <span className="size-1 rounded-full bg-white/60" aria-hidden />
               <span>Redes</span>
-              <span className="size-1 rounded-full bg-white/30" aria-hidden />
+              <span className="size-1 rounded-full bg-white/60" aria-hidden />
               <span>Soporte 24/7</span>
-              <span className="size-1 rounded-full bg-white/30" aria-hidden />
+              <span className="size-1 rounded-full bg-white/60" aria-hidden />
               <span>Insumos</span>
             </div>
           </div>
