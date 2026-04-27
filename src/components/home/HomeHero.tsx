@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, MessageCircle, Cpu, Server, Network, Activity } from "lucide-react";
-import heroSceneImage from "@/assets/hero-it-scene-cutout.png";
+import heroSceneImage from "@/assets/hero-it-scene.png";
 
 const HERO_LOGO_URL =
   "https://res.cloudinary.com/dfxz2hxgr/image/upload/v1777286692/WhatsApp_Image_2026-04-20_at_12.37.03_PM_1_1_btnvc0.png";
@@ -59,7 +59,7 @@ export function HomeHero() {
       <div className="relative container flex flex-1 flex-col justify-center py-10 md:py-14 lg:py-16">
         <div className="grid w-full lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-16 items-center">
           {/* LEFT: Logo + headline */}
-          <div className="lg:col-span-6 max-w-2xl">
+          <div className="lg:col-span-6 max-w-2xl relative z-[20]">
             <div className="mb-7 md:mb-8">
               <img
                 src={HERO_LOGO_URL}
@@ -121,70 +121,83 @@ export function HomeHero() {
             </div>
           </div>
 
-          {/* RIGHT: Escena tecnológica integrada — sin contenedor */}
-          <div className="lg:col-span-6 relative min-h-[360px] md:min-h-[460px] lg:min-h-[560px]">
-            {/* Glow verde difuso detrás de la escena */}
-            <div
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                background:
-                  "radial-gradient(ellipse 70% 60% at 55% 45%, hsl(95 90% 50% / 0.32) 0%, hsl(120 70% 30% / 0.18) 35%, transparent 70%)",
-                filter: "blur(40px)",
-              }}
-              aria-hidden
-            />
-            {/* Light spot superior */}
-            <div
-              className="absolute -top-10 right-[10%] size-72 pointer-events-none"
-              style={{
-                background:
-                  "radial-gradient(circle, hsl(82 95% 60% / 0.35) 0%, transparent 70%)",
-                filter: "blur(50px)",
-              }}
-              aria-hidden
-            />
-
-            {/* Imagen escena — sin caja, full bleed, overflow hacia los bordes */}
-            <img
-              src={HERO_SCENE_IMAGE}
-              alt="Escena tecnológica Enertech: servidores corporativos sobre mesa con iluminación verde"
-              className="relative z-10 w-[115%] md:w-[120%] lg:w-[128%] xl:w-[132%] max-w-none -mr-[10%] md:-mr-[14%] lg:-mr-[20%] xl:-mr-[24%] ml-auto block select-none pointer-events-none"
-              style={{
-                filter:
-                  "drop-shadow(0 50px 60px rgba(0,0,0,0.55)) drop-shadow(0 20px 30px rgba(0,0,0,0.4)) drop-shadow(0 0 80px hsl(95 90% 45% / 0.25))",
-                transform: "perspective(1600px) rotateY(-3deg) rotateX(1deg)",
-                transformOrigin: "center center",
-              }}
-              width={1600}
-              height={1200}
-              fetchPriority="high"
-              decoding="async"
-              draggable={false}
-            />
-
-            {/* Reflejo / sombra difusa debajo (piso de vidrio) */}
-            <div
-              className="absolute left-[8%] right-[-10%] bottom-[4%] h-16 md:h-24 pointer-events-none z-[5]"
-              style={{
-                background:
-                  "radial-gradient(ellipse at center, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.25) 40%, transparent 75%)",
-                filter: "blur(18px)",
-              }}
-              aria-hidden
-            />
-
-            {/* Noise sutil sobre la zona de la escena */}
-            <div
-              className="absolute inset-0 pointer-events-none opacity-[0.06] mix-blend-overlay z-[11]"
-              style={{
-                backgroundImage:
-                  "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.6'/></svg>\")",
-              }}
-              aria-hidden
-            />
-          </div>
+          {/* Spacer derecho — la imagen real está absoluta sobre la <section> */}
+          <div className="hidden lg:block lg:col-span-6" aria-hidden />
         </div>
       </div>
+
+      {/* ESCENA tecnológica — anclada al borde derecho del hero, sin caja */}
+      <div
+        className="pointer-events-none absolute inset-y-0 right-0 w-full lg:w-[55%] xl:w-[52%] 2xl:w-[50%] z-[2] hidden md:block"
+        style={{ isolation: "isolate" }}
+        aria-hidden
+      >
+        {/* Glow verde radial detrás */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse 60% 55% at 55% 50%, hsl(95 95% 55% / 0.30) 0%, hsl(120 70% 30% / 0.15) 40%, transparent 72%)",
+            filter: "blur(30px)",
+          }}
+        />
+        {/* Light spot superior */}
+        <div
+          className="absolute -top-16 right-[12%] w-[420px] h-[420px]"
+          style={{
+            background:
+              "radial-gradient(circle, hsl(82 95% 60% / 0.32) 0%, transparent 70%)",
+            filter: "blur(60px)",
+          }}
+        />
+
+        {/* Imagen — fondo negro fusionado con el verde via screen blend */}
+        <img
+          src={HERO_SCENE_IMAGE}
+          alt=""
+          className="absolute right-0 bottom-0 h-[92%] lg:h-[96%] xl:h-full w-auto max-w-none object-contain object-right-bottom select-none"
+          style={{
+            mixBlendMode: "screen",
+            filter: "brightness(1.05) contrast(1.08) saturate(1.15)",
+            WebkitMaskImage:
+              "linear-gradient(100deg, transparent 0%, black 20%, black 100%)",
+            maskImage:
+              "linear-gradient(100deg, transparent 0%, black 20%, black 100%)",
+          }}
+          draggable={false}
+          decoding="async"
+          fetchPriority="high"
+        />
+
+        {/* Sombra de piso difusa */}
+        <div
+          className="absolute bottom-[2%] left-[10%] right-[6%] h-20"
+          style={{
+            background:
+              "radial-gradient(ellipse at center, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.2) 45%, transparent 75%)",
+            filter: "blur(22px)",
+          }}
+        />
+      </div>
+
+      {/* Versión mobile — imagen suave debajo del texto */}
+      <div className="md:hidden relative z-[2] -mt-4 mb-2 px-4 pointer-events-none">
+        <img
+          src={HERO_SCENE_IMAGE}
+          alt=""
+          className="w-full h-auto object-contain"
+          style={{
+            mixBlendMode: "screen",
+            filter: "brightness(1.05) contrast(1.08) saturate(1.15)",
+            WebkitMaskImage:
+              "linear-gradient(to bottom, black 70%, transparent 100%)",
+            maskImage: "linear-gradient(to bottom, black 70%, transparent 100%)",
+          }}
+          draggable={false}
+          decoding="async"
+        />
+      </div>
+
 
       {/* Bottom edge fade for smooth transition into next section */}
       <div
