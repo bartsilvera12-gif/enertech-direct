@@ -1,13 +1,15 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, MessageCircle, Cpu, Server, Network, Activity } from "lucide-react";
-import heroITImage from "@/assets/hero-it-infrastructure.jpg";
 
 const HERO_LOGO_URL =
   "https://res.cloudinary.com/dfxz2hxgr/image/upload/v1777286692/WhatsApp_Image_2026-04-20_at_12.37.03_PM_1_1_btnvc0.png";
 
-/** Degradado corporativo verde tecnológico (oscuro → Enertech). */
+const HERO_SCENE_IMAGE =
+  "https://res.cloudinary.com/dfxz2hxgr/image/upload/v1777287977/ChatGPT_Image_27_abr_2026_08_05_59_a.m._fmiie6.png";
+
+/** Degradado corporativo verde tecnológico, más profundo para integración de escena. */
 const HERO_GRADIENT =
-  "linear-gradient(125deg, hsl(160 45% 8%) 0%, hsl(150 42% 14%) 22%, hsl(120 48% 22%) 48%, hsl(95 60% 32%) 75%, hsl(82 70% 42%) 100%)";
+  "linear-gradient(120deg, hsl(160 55% 5%) 0%, hsl(155 50% 9%) 28%, hsl(145 48% 14%) 55%, hsl(120 45% 18%) 80%, hsl(95 55% 24%) 100%)";
 
 export function HomeHero() {
   return (
