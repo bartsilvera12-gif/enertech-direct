@@ -27,7 +27,7 @@ const FALLBACK_ANON =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjN43kdQwgnWNReilDMblYTn_I0";
 
 /** Todas las llamadas `.from()` / `.rpc()` usan PostgREST con Accept-Profile / Content-Profile = enertech. Sin `global.headers` que pisen esos perfiles. */
-export const supabase: SupabaseClient = createClient(
+export const supabase = createClient<any, typeof SUPABASE_DB_SCHEMA>(
   configured ? supabaseUrl : FALLBACK_URL,
   configured ? anonKey : FALLBACK_ANON,
   {
