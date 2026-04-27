@@ -33,13 +33,22 @@ const Home = () => {
     queryFn: () => fetchProducts({ featuredOnly: true, sort: "newest" }),
   });
 
-  const categoryTiles = TILE_FALLBACK.map((t) => {
-    const match = roots.find((c) => c.slug === t.slug);
+  const categoryTiles = (roots.length > 0 ? roots.slice(0, 8) : []).map((c) => {
+    const fb = TILE_FALLBACK.find((t) => t.slug === c.slug);
     return {
-      ...t,
-      href: match ? `/catalog?cat=${match.slug}` : `/catalog?q=${encodeURIComponent(t.title)}`,
+      slug: c.slug,
+      title: c.name,
+      desc: fb?.desc ?? "Explorá productos disponibles.",
+      href: `/catalog?cat=${encodeURIComponent(c.slug)}`,
     };
   });
+
+  const fallbackTiles = TILE_FALLBACK.map((t) => ({
+    ...t,
+    href: `/catalog?q=${encodeURIComponent(t.title)}`,
+  }));
+
+  const tilesToRender = categoryTiles.length > 0 ? categoryTiles : fallbackTiles;
 
   return (
     <>
