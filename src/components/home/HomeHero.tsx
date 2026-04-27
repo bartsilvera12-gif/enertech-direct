@@ -199,9 +199,6 @@ export function HomeHero() {
         />
       </div>
 
-      <div style={{ display: "none" }}>{/* spacer placeholder */}</div>
-        </div>
-      </div>
 
       {/* Bottom edge fade for smooth transition into next section */}
       <div
