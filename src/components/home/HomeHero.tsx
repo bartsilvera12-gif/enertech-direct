@@ -58,14 +58,14 @@ export function HomeHero() {
       />
 
       <div className="container relative px-4 sm:px-6">
-        {/* Grid horizontal compacto: logo izq | (texto + escena) der, ambos centrados verticalmente */}
-        <div className="grid grid-cols-1 items-center gap-8 py-10 md:py-14 lg:grid-cols-12 lg:gap-6 lg:py-16">
-          {/* IZQUIERDA — Logo centrado verticalmente sobre la pared */}
-          <div className="flex items-center justify-center lg:col-span-5 lg:justify-end lg:pr-6">
+        {/* Grid horizontal: logo izq (alineado al final = junto a los equipos) | (texto + escena) der */}
+        <div className="grid grid-cols-1 items-end gap-6 py-8 md:py-10 lg:grid-cols-12 lg:gap-8 lg:py-12">
+          {/* IZQUIERDA — Logo alineado verticalmente con los equipos (parte baja de la pared) */}
+          <div className="flex items-end justify-center pb-2 lg:col-span-5 lg:justify-end lg:pb-10 lg:pr-4">
             <img
               src={ENERTECH_BRAND_LOCKUP_URL}
               alt="Enertech — Energía e insumos"
-              className="h-auto w-[min(78%,320px)] object-contain drop-shadow-[0_6px_24px_rgba(0,0,0,0.22)] lg:w-[min(100%,360px)]"
+              className="h-auto w-[min(70%,280px)] object-contain drop-shadow-[0_6px_24px_rgba(0,0,0,0.22)] lg:w-[min(100%,340px)]"
               width={520}
               height={160}
               decoding="async"
