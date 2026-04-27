@@ -35,46 +35,7 @@ export function HomeHero() {
         }}
         aria-hidden
       />
-      {/* Vignette + glow suaves para fondo claro */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: `
-            radial-gradient(ellipse 60% 55% at 15% 30%, hsl(75 90% 70% / 0.35) 0%, transparent 60%),
-            radial-gradient(ellipse 60% 50% at 95% 75%, hsl(110 65% 30% / 0.30) 0%, transparent 65%),
-            radial-gradient(ellipse 70% 40% at 50% 105%, hsl(115 60% 25% / 0.25) 0%, transparent 60%)
-          `,
-        }}
-        aria-hidden
-      />
-      {/* Tech grid */}
-      <div
-        className="absolute inset-0 pointer-events-none opacity-[0.12]"
-        style={{
-          backgroundImage: `
-            linear-gradient(hsl(0 0% 100% / 0.08) 1px, transparent 1px),
-            linear-gradient(90deg, hsl(0 0% 100% / 0.08) 1px, transparent 1px)
-          `,
-          backgroundSize: "64px 64px",
-          maskImage: "linear-gradient(180deg, black 0%, black 70%, transparent 100%)",
-        }}
-        aria-hidden
-      />
-      {/* Diagonal scanlines */}
-      <div
-        className="absolute inset-0 pointer-events-none opacity-[0.08] mix-blend-overlay"
-        style={{
-          backgroundImage: `repeating-linear-gradient(-30deg, transparent 0, transparent 56px, hsl(82 80% 60% / 0.18) 56px, hsl(82 80% 60% / 0.18) 57px)`,
-        }}
-        aria-hidden
-      />
-      {/* Floating tech icons */}
-      <Server className="absolute left-[5%] top-[18%] size-20 text-white/[0.06] hidden xl:block pointer-events-none" aria-hidden />
-      <Cpu className="absolute right-[8%] top-[14%] size-14 text-white/[0.07] hidden lg:block pointer-events-none" aria-hidden />
-      <Network className="absolute left-[10%] bottom-[22%] size-16 text-white/[0.055] hidden lg:block pointer-events-none" aria-hidden />
-      <Activity className="absolute right-[14%] bottom-[18%] size-12 text-white/[0.06] hidden lg:block pointer-events-none" aria-hidden />
-
-      <div className="relative container flex flex-1 flex-col justify-center py-10 md:py-14 lg:py-16">
+      <div className="relative container flex flex-1 flex-col justify-center py-10 md:py-14 lg:py-16 z-[3]">
         <div className="grid w-full lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-16 items-center">
           {/* LEFT: Logo + headline */}
           <div className="lg:col-span-6 max-w-2xl relative z-[20]">
