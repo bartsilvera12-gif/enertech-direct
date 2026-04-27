@@ -6,85 +6,51 @@ import { ENERTECH_BRAND_LOCKUP_URL } from "@/lib/brandAssets";
 const HERO_SCENE_IMAGE_URL =
   "https://res.cloudinary.com/dfxz2hxgr/image/upload/v1777289473/Dise%C3%B1o_sin_t%C3%ADtulo_16_zpkyb0.png";
 
-/** Pared verde estilo estudio (verde manzana). */
+/** Pared verde estilo estudio (verde manzana) — ahora ocupa todo el hero. */
 const WALL_GRADIENT = `
-  radial-gradient(ellipse 120% 90% at 50% 35%,
+  radial-gradient(ellipse 130% 100% at 50% 40%,
     hsl(88 78% 60%) 0%,
-    hsl(95 70% 50%) 45%,
-    hsl(108 58% 40%) 100%
-  )
-`;
-
-/** Piso/mesa de acero pulido. */
-const FLOOR_GRADIENT = `
-  linear-gradient(180deg,
-    hsl(210 12% 80%) 0%,
-    hsl(210 14% 70%) 22%,
-    hsl(210 12% 58%) 60%,
-    hsl(215 14% 46%) 100%
+    hsl(95 72% 52%) 45%,
+    hsl(105 60% 42%) 100%
   )
 `;
 
 export function HomeHero() {
   return (
     <section className="relative isolate overflow-hidden text-white">
-      {/* PARED VERDE (parte superior) */}
+      {/* Fondo verde completo */}
       <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-[68%] -z-20"
+        className="pointer-events-none absolute inset-0 -z-20"
         style={{ background: WALL_GRADIENT }}
-        aria-hidden
-      />
-      {/* PISO METÁLICO (parte inferior) */}
-      <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-[32%] -z-20"
-        style={{ background: FLOOR_GRADIENT }}
-        aria-hidden
-      />
-      {/* Línea de horizonte sutil */}
-      <div
-        className="pointer-events-none absolute inset-x-0 top-[68%] h-[2px] -z-10"
-        style={{
-          background: "linear-gradient(90deg, transparent, hsl(0 0% 0% / 0.22), transparent)",
-        }}
-        aria-hidden
-      />
-      {/* Sombra ambiente bajo el horizonte */}
-      <div
-        className="pointer-events-none absolute inset-x-0 top-[68%] h-20 -z-10"
-        style={{
-          background: "linear-gradient(180deg, hsl(0 0% 0% / 0.28) 0%, transparent 100%)",
-        }}
         aria-hidden
       />
 
       <div className="container relative px-4 sm:px-6">
-        {/* Grid horizontal compacto */}
-        <div className="grid grid-cols-1 items-center gap-6 py-8 md:py-10 lg:grid-cols-12 lg:gap-6 lg:py-10">
-          {/* IZQUIERDA — Logo centrado verticalmente */}
-          <div className="flex items-center justify-center lg:col-span-5 lg:justify-end lg:pr-4">
+        <div className="grid grid-cols-1 items-center gap-6 py-10 md:py-12 lg:grid-cols-12 lg:gap-6 lg:py-14">
+          {/* IZQUIERDA — Logo grande + descripción debajo */}
+          <div className="flex flex-col items-center justify-center text-center lg:col-span-5 lg:items-end lg:text-right lg:pr-4">
             <img
               src={ENERTECH_BRAND_LOCKUP_URL}
               alt="Enertech — Energía e insumos"
-              className="h-auto w-[min(70%,260px)] object-contain drop-shadow-[0_6px_24px_rgba(0,0,0,0.22)] lg:w-[min(100%,320px)]"
+              className="h-auto w-[min(86%,420px)] object-contain drop-shadow-[0_8px_28px_rgba(0,0,0,0.25)] lg:w-[min(100%,460px)]"
               width={520}
               height={160}
               decoding="async"
               fetchPriority="high"
             />
+            <p className="mt-4 max-w-xs text-sm font-semibold text-white/95 drop-shadow-[0_1px_6px_rgba(0,40,15,0.35)] md:text-base lg:max-w-[360px]">
+              Equipos, Soporte y Soluciones Integrales
+            </p>
           </div>
 
-          {/* DERECHA — Texto arriba + escena debajo */}
+          {/* DERECHA — Texto + CTAs arriba, escena grande debajo */}
           <div className="relative flex flex-col items-center lg:col-span-7 lg:items-end">
-            {/* Texto */}
             <div className="text-center lg:text-right">
               <h1 className="mx-auto max-w-md text-base font-extrabold uppercase leading-[1.2] tracking-[0.04em] text-white drop-shadow-[0_2px_10px_rgba(0,40,15,0.35)] sm:text-lg md:text-xl lg:mx-0 lg:ml-auto">
                 Ventas de informática corporativa:
                 <br />
-                <span className="text-white">Potenciando su éxito empresarial</span>
+                Potenciando su éxito empresarial
               </h1>
-              <p className="mt-2 text-xs font-medium text-white/95 drop-shadow-[0_1px_6px_rgba(0,40,15,0.35)] md:text-sm">
-                Equipos, Soporte y Soluciones Integrales
-              </p>
 
               <div className="mt-4 flex flex-wrap justify-center gap-2.5 lg:justify-end">
                 <Link
@@ -110,15 +76,15 @@ export function HomeHero() {
               </p>
             </div>
 
-            {/* Escena (servidor + monitores) — apoyada sobre el horizonte */}
-            <div className="relative mt-3 w-full max-w-[360px] lg:mt-4 lg:max-w-[400px]">
-              {/* Sombra de contacto */}
+            {/* Escena (servidor + monitores) — más grande */}
+            <div className="relative mt-5 w-full max-w-[520px] lg:mt-6 lg:max-w-[600px]">
+              {/* Sombra de contacto sobre el verde */}
               <div
-                className="pointer-events-none absolute -bottom-1 left-1/2 h-7 w-[78%] -translate-x-1/2 rounded-[50%]"
+                className="pointer-events-none absolute -bottom-2 left-1/2 h-10 w-[80%] -translate-x-1/2 rounded-[50%]"
                 style={{
                   background:
-                    "radial-gradient(ellipse at center, hsl(0 0% 0% / 0.55) 0%, hsl(0 0% 0% / 0.18) 55%, transparent 78%)",
-                  filter: "blur(10px)",
+                    "radial-gradient(ellipse at center, hsl(0 0% 0% / 0.45) 0%, hsl(0 0% 0% / 0.16) 55%, transparent 78%)",
+                  filter: "blur(14px)",
                 }}
                 aria-hidden
               />
@@ -130,7 +96,7 @@ export function HomeHero() {
                 className="relative mx-auto block h-auto w-full object-contain"
                 style={{
                   filter:
-                    "drop-shadow(0 18px 22px hsl(0 0% 0% / 0.32)) drop-shadow(0 0 50px hsl(140 70% 45% / 0.18))",
+                    "drop-shadow(0 22px 26px hsl(0 0% 0% / 0.34)) drop-shadow(0 0 60px hsl(140 70% 45% / 0.2))",
                 }}
                 decoding="async"
                 fetchPriority="high"
