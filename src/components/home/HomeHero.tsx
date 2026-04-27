@@ -69,7 +69,7 @@ export function HomeHero() {
               width={520}
               height={160}
               decoding="async"
-              fetchpriority="high"
+              fetchPriority="high"
             />
           </div>
 
@@ -129,7 +129,7 @@ export function HomeHero() {
                     "drop-shadow(0 24px 28px hsl(0 0% 0% / 0.35)) drop-shadow(0 0 60px hsl(140 70% 45% / 0.18))",
                 }}
                 decoding="async"
-                fetchpriority="high"
+                fetchPriority="high"
               />
             </div>
 
