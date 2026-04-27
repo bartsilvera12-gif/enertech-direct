@@ -7,9 +7,9 @@ const HERO_LOGO_URL =
 
 const HERO_SCENE_IMAGE = heroSceneImage;
 
-/** Degradado corporativo verde tecnológico, más profundo para integración de escena. */
+/** Verde manzana vivo con degradado sutil — referencia Enertech. */
 const HERO_GRADIENT =
-  "linear-gradient(120deg, hsl(160 55% 5%) 0%, hsl(155 50% 9%) 28%, hsl(145 48% 14%) 55%, hsl(120 45% 18%) 80%, hsl(95 55% 24%) 100%)";
+  "linear-gradient(135deg, hsl(88 72% 58%) 0%, hsl(92 75% 52%) 35%, hsl(96 78% 46%) 70%, hsl(100 70% 40%) 100%)";
 
 export function HomeHero() {
   return (
