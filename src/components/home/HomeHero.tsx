@@ -62,8 +62,8 @@ export function HomeHero() {
 
       <div className="relative z-0 container flex flex-1 flex-col justify-center py-10 md:py-12 lg:py-14">
         <div className="grid w-full items-center gap-10 lg:grid-cols-12 lg:gap-10 xl:gap-14">
-          {/* Izquierda — escena 3D (referencia: el producto participa a la izquierda) */}
-          <div className="relative z-0 order-1 lg:col-span-7 xl:col-span-7 lg:order-1">
+          {/* Columnas 1–7: SOLO escena (forzado; no depende del orden visual del navegador) */}
+          <div className="relative z-0 order-1 lg:order-1 lg:col-span-7 lg:col-start-1 xl:col-span-7 xl:col-start-1">
             <div className="relative mx-auto min-h-[min(78vw,480px)] sm:min-h-[440px] md:min-h-[520px] lg:mx-0 lg:ml-[-6vw] lg:mr-0 lg:min-h-[min(72vh,760px)] xl:ml-[-8vw] xl:min-h-[min(76vh,820px)]">
               <div
                 className="pointer-events-none absolute left-[32%] top-[44%] z-0 h-[min(92vw,620px)] w-[min(125vw,820px)] max-w-none -translate-x-1/2 -translate-y-1/2 rounded-full opacity-95"
@@ -127,7 +127,7 @@ export function HomeHero() {
                 aria-hidden
               >
                 <div
-                  className="absolute inset-0 flex items-start justify-center pl-[1%] lg:justify-start lg:pl-[2%]"
+                  className="absolute inset-0 flex items-start justify-start pl-0"
                   style={{
                     transform: "scaleY(-1)",
                     filter: "blur(0.6px)",
@@ -144,11 +144,11 @@ export function HomeHero() {
 
               {/* Perspectiva 3/4 hacia el centro (imagen izquierda → rotateY positivo) */}
               <div
-                className="pointer-events-none absolute inset-x-[-14%] bottom-[6%] top-[-4%] z-[9] flex items-end justify-center overflow-visible lg:justify-start lg:pl-0"
+                className="pointer-events-none absolute inset-x-[-14%] bottom-[6%] top-[-4%] z-[9] flex w-full items-end justify-start overflow-visible pl-0"
                 style={{ perspective: "1400px" }}
               >
                 <div
-                  className="relative flex w-full max-w-none items-end justify-center lg:justify-start"
+                  className="relative flex w-full max-w-none items-end justify-start"
                   style={{
                     transformStyle: "preserve-3d",
                   }}
@@ -158,11 +158,11 @@ export function HomeHero() {
                     alt="Equipamiento informático corporativo — Enertech"
                     width={1400}
                     height={1050}
-                    className="relative h-auto max-h-[min(88vh,720px)] w-auto max-w-[145%] object-contain object-bottom object-left sm:max-h-[min(86vh,760px)] lg:max-h-[min(84vh,820px)] lg:max-w-[150%]"
+                    className="relative -ml-[2%] h-auto max-h-[min(88vh,720px)] w-auto max-w-[155%] object-contain object-bottom object-left sm:max-h-[min(86vh,760px)] lg:-ml-[4%] lg:max-h-[min(84vh,820px)] lg:max-w-[160%]"
                     style={{
                       transform:
-                        "rotateY(6deg) rotateX(2deg) scale(1.12) translateX(-6%) translateZ(42px)",
-                      transformOrigin: "42% 92%",
+                        "rotateY(5deg) rotateX(2deg) scale(1.12) translateX(-8%) translateZ(42px)",
+                      transformOrigin: "28% 92%",
                       filter:
                         "drop-shadow(0 0 100px hsl(142 75% 52% / 0.48)) drop-shadow(0 64px 110px hsl(0 0% 0% / 0.5)) drop-shadow(20px 40px 50px hsl(0 0% 0% / 0.22))",
                     }}
@@ -183,53 +183,55 @@ export function HomeHero() {
             </div>
           </div>
 
-          {/* Derecha — logo + titulares (referencia: copy junto al bloque visual a la derecha) */}
-          <div className="relative z-10 order-2 lg:col-span-5 xl:col-span-5 lg:order-2 lg:justify-self-end w-full max-w-xl lg:max-w-[min(100%,38rem)]">
-            <div className="mb-6 md:mb-8">
-              <img
-                src={ENERTECH_BRAND_LOCKUP_URL}
-                alt="Enertech — Energía e insumos"
-                className="h-[4.5rem] sm:h-[5.75rem] md:h-[6.75rem] lg:h-[7.25rem] xl:h-[7.75rem] w-auto max-w-[min(100%,560px)] xl:max-w-[min(100%,640px)] object-contain object-left lg:object-right drop-shadow-[0_4px_24px_rgba(0,0,0,0.25)] lg:ml-auto"
-                width={640}
-                height={130}
-                decoding="async"
-                fetchpriority="high"
-              />
+          {/* Columnas 8–12: marca + copy (referencia: mitad derecha, contenido centrado en esa mitad) */}
+          <div className="relative z-10 order-2 flex w-full flex-col lg:order-2 lg:col-span-5 lg:col-start-8 xl:col-span-5 xl:col-start-8">
+            <div className="mx-auto flex w-full max-w-xl flex-col items-center text-center lg:max-w-[min(100%,36rem)]">
+              <div className="mb-6 md:mb-8">
+                <img
+                  src={ENERTECH_BRAND_LOCKUP_URL}
+                  alt="Enertech — Energía e insumos"
+                  className="mx-auto h-[4.5rem] sm:h-[5.75rem] md:h-[6.75rem] lg:h-[7.25rem] xl:h-[7.75rem] w-auto max-w-[min(100%,560px)] xl:max-w-[min(100%,640px)] object-contain object-center drop-shadow-[0_4px_24px_rgba(0,0,0,0.25)]"
+                  width={640}
+                  height={130}
+                  decoding="async"
+                  fetchpriority="high"
+                />
+              </div>
+
+              <h1 className="text-[1.05rem] sm:text-[1.25rem] md:text-[1.45rem] lg:text-[1.65rem] xl:text-[1.85rem] font-bold uppercase tracking-[0.06em] leading-[1.2] text-white text-balance drop-shadow-[0_2px_12px_rgba(0,35,20,0.35)]">
+                Ventas de informática corporativa:{" "}
+                <span className="text-[hsl(62_95%_92%)] drop-shadow-[0_1px_8px_rgba(0,0,0,0.2)]">
+                  Potenciando su éxito empresarial
+                </span>
+              </h1>
+
+              <p className="mt-4 md:mt-5 max-w-[46ch] text-base md:text-lg font-medium leading-snug text-white/95 drop-shadow-[0_1px_6px_rgba(0,35,15,0.35)]">
+                Equipos, Soporte y Soluciones Integrales
+              </p>
+
+              <div className="mt-7 md:mt-9 flex flex-wrap justify-center gap-3 sm:gap-4">
+                <Link
+                  to="/catalog"
+                  className="inline-flex items-center gap-2 rounded-xl bg-white px-7 py-3.5 text-sm md:text-[15px] font-bold text-neutral-900 shadow-[0_14px_40px_-12px_rgba(0,0,0,0.35)] hover:bg-white/95 transition-colors"
+                >
+                  Ver productos
+                  <ArrowRight className="size-4" strokeWidth={2.5} />
+                </Link>
+                <a
+                  href="https://wa.me/595971472716"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-xl bg-[#25D366] px-7 py-3.5 text-sm md:text-[15px] font-bold text-white shadow-[0_14px_40px_-12px_rgba(37,211,102,0.55)] hover:bg-[#1ebe5a] transition-colors"
+                >
+                  <MessageCircle className="size-4 shrink-0" />
+                  WhatsApp
+                </a>
+              </div>
+
+              <p className="mt-8 text-[11px] sm:text-xs tracking-wide text-white/75">
+                <span className="opacity-90">www.enertechsolutions.com</span>
+              </p>
             </div>
-
-            <h1 className="text-[1.05rem] sm:text-[1.25rem] md:text-[1.45rem] lg:text-[1.65rem] xl:text-[1.85rem] font-bold uppercase tracking-[0.06em] leading-[1.2] text-white text-balance lg:text-right drop-shadow-[0_2px_12px_rgba(0,35,20,0.35)]">
-              Ventas de informática corporativa:{" "}
-              <span className="text-[hsl(62_95%_92%)] drop-shadow-[0_1px_8px_rgba(0,0,0,0.2)]">
-                Potenciando su éxito empresarial
-              </span>
-            </h1>
-
-            <p className="mt-4 md:mt-5 text-base md:text-lg font-medium leading-snug text-white/95 max-w-[46ch] lg:ml-auto lg:text-right drop-shadow-[0_1px_6px_rgba(0,35,15,0.35)]">
-              Equipos, Soporte y Soluciones Integrales
-            </p>
-
-            <div className="mt-7 md:mt-9 flex flex-wrap gap-3 sm:gap-4 lg:justify-end">
-              <Link
-                to="/catalog"
-                className="inline-flex items-center gap-2 rounded-xl bg-white px-7 py-3.5 text-sm md:text-[15px] font-bold text-[hsl(142_55%_32%)] shadow-[0_14px_40px_-12px_rgba(0,0,0,0.35)] hover:bg-white/95 transition-colors"
-              >
-                Ver productos
-                <ArrowRight className="size-4" strokeWidth={2.5} />
-              </Link>
-              <a
-                href="https://wa.me/595971472716"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-xl bg-[#25D366] px-7 py-3.5 text-sm md:text-[15px] font-bold text-white shadow-[0_14px_40px_-12px_rgba(37,211,102,0.55)] hover:bg-[#1ebe5a] transition-colors"
-              >
-                <MessageCircle className="size-4 shrink-0" />
-                WhatsApp
-              </a>
-            </div>
-
-            <p className="mt-8 text-[11px] sm:text-xs tracking-wide text-white/75 lg:text-right">
-              <span className="opacity-90">www.enertechsolutions.com</span>
-            </p>
           </div>
         </div>
       </div>
