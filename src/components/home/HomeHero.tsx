@@ -73,16 +73,32 @@ export function HomeHero() {
             </p>
           </div>
 
-          {/* DERECHA — Escena de equipos grande */}
-          <div className="relative flex h-full items-center justify-center lg:col-span-7 lg:justify-end">
-            <div className="relative w-full max-w-[480px] lg:max-w-[640px]">
-              {/* Sombra de contacto sobre el verde */}
+          {/* DERECHA — Escena de equipos grande con efecto 3D */}
+          <div
+            className="relative flex h-full items-center justify-center lg:col-span-7 lg:justify-end"
+            style={{ perspective: "1400px" }}
+          >
+            <div className="group relative w-full max-w-[640px] lg:max-w-[820px]">
+              {/* Halo verde de fondo (profundidad) */}
               <div
-                className="pointer-events-none absolute -bottom-2 left-1/2 h-10 w-[80%] -translate-x-1/2 rounded-[50%]"
+                className="pointer-events-none absolute inset-0 -z-10"
                 style={{
                   background:
-                    "radial-gradient(ellipse at center, hsl(0 0% 0% / 0.45) 0%, hsl(0 0% 0% / 0.16) 55%, transparent 78%)",
-                  filter: "blur(14px)",
+                    "radial-gradient(ellipse 70% 60% at 55% 50%, hsl(140 80% 55% / 0.45) 0%, transparent 70%)",
+                  filter: "blur(40px)",
+                  transform: "translateZ(-80px)",
+                }}
+                aria-hidden
+              />
+              {/* Sombra de contacto proyectada */}
+              <div
+                className="pointer-events-none absolute -bottom-4 left-1/2 h-14 w-[82%] -translate-x-1/2 rounded-[50%]"
+                style={{
+                  background:
+                    "radial-gradient(ellipse at center, hsl(0 0% 0% / 0.55) 0%, hsl(0 0% 0% / 0.22) 50%, transparent 78%)",
+                  filter: "blur(18px)",
+                  transform: "rotateX(70deg)",
+                  transformOrigin: "50% 100%",
                 }}
                 aria-hidden
               />
@@ -91,13 +107,24 @@ export function HomeHero() {
                 alt="Equipamiento informático corporativo — Enertech"
                 width={1400}
                 height={900}
-                className="relative mx-auto block h-auto max-h-[min(72vh,620px)] w-full object-contain"
+                className="relative mx-auto block h-auto max-h-[min(78vh,720px)] w-full object-contain transition-transform duration-700 ease-out will-change-transform group-hover:scale-[1.02]"
                 style={{
+                  transform: "rotateY(-8deg) rotateX(4deg) scale(1.06)",
+                  transformOrigin: "60% 60%",
                   filter:
-                    "drop-shadow(0 22px 26px hsl(0 0% 0% / 0.34)) drop-shadow(0 0 60px hsl(140 70% 45% / 0.2))",
+                    "drop-shadow(0 32px 36px hsl(0 0% 0% / 0.45)) drop-shadow(0 12px 18px hsl(0 0% 0% / 0.35)) drop-shadow(0 0 80px hsl(140 75% 50% / 0.35))",
                 }}
                 decoding="async"
                 fetchPriority="high"
+              />
+              {/* Reflejo especular sutil (highlight superior izquierdo) */}
+              <div
+                className="pointer-events-none absolute inset-0 -z-[1] mix-blend-screen opacity-40"
+                style={{
+                  background:
+                    "radial-gradient(ellipse 40% 30% at 30% 20%, hsl(0 0% 100% / 0.35) 0%, transparent 70%)",
+                }}
+                aria-hidden
               />
             </div>
           </div>
