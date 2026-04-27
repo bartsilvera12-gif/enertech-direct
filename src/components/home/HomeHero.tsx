@@ -159,11 +159,9 @@ export function HomeHero() {
             filter:
               "drop-shadow(0 40px 50px rgba(0,0,0,0.55)) drop-shadow(0 12px 24px rgba(0,0,0,0.45)) drop-shadow(0 0 70px hsl(95 90% 45% / 0.28))",
             WebkitMaskImage:
-              "linear-gradient(to right, transparent 0%, black 18%, black 100%), linear-gradient(to bottom, black 70%, transparent 98%)",
+              "linear-gradient(100deg, transparent 0%, black 22%, black 100%)",
             maskImage:
-              "linear-gradient(to right, transparent 0%, black 18%, black 100%), linear-gradient(to bottom, black 70%, transparent 98%)",
-            WebkitMaskComposite: "source-in",
-            maskComposite: "intersect",
+              "linear-gradient(100deg, transparent 0%, black 22%, black 100%)",
           }}
           draggable={false}
           decoding="async"
