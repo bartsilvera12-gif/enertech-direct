@@ -121,54 +121,67 @@ export function HomeHero() {
             </div>
           </div>
 
-          {/* RIGHT: IT infrastructure visual */}
-          <div className="lg:col-span-6 relative">
-            <div className="relative mx-auto max-w-[600px] lg:max-w-none">
-              {/* Glow halo behind image */}
-              <div
-                className="absolute -inset-6 lg:-inset-10 rounded-[2.5rem] blur-2xl opacity-70 pointer-events-none"
-                style={{
-                  background:
-                    "radial-gradient(ellipse at center, hsl(82 80% 50% / 0.35) 0%, transparent 70%)",
-                }}
-                aria-hidden
-              />
-              <div className="relative overflow-hidden rounded-2xl lg:rounded-[1.75rem] border border-white/15 shadow-[0_40px_80px_-30px_rgba(0,0,0,0.7),0_0_0_1px_rgba(255,255,255,0.08)_inset] ring-1 ring-white/5">
-                <img
-                  src={heroITImage}
-                  alt="Infraestructura IT corporativa Enertech: servidores, monitores y soluciones tecnológicas"
-                  width={1600}
-                  height={1200}
-                  className="w-full h-auto object-cover aspect-[4/3] lg:aspect-[5/4]"
-                  fetchPriority="high"
-                  decoding="async"
-                />
-                {/* Subtle overlay for depth */}
-                <div
-                  className="absolute inset-0 pointer-events-none"
-                  style={{
-                    background:
-                      "linear-gradient(135deg, transparent 0%, transparent 60%, hsl(150 50% 8% / 0.25) 100%)",
-                  }}
-                  aria-hidden
-                />
-              </div>
+          {/* RIGHT: Escena tecnológica integrada — sin contenedor */}
+          <div className="lg:col-span-6 relative min-h-[360px] md:min-h-[460px] lg:min-h-[560px]">
+            {/* Glow verde difuso detrás de la escena */}
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background:
+                  "radial-gradient(ellipse 70% 60% at 55% 45%, hsl(95 90% 50% / 0.32) 0%, hsl(120 70% 30% / 0.18) 35%, transparent 70%)",
+                filter: "blur(40px)",
+              }}
+              aria-hidden
+            />
+            {/* Light spot superior */}
+            <div
+              className="absolute -top-10 right-[10%] size-72 pointer-events-none"
+              style={{
+                background:
+                  "radial-gradient(circle, hsl(82 95% 60% / 0.35) 0%, transparent 70%)",
+                filter: "blur(50px)",
+              }}
+              aria-hidden
+            />
 
-              {/* Floating spec card */}
-              <div className="hidden md:flex absolute -bottom-5 -left-5 lg:-bottom-7 lg:-left-7 items-center gap-3 rounded-2xl border border-white/15 bg-[hsl(150_45%_10%)]/85 backdrop-blur-md px-4 py-3 shadow-[0_20px_40px_-20px_rgba(0,0,0,0.6)]">
-                <div className="flex size-10 items-center justify-center rounded-xl bg-primary/20 text-primary-glow">
-                  <Server className="size-5" />
-                </div>
-                <div>
-                  <div className="text-[10px] uppercase tracking-[0.18em] text-white/60 font-semibold">
-                    Infraestructura
-                  </div>
-                  <div className="text-sm font-bold text-white leading-tight">
-                    Equipos · Redes · Soporte
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* Imagen escena — sin caja, full bleed, overflow hacia los bordes */}
+            <img
+              src={HERO_SCENE_IMAGE}
+              alt="Escena tecnológica Enertech: servidores corporativos sobre mesa con iluminación verde"
+              className="relative z-10 w-[115%] md:w-[120%] lg:w-[128%] xl:w-[132%] max-w-none -mr-[10%] md:-mr-[14%] lg:-mr-[20%] xl:-mr-[24%] ml-auto block select-none pointer-events-none"
+              style={{
+                filter:
+                  "drop-shadow(0 50px 60px rgba(0,0,0,0.55)) drop-shadow(0 20px 30px rgba(0,0,0,0.4)) drop-shadow(0 0 80px hsl(95 90% 45% / 0.25))",
+                transform: "perspective(1600px) rotateY(-3deg) rotateX(1deg)",
+                transformOrigin: "center center",
+              }}
+              width={1600}
+              height={1200}
+              fetchPriority="high"
+              decoding="async"
+              draggable={false}
+            />
+
+            {/* Reflejo / sombra difusa debajo (piso de vidrio) */}
+            <div
+              className="absolute left-[8%] right-[-10%] bottom-[4%] h-16 md:h-24 pointer-events-none z-[5]"
+              style={{
+                background:
+                  "radial-gradient(ellipse at center, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.25) 40%, transparent 75%)",
+                filter: "blur(18px)",
+              }}
+              aria-hidden
+            />
+
+            {/* Noise sutil sobre la zona de la escena */}
+            <div
+              className="absolute inset-0 pointer-events-none opacity-[0.06] mix-blend-overlay z-[11]"
+              style={{
+                backgroundImage:
+                  "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.6'/></svg>\")",
+              }}
+              aria-hidden
+            />
           </div>
         </div>
       </div>
