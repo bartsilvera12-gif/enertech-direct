@@ -66,7 +66,7 @@ const Home = () => {
             </Link>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {categoryTiles.map((c) => (
+            {tilesToRender.map((c) => (
               <Link
                 key={c.slug}
                 to={c.href}
