@@ -17,14 +17,14 @@ export function HomeHero() {
       className="relative flex min-h-[calc(100vh-112px)] flex-col overflow-hidden text-white"
       style={{ background: HERO_GRADIENT }}
     >
-      {/* Vignette + glow */}
+      {/* Vignette + glow suaves para fondo claro */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           background: `
-            radial-gradient(ellipse 70% 60% at 12% 25%, hsl(82 80% 50% / 0.22) 0%, transparent 55%),
-            radial-gradient(ellipse 55% 50% at 95% 65%, hsl(170 60% 8% / 0.5) 0%, transparent 60%),
-            radial-gradient(ellipse 60% 45% at 50% 100%, hsl(160 50% 5% / 0.4) 0%, transparent 55%)
+            radial-gradient(ellipse 60% 55% at 15% 30%, hsl(75 90% 70% / 0.35) 0%, transparent 60%),
+            radial-gradient(ellipse 60% 50% at 95% 75%, hsl(110 65% 30% / 0.30) 0%, transparent 65%),
+            radial-gradient(ellipse 70% 40% at 50% 105%, hsl(115 60% 25% / 0.25) 0%, transparent 60%)
           `,
         }}
         aria-hidden
