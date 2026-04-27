@@ -107,7 +107,7 @@ export function HomeHero() {
                 alt="Equipamiento informático corporativo — Enertech"
                 width={1400}
                 height={900}
-                className="relative mx-auto block h-auto max-h-[min(90vh,860px)] w-full object-contain transition-transform duration-700 ease-out will-change-transform group-hover:scale-[1.02]"
+                className="relative mx-auto block h-auto max-h-[min(75vh,680px)] w-full object-contain transition-transform duration-700 ease-out will-change-transform group-hover:scale-[1.02]"
                 style={{
                   transform: "rotateY(-8deg) rotateX(4deg) scale(1.06)",
                   transformOrigin: "60% 60%",
