@@ -10,6 +10,7 @@ import {
 } from "@/services/storeService";
 import { recordProductEvent } from "@/services/productEventService";
 import { ProductCardPremium } from "@/components/store/ProductCardPremium";
+import { AddToCartButton } from "@/components/store/AddToCartButton";
 import { useStoreWhatsappDigits } from "@/hooks/useStoreWhatsappHref";
 const PLACEHOLDER_IMG =
   "https://res.cloudinary.com/dfxz2hxgr/image/upload/v1776880618/ed87b586-7ad8-442b-aac0-5826742a33b1.png";
@@ -99,7 +100,7 @@ const ProductDetail = () => {
               <p className="text-muted-foreground">Consultar precio</p>
             )}
             {product.discountPercent != null && (
-              <span className="inline-flex items-center rounded-md bg-destructive/12 text-destructive px-2.5 py-1 text-sm font-bold tabular-nums">
+              <span className="inline-flex items-center rounded-md bg-primary/14 text-primary px-2.5 py-1 text-sm font-bold tabular-nums">
                 −{product.discountPercent}%
               </span>
             )}
@@ -169,18 +170,21 @@ const ProductDetail = () => {
 
           {product.shortDescription && <p className="text-muted-foreground leading-relaxed">{product.shortDescription}</p>}
 
-          <a
-            href={whatsappHref ?? "#"}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => {
-              if (!whatsappHref) e.preventDefault();
-            }}
-            className="inline-flex w-full sm:w-auto items-center justify-center gap-3 rounded-xl bg-[#25D366] text-white px-8 py-4 text-base font-semibold hover:bg-[#1ebe5a] transition-colors shadow-lg shadow-black/10"
-          >
-            <MessageCircle className="size-5 shrink-0 fill-current" />
-            Consultar por WhatsApp
-          </a>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <AddToCartButton product={product} variant="detail" className="sm:flex-1" />
+            <a
+              href={whatsappHref ?? "#"}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => {
+                if (!whatsappHref) e.preventDefault();
+              }}
+              className="inline-flex w-full sm:flex-1 items-center justify-center gap-3 rounded-xl bg-[#25D366] text-white px-8 py-4 text-base font-semibold hover:bg-[#1ebe5a] transition-colors shadow-lg shadow-black/10"
+            >
+              <MessageCircle className="size-5 shrink-0 fill-current" />
+              Consultar por WhatsApp
+            </a>
+          </div>
 
           {product.description && (
             <div className="pt-8 border-t border-border/60">

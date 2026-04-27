@@ -6,6 +6,7 @@ import { formatProductWhatsAppHref, formatPYG } from "@/services/storeService";
 import { recordProductEvent } from "@/services/productEventService";
 import { useStoreWhatsappDigits } from "@/hooks/useStoreWhatsappHref";
 import { cn } from "@/lib/utils";
+import { AddToCartButton } from "@/components/store/AddToCartButton";
 
 const PLACEHOLDER_IMG =
   "https://res.cloudinary.com/dfxz2hxgr/image/upload/v1776880618/ed87b586-7ad8-442b-aac0-5826742a33b1.png";
@@ -83,19 +84,22 @@ export const ProductCardPremium = ({ product, className }: Props) => {
         )}
         {product.price === 0 && <p className="text-sm text-muted-foreground">Consultar precio</p>}
 
-        <a
-          href={whatsappHref ?? "#"}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => {
-            if (!whatsappHref) e.preventDefault();
-          }}
-          className="mt-auto pt-3 inline-flex items-center justify-center gap-2 w-full bg-[#25D366] text-white py-3 rounded-lg text-sm font-semibold hover:bg-[#1ebe5a] transition-colors disabled:opacity-50"
-          aria-disabled={!whatsappHref}
-        >
-          <MessageCircle className="size-4 shrink-0 fill-current" />
-          Consultar por WhatsApp
-        </a>
+        <div className="mt-auto pt-3 flex flex-col gap-2">
+          <AddToCartButton product={product} />
+          <a
+            href={whatsappHref ?? "#"}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => {
+              if (!whatsappHref) e.preventDefault();
+            }}
+            className="inline-flex items-center justify-center gap-2 w-full bg-[#25D366] text-white py-3 rounded-lg text-sm font-semibold hover:bg-[#1ebe5a] transition-colors disabled:opacity-50"
+            aria-disabled={!whatsappHref}
+          >
+            <MessageCircle className="size-4 shrink-0 fill-current" />
+            Consultar por WhatsApp
+          </a>
+        </div>
       </div>
     </article>
   );

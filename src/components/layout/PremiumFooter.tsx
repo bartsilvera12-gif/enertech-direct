@@ -4,7 +4,7 @@ import { ENERTECH_BRAND_LOCKUP_URL } from "@/lib/brandAssets";
 
 export const PremiumFooter = () => {
   return (
-    <footer className="border-t border-white/15 bg-[hsl(var(--strategic))] text-white mt-auto">
+    <footer className="border-t border-white/10 bg-gradient-to-br from-[hsl(78_58%_26%)] via-[hsl(160_38%_18%)] to-[hsl(175_42%_14%)] text-white mt-auto">
       <div className="container py-16 lg:py-20">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
           <div className="lg:col-span-5 space-y-6">
@@ -37,6 +37,11 @@ export const PremiumFooter = () => {
                 <li>
                   <Link to="/catalog?featured=1" className="hover:text-primary-glow transition-colors">
                     Destacados
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/nosotros" className="hover:text-primary-glow transition-colors">
+                    Nosotros
                   </Link>
                 </li>
                 <li>

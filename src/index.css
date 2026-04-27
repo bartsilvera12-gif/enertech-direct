@@ -33,10 +33,10 @@
     --brand-deep: 78 65% 32%;
     --brand-glow: 78 80% 55%;
 
-    /* Rojo acento (headers, botones secundarios fuertes) */
-    --accent: 0 78% 48%;
+    /* Rojo acento secundario (ofertas / alertas puntuales) */
+    --accent: 0 72% 46%;
     --accent-foreground: 0 0% 100%;
-    --accent-deep: 0 72% 38%;
+    --accent-deep: 0 68% 38%;
 
     --secondary: 210 16% 96%;
     --secondary-foreground: 220 15% 12%;
@@ -56,14 +56,14 @@
     --contrast: 220 18% 10%;
     --contrast-foreground: 210 30% 98%;
 
-    --strategic: 0 82% 50%;
+    --strategic: 0 70% 46%;
     --strategic-foreground: 0 0% 100%;
 
     --gradient-brand: linear-gradient(135deg, hsl(78 72% 44%) 0%, hsl(78 58% 30%) 100%);
     --gradient-ink: linear-gradient(135deg, hsl(220 18% 14%) 0%, hsl(220 24% 6%) 100%);
     --gradient-accent: linear-gradient(135deg, hsl(0 82% 50%) 0%, hsl(0 72% 38%) 100%);
     --gradient-warm: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(210 25% 97%) 100%);
-    --gradient-mesh: radial-gradient(60% 50% at 15% 10%, hsl(78 72% 44% / 0.08) 0%, transparent 60%), radial-gradient(50% 50% at 85% 30%, hsl(0 82% 50% / 0.06) 0%, transparent 60%), radial-gradient(80% 60% at 50% 100%, hsl(220 18% 10% / 0.03) 0%, transparent 60%);
+    --gradient-mesh: radial-gradient(60% 50% at 15% 10%, hsl(78 72% 44% / 0.1) 0%, transparent 60%), radial-gradient(50% 50% at 85% 30%, hsl(78 60% 40% / 0.06) 0%, transparent 58%), radial-gradient(80% 60% at 50% 100%, hsl(220 18% 10% / 0.03) 0%, transparent 60%);
     --gradient-radial-brand: radial-gradient(60% 60% at 50% 0%, hsl(78 72% 44% / 0.12) 0%, transparent 70%);
     --gradient-radial-accent: radial-gradient(60% 60% at 50% 0%, hsl(0 82% 50% / 0.10) 0%, transparent 70%);
 

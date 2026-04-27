@@ -1,10 +1,22 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, Search, MessageCircle, ChevronRight, Truck, Headphones, Phone, Clock } from "lucide-react";
+import {
+  Menu,
+  X,
+  Search,
+  MessageCircle,
+  ChevronRight,
+  Truck,
+  Headphones,
+  Phone,
+  Clock,
+  ShoppingCart,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { fetchCategories, rootCategories, childrenOfParentSlug } from "@/services/storeService";
 import { SmartSearch } from "@/components/store/SmartSearch";
+import { useCart } from "@/store/cart";
 
 const HEADER_ISOTYPE_URL =
   "https://res.cloudinary.com/dfxz2hxgr/image/upload/v1776878281/WhatsApp_Image_2026-04-20_at_12.37.03_PM_qvvqam.png";
@@ -17,12 +29,15 @@ const navItems = [
   { to: "/", label: "Inicio" },
   { to: "/catalog", label: "Productos" },
   { to: "/catalog", label: "Categorías", hash: "#cats" },
+  { to: "/nosotros", label: "Nosotros" },
   { to: "/contact", label: "Contacto" },
 ];
 
 export const PremiumHeader = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const openCart = useCart((s) => s.open);
+  const cartCount = useCart((s) => s.items.reduce((acc, i) => acc + i.quantity, 0));
   const [mobileOpen, setMobileOpen] = useState(false);
   const [catOpen, setCatOpen] = useState(false);
   /** Raíz cuyas subcategorías están visibles en el mega menú / acordeón móvil */
@@ -115,7 +130,7 @@ export const PremiumHeader = () => {
               />
               <button
                 type="submit"
-                className="bg-strategic text-strategic-foreground px-5 py-3 text-sm font-semibold inline-flex items-center gap-2 hover:opacity-95 transition-opacity"
+                className="bg-primary text-primary-foreground px-5 py-3 text-sm font-semibold inline-flex items-center gap-2 hover:bg-primary-deep transition-colors"
               >
                 <Search className="size-4" />
                 Buscar
@@ -124,6 +139,19 @@ export const PremiumHeader = () => {
           </form>
 
           <div className="flex items-center gap-2 ml-auto">
+            <button
+              type="button"
+              onClick={() => openCart()}
+              className="relative inline-flex size-10 items-center justify-center rounded-xl border border-border/70 bg-card text-foreground hover:bg-muted hover:border-primary/30 transition-colors"
+              aria-label={`Carrito${cartCount ? `, ${cartCount} productos` : ""}`}
+            >
+              <ShoppingCart className="size-5 text-primary" aria-hidden />
+              {cartCount > 0 ? (
+                <span className="absolute -top-1 -right-1 min-h-[1.25rem] min-w-[1.25rem] rounded-full bg-primary px-1 text-[10px] font-bold leading-none text-primary-foreground flex items-center justify-center tabular-nums">
+                  {cartCount > 99 ? "99+" : cartCount}
+                </span>
+              ) : null}
+            </button>
             <a
               href={WA_BUSINESS}
               target="_blank"
@@ -219,10 +247,10 @@ export const PremiumHeader = () => {
               const active =
                 item.label === "Categorías"
                   ? false
-                  : location.pathname === pathOnly && location.pathname !== "/" && item.to !== "/"
-                    ? true
-                    : location.pathname === "/" && item.to === "/";
-              const isHomeActive = item.to === "/" && location.pathname === "/";
+                  : item.label === "Productos"
+                    ? location.pathname.startsWith("/catalog")
+                    : location.pathname === pathOnly;
+              const isHomeActive = item.label === "Inicio" && location.pathname === "/";
               return (
                 <Link
                   key={item.label + item.to}

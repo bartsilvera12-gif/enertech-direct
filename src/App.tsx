@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import Catalog from "./pages/Catalog";
 import ProductDetail from "./pages/ProductDetail";
 import Contact from "./pages/Contact";
+import Nosotros from "./pages/Nosotros";
 import NotFound from "./pages/NotFound.tsx";
 import { ProtectedAdminRoute } from "@/components/admin/ProtectedAdminRoute";
 import AdminLayout from "@/components/layout/AdminLayout";
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/catalog" element={<Catalog />} />
             <Route path="/product/:slug" element={<ProductDetail />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/nosotros" element={<Nosotros />} />
             <Route path="/cart" element={<Navigate to="/catalog" replace />} />
             <Route path="/checkout" element={<Navigate to="/catalog" replace />} />
             <Route path="/order/sent" element={<Navigate to="/catalog" replace />} />
