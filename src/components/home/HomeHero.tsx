@@ -2,9 +2,9 @@ import { Link } from "react-router-dom";
 import { ArrowRight, MessageCircle } from "lucide-react";
 import { ENERTECH_BRAND_LOCKUP_URL } from "@/lib/brandAssets";
 
-/** Escena (servidor + monitores sobre mesa de vidrio). PNG sin fondo. */
+/** Escena (servidor + monitores). PNG sin fondo. */
 const HERO_SCENE_IMAGE_URL =
-  "https://res.cloudinary.com/dfxz2hxgr/image/upload/v1777289473/Dise%C3%B1o_sin_t%C3%ADtulo_16_zpkyb0.png";
+  "https://res.cloudinary.com/dfxz2hxgr/image/upload/v1777296294/Dise%C3%B1o_sin_t%C3%ADtulo_16_1_pbzj4w.png";
 
 /** Pared verde estilo estudio (verde manzana) — ahora ocupa todo el hero. */
 const WALL_GRADIENT = `
