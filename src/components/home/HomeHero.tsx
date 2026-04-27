@@ -59,7 +59,7 @@ export function HomeHero() {
       <div className="relative container flex flex-1 flex-col justify-center py-10 md:py-14 lg:py-16">
         <div className="grid w-full lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-16 items-center">
           {/* LEFT: Logo + headline */}
-          <div className="lg:col-span-6 max-w-2xl">
+          <div className="lg:col-span-6 max-w-2xl relative z-[20]">
             <div className="mb-7 md:mb-8">
               <img
                 src={HERO_LOGO_URL}
