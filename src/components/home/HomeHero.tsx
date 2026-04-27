@@ -14,9 +14,27 @@ const HERO_GRADIENT =
 export function HomeHero() {
   return (
     <section
-      className="relative flex min-h-[calc(100vh-112px)] flex-col overflow-hidden text-white"
+      className="relative flex min-h-[calc(100vh-112px)] flex-col overflow-hidden"
       style={{ background: HERO_GRADIENT }}
     >
+      {/* Imagen de escena IT como fondo integrado */}
+      <img
+        src={HERO_SCENE_IMAGE}
+        alt="Infraestructura IT corporativa Enertech: servidores, monitores y soluciones tecnológicas"
+        className="absolute inset-0 w-full h-full object-cover object-right z-0 select-none pointer-events-none"
+        draggable={false}
+        decoding="async"
+        fetchPriority="high"
+      />
+      {/* Vignette para asegurar legibilidad del texto a la izquierda */}
+      <div
+        className="absolute inset-0 pointer-events-none z-[1]"
+        style={{
+          background:
+            "linear-gradient(90deg, hsl(95 75% 50% / 0.92) 0%, hsl(95 75% 50% / 0.65) 28%, hsl(95 75% 50% / 0.15) 50%, transparent 70%)",
+        }}
+        aria-hidden
+      />
       {/* Vignette + glow suaves para fondo claro */}
       <div
         className="absolute inset-0 pointer-events-none"
