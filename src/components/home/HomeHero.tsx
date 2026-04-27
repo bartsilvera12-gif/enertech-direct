@@ -128,7 +128,8 @@ export function HomeHero() {
 
       {/* ESCENA tecnológica — anclada al borde derecho del hero, sin caja */}
       <div
-        className="pointer-events-none absolute inset-y-0 right-0 w-full lg:w-[62%] xl:w-[58%] 2xl:w-[55%] z-[2] hidden md:block"
+        className="pointer-events-none absolute inset-y-0 right-0 w-full lg:w-[55%] xl:w-[52%] 2xl:w-[50%] z-[2] hidden md:block"
+        style={{ isolation: "isolate" }}
         aria-hidden
       >
         {/* Glow verde radial detrás */}
