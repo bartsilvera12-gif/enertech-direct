@@ -32,7 +32,9 @@ export default function AdminLogin() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isSupabaseConfigured()) {
-      toast.error("Falta configurar VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY");
+      toast.error(
+        "Faltan variables de entorno en el build de producción. Configurá VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY en Hostinger y ejecutá Redeploy.",
+      );
       return;
     }
     setSubmitting(true);
@@ -74,7 +76,7 @@ export default function AdminLogin() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <section className="relative bg-strategic text-strategic-foreground pt-10 pb-24 sm:pb-28 px-6 overflow-hidden">
+      <section className="relative admin-sidebar-gradient text-white pt-10 pb-24 sm:pb-28 px-6 overflow-hidden">
         <div
           className="pointer-events-none absolute inset-0 opacity-[0.14]"
           style={{
@@ -83,14 +85,14 @@ export default function AdminLogin() {
                 -18deg,
                 transparent 0,
                 transparent 38px,
-                hsl(0 0% 100% / 0.07) 38px,
-                hsl(0 0% 100% / 0.07) 39px
+                hsl(0 0% 100% / 0.06) 38px,
+                hsl(0 0% 100% / 0.06) 39px
               )
             `,
           }}
           aria-hidden
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-black/[0.12] via-transparent to-black/[0.18] pointer-events-none" aria-hidden />
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/[0.08] via-transparent to-black/[0.2] pointer-events-none" aria-hidden />
         <div className="relative z-10 max-w-lg mx-auto text-center">
           <img
             src={LOGIN_BRAND_ISOTYPE_URL}
@@ -101,9 +103,9 @@ export default function AdminLogin() {
             decoding="async"
           />
           <h1 className="mt-6 text-2xl sm:text-3xl font-semibold tracking-tight text-white text-balance">Panel de administración</h1>
-          <p className="mt-3 text-sm text-white/78">
-            <span className="font-semibold text-primary-glow">Enertech</span>
-            <span className="text-white/70"> · Informática e insumos</span>
+          <p className="mt-3 text-sm text-emerald-100/85">
+            <span className="font-semibold text-emerald-50">Enertech</span>
+            <span className="text-emerald-100/75"> · Informática e insumos</span>
           </p>
         </div>
       </section>
@@ -112,14 +114,8 @@ export default function AdminLogin() {
         <div className="w-full max-w-md rounded-2xl border border-border/50 bg-card shadow-elevated p-8 sm:p-10">
           {!isSupabaseConfigured() ? (
             <p className="text-sm text-destructive text-center mb-6 leading-relaxed">
-              Creá o editá <code className="text-xs bg-muted px-1 rounded">.env.local</code> en la raíz del repo con{" "}
-              <code className="text-xs bg-muted px-1 rounded">VITE_SUPABASE_URL</code> y{" "}
-              <code className="text-xs bg-muted px-1 rounded">VITE_SUPABASE_ANON_KEY</code> (podés copiar desde{" "}
-              <code className="text-xs bg-muted px-1 rounded">.env.example</code>). Después{" "}
-              <strong className="font-semibold">detené y volvé a iniciar</strong>{" "}
-              <code className="text-xs bg-muted px-1 rounded">npm run dev</code>. En el sitio publicado, esas mismas
-              variables tienen que estar definidas <strong className="font-semibold">al ejecutar el build</strong> en tu
-              servidor o CI.
+              Faltan variables de entorno en el build de producción. Configurá VITE_SUPABASE_URL y
+              VITE_SUPABASE_ANON_KEY en Hostinger y ejecutá Redeploy.
             </p>
           ) : null}
           <form onSubmit={handleLogin} className="space-y-5">

@@ -31,30 +31,29 @@ export default function AdminLayout() {
       <aside
         className={cn(
           "fixed inset-y-0 left-0 z-50 w-64 flex flex-col h-screen overflow-hidden",
-          "bg-strategic text-strategic-foreground border-r border-white/15",
-          "transform transition-transform duration-300 ease-out shadow-[4px_0_24px_-8px_rgba(0,0,0,0.15)]",
+          "admin-sidebar-gradient text-white border-r border-emerald-900/40",
+          "transform transition-transform duration-300 ease-out shadow-[4px_0_32px_-12px_rgba(0,40,30,0.35)]",
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         )}
       >
-        {/* Patrón sutil (misma línea visual que hero/footer) */}
         <div
-          className="pointer-events-none absolute inset-0 opacity-[0.12]"
+          className="pointer-events-none absolute inset-0 opacity-[0.14]"
           style={{
             backgroundImage: `
               repeating-linear-gradient(
                 -18deg,
                 transparent 0,
                 transparent 40px,
-                hsl(0 0% 100% / 0.08) 40px,
-                hsl(0 0% 100% / 0.08) 41px
+                hsl(0 0% 100% / 0.06) 40px,
+                hsl(0 0% 100% / 0.06) 41px
               )
             `,
           }}
           aria-hidden
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/[0.08] via-transparent to-black/[0.12] pointer-events-none" aria-hidden />
+        <div className="absolute inset-0 bg-gradient-to-b from-emerald-400/[0.07] via-transparent to-black/[0.25] pointer-events-none" aria-hidden />
 
-        <div className="relative flex items-center justify-between h-16 px-5 border-b border-white/15">
+        <div className="relative flex items-center justify-between h-16 px-5 border-b border-white/10">
           <Link to="/admin" className="flex items-center gap-3 min-w-0 group">
             <img
               src={ADMIN_BRAND_ISOTYPE_URL}
@@ -65,11 +64,13 @@ export default function AdminLayout() {
               decoding="async"
             />
             <div className="min-w-0 text-left leading-tight">
-              <span className="block font-semibold tracking-tight text-primary-glow drop-shadow-sm truncate">Enertech</span>
-              <span className="block text-[10px] uppercase tracking-[0.22em] text-white/60">Administración</span>
+              <span className="block font-semibold tracking-tight text-emerald-50 drop-shadow-sm truncate group-hover:text-white transition-colors">
+                Enertech
+              </span>
+              <span className="block text-[10px] uppercase tracking-[0.22em] text-emerald-200/65">Administración</span>
             </div>
           </Link>
-          <button type="button" className="lg:hidden p-1.5 rounded-md hover:bg-white/10" onClick={() => setSidebarOpen(false)} aria-label="Cerrar menú">
+          <button type="button" className="lg:hidden p-1.5 rounded-md hover:bg-white/[0.12]" onClick={() => setSidebarOpen(false)} aria-label="Cerrar menú">
             <X className="size-5" />
           </button>
         </div>
@@ -86,10 +87,10 @@ export default function AdminLayout() {
                 to={link.href}
                 onClick={() => setSidebarOpen(false)}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors",
+                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
                   active
-                    ? "bg-primary text-primary-foreground shadow-md shadow-black/20"
-                    : "text-white/88 hover:text-white hover:bg-white/10",
+                    ? "bg-primary text-primary-foreground shadow-lg shadow-black/25 ring-1 ring-white/15"
+                    : "text-emerald-50/90 hover:text-white hover:bg-white/[0.12]",
                 )}
               >
                 <link.icon className="size-[18px] shrink-0 opacity-95" />
@@ -99,11 +100,11 @@ export default function AdminLayout() {
           })}
         </nav>
 
-        <div className="relative p-3 border-t border-white/15 bg-black/10">
+        <div className="relative p-3 border-t border-white/10 bg-black/15">
           <Button
             type="button"
             variant="ghost"
-            className="w-full justify-start gap-3 rounded-xl text-white/88 hover:text-white hover:bg-white/10"
+            className="w-full justify-start gap-3 rounded-xl text-emerald-50/88 hover:text-white hover:bg-white/[0.12]"
             onClick={() => void handleLogout()}
           >
             <LogOut className="size-[18px]" />
@@ -112,8 +113,8 @@ export default function AdminLayout() {
         </div>
       </aside>
 
-      <div className="flex-1 flex flex-col min-h-screen min-w-0 w-full lg:ml-64 lg:min-h-0 lg:h-full lg:overflow-hidden surface-mesh">
-        <header className="sticky top-0 z-30 shrink-0 h-16 border-b border-border/40 bg-background/95 backdrop-blur-md flex items-center px-4 sm:px-6 gap-4 shadow-soft">
+      <div className="flex-1 flex flex-col min-h-screen min-w-0 w-full lg:ml-64 lg:min-h-0 lg:h-full lg:overflow-hidden admin-main-canvas">
+        <header className="sticky top-0 z-30 shrink-0 h-16 border-b border-border/50 bg-background/90 backdrop-blur-md flex items-center px-4 sm:px-6 gap-4 shadow-soft">
           <button
             type="button"
             className="lg:hidden inline-flex items-center justify-center rounded-lg border border-border/60 bg-card p-2 hover:bg-muted/50 transition-colors"
@@ -124,7 +125,6 @@ export default function AdminLayout() {
           </button>
           <div className="flex flex-col min-w-0">
             <span className="text-[11px] uppercase tracking-[0.22em] text-primary font-semibold">Panel</span>
-            <span className="text-xs text-muted-foreground truncate">enertech · catálogo y stock</span>
           </div>
           <Link
             to="/"

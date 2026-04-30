@@ -11,7 +11,7 @@ import {
 } from "@/services/adminCategoryService";
 import { directSubcategoriesOfRoot, isRootCategory, rootCategoriesSorted } from "@/lib/categoryHierarchy";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -80,12 +80,7 @@ export default function AdminCategories() {
     <div className="space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-muted-foreground text-xs uppercase tracking-[0.2em] mb-2">Catálogo</p>
-          <h1 className="text-3xl font-semibold tracking-tight">Categorías</h1>
-          <p className="text-muted-foreground text-sm mt-2 max-w-xl">
-            Dos niveles únicamente: <strong>categorías principales</strong> y <strong>subcategorías</strong> que dependen de
-            ellas.
-          </p>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Categorías</h1>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button type="button" variant="default" onClick={() => setDialog({ kind: "create-root" })}>
@@ -99,10 +94,9 @@ export default function AdminCategories() {
         </div>
       </div>
 
-      <Card>
+      <Card className="border-border/50 shadow-soft rounded-2xl">
         <CardHeader>
-          <CardTitle>Listado jerárquico</CardTitle>
-          <CardDescription>{isLoading ? "Cargando…" : `${roots.length} categorías principales · ${rows.length} registros totales`}</CardDescription>
+          <CardTitle>{isLoading ? "Cargando…" : `${roots.length} principales · ${rows.length} registros`}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           {roots.length === 0 && !isLoading ? (

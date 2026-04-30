@@ -8,7 +8,7 @@ import { fetchProductsAdmin, updateProductAdmin } from "@/services/adminProductS
 import type { Product } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -115,9 +115,7 @@ export default function AdminProducts() {
     <div className="space-y-8 max-w-7xl">
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <p className="eyebrow mb-2">Catálogo</p>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">Productos</h1>
-          <p className="text-sm text-muted-foreground mt-1">Schema enertech.products · edición en tiempo real.</p>
         </div>
         <Button type="button" onClick={openCreate} className="gap-2 shrink-0">
           <Plus className="size-4" />
@@ -125,20 +123,19 @@ export default function AdminProducts() {
         </Button>
       </div>
 
-      <Card className="border-border/15">
+      <Card className="border-border/50 shadow-soft rounded-2xl">
         <CardHeader className="space-y-4">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0">
-              <CardTitle className="text-base">Inventario</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-base">
                 {isLoading
-                  ? "Cargando…"
+                  ? "Inventario"
                   : isError
-                    ? "Error al cargar datos · revisá consola / permisos API"
+                    ? "Error al cargar"
                     : searchQuery.trim()
-                      ? `${filteredRows.length} de ${rows.length} referencias · PYG`
-                      : `${rows.length} referencias · PYG`}
-              </CardDescription>
+                      ? `${filteredRows.length} de ${rows.length} referencias`
+                      : `${rows.length} referencias`}
+              </CardTitle>
             </div>
             <div className="relative w-full lg:max-w-sm shrink-0">
               <Search

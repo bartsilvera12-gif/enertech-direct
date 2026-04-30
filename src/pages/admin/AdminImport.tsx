@@ -10,7 +10,7 @@ import {
   type ColumnMapping,
 } from "@/services/productImportService";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -67,19 +67,14 @@ export default function AdminImport() {
   return (
     <div className="space-y-8">
       <div>
-        <p className="text-muted-foreground text-xs uppercase tracking-[0.2em] mb-2">Catálogo</p>
-        <h1 className="text-3xl font-semibold tracking-tight">Importar productos</h1>
-        <p className="text-muted-foreground text-sm mt-2 max-w-2xl">
-          Subí una hoja Excel (.xlsx) y mapeá cada columna a los campos estándar. Codigo debe ser único (actualiza si ya existe).
-        </p>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Importar Excel</h1>
       </div>
 
-      <Card>
+      <Card className="border-border/60 shadow-soft">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Upload className="size-5" /> Archivo
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Upload className="size-5 text-primary shrink-0" /> Archivo
           </CardTitle>
-          <CardDescription>Primera fila = encabezados.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <InputFile onPick={(f) => void loadFile(f)} />
