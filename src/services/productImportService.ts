@@ -1,5 +1,6 @@
 import * as XLSX from "xlsx";
 import { supabase, assertSupabaseConfigured } from "@/lib/supabase";
+import { formatPostgrestError } from "@/lib/postgrestError";
 import { slugify } from "@/lib/slug";
 import type { ExcelCanonicalField } from "@/types";
 import { PRODUCT_EMBED } from "@/services/catalogService";
@@ -189,8 +190,16 @@ export async function importProductsFromExcel(
     const row = rows[i];
     const codigo = cell(row, h("codigo"));
     const descripcion = cell(row, h("descripcion"));
-    if (!codigo || !descripcion) {
-      result.errors.push(`Fila ${i + 2}: falta Codigo o Descripcion`);
+    if (!codigo && !descripcion) {
+      result.errors.push(`Fila ${i + 2}: falta Codigo y Descripcion`);
+      continue;
+    }
+    if (!codigo) {
+      result.errors.push(`Fila ${i + 2}: falta Codigo`);
+      continue;
+    }
+    if (!descripcion) {
+      result.errors.push(`Fila ${i + 2}: falta Descripcion`);
       continue;
     }
 
@@ -307,7 +316,7 @@ export async function importProductsFromExcel(
         result.created += 1;
       }
     } catch (e) {
-      result.errors.push(`Fila ${i + 2}: ${e instanceof Error ? e.message : String(e)}`);
+      result.errors.push(`Fila ${i + 2}: ${formatPostgrestError(e)}`);
     }
   }
 

@@ -10,7 +10,9 @@ import {
   parseExcelToObjects,
   type ColumnMapping,
 } from "@/services/productImportService";
+import { formatPostgrestError } from "@/lib/postgrestError";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import {
@@ -20,6 +22,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 const FIELDS = Object.keys(EXCEL_FIELD_LABELS) as ExcelCanonicalField[];
 
@@ -41,6 +49,13 @@ const FIELD_ORDER: ExcelCanonicalField[] = [
   "fecha",
   "situacion",
 ];
+
+const REQUIRED_FIELDS: ExcelCanonicalField[] = ["codigo", "descripcion"];
+const OPTIONAL_FIELDS: ExcelCanonicalField[] = FIELD_ORDER.filter(
+  (f) => !REQUIRED_FIELDS.includes(f),
+);
+
+const PREVIEW_ROWS = 5;
 
 function autoMapHeaders(sheet: ReturnType<typeof parseExcelToObjects>): ColumnMapping {
   const auto: ColumnMapping = {};
@@ -108,14 +123,26 @@ function downloadExampleXlsx() {
   XLSX.writeFile(wb, "enertech-plantilla-importacion-productos.xlsx");
 }
 
+function previewCell(value: unknown): string {
+  if (value === null || value === undefined) return "";
+  const s = String(value).trim();
+  return s.length > 80 ? `${s.slice(0, 77)}…` : s;
+}
+
 export default function AdminImport() {
   const qc = useQueryClient();
   const [mapping, setMapping] = useState<ColumnMapping>({});
   const [parsed, setParsed] = useState<ReturnType<typeof parseExcelToObjects> | null>(null);
+  const [loadedFileName, setLoadedFileName] = useState<string | null>(null);
 
   const headerOptions = useMemo(() => {
     if (!parsed?.headers.length) return [];
     return parsed.headers.filter(Boolean);
+  }, [parsed]);
+
+  const previewSlice = useMemo(() => {
+    if (!parsed?.rows.length) return [];
+    return parsed.rows.slice(0, PREVIEW_ROWS);
   }, [parsed]);
 
   const loadFile = async (file: File | null) => {
@@ -123,8 +150,9 @@ export default function AdminImport() {
     const buf = await file.arrayBuffer();
     const sheet = parseExcelToObjects(buf);
     setParsed(sheet);
+    setLoadedFileName(file.name);
     setMapping(autoMapHeaders(sheet));
-    toast.message(`Leídas ${sheet.rows.length} filas (${sheet.headers.length} columnas)`);
+    toast.success(`Archivo cargado: ${sheet.rows.length} filas · ${sheet.headers.length} columnas`);
   };
 
   const importMut = useMutation({
@@ -137,9 +165,18 @@ export default function AdminImport() {
       qc.invalidateQueries({ queryKey: ["products"] });
       qc.invalidateQueries({ queryKey: ["categories"] });
       toast.success(`Importación: ${res.created} nuevos, ${res.updated} actualizados`);
-      if (res.errors.length) toast.error(`${res.errors.length} errores (primera línea): ${res.errors[0]}`);
+      if (res.errors.length) {
+        const maxLines = 15;
+        const lines = res.errors.slice(0, maxLines);
+        const rest = res.errors.length - lines.length;
+        toast.error(`Errores en ${res.errors.length} fila(s)`, {
+          description:
+            lines.join("\n") + (rest > 0 ? `\n… y ${rest} más` : ""),
+          duration: Math.min(12000 + res.errors.length * 400, 25000),
+        });
+      }
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: unknown) => toast.error(formatPostgrestError(e)),
   });
 
   return (
@@ -180,35 +217,39 @@ export default function AdminImport() {
         </CardContent>
       </Card>
 
-      <Card className="border-border/60 shadow-soft overflow-hidden">
-        <CardHeader className="border-b border-border/50 bg-muted/30">
-          <CardTitle className="text-base">Columnas admitidas</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0 overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border/60 bg-muted/20 text-left">
-                <th className="px-4 py-2 font-semibold">Columna sugerida</th>
-                <th className="px-4 py-2 font-semibold">Uso</th>
-              </tr>
-            </thead>
-            <tbody>
-              {FIELD_ORDER.map((f) => (
-                <tr key={f} className="border-b border-border/40">
-                  <td className="px-4 py-2 font-mono text-xs">{EXCEL_FIELD_LABELS[f]}</td>
-                  <td className="px-4 py-2 text-muted-foreground">
-                    {f === "codigo" || f === "descripcion" ? (
-                      <span className="text-foreground font-medium">Obligatoria</span>
-                    ) : (
-                      "Opcional"
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </CardContent>
-      </Card>
+      <Accordion type="single" collapsible className="rounded-lg border border-border/60 bg-card px-4 shadow-soft">
+        <AccordionItem value="column-ref" className="border-0">
+          <AccordionTrigger className="text-sm font-medium hover:no-underline py-4">
+            Lista de columnas admitidas (referencia)
+          </AccordionTrigger>
+          <AccordionContent className="pb-4">
+            <div className="overflow-x-auto rounded-md border border-border/50">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border/60 bg-muted/20 text-left">
+                    <th className="px-4 py-2 font-semibold">Columna sugerida</th>
+                    <th className="px-4 py-2 font-semibold">Uso</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {FIELD_ORDER.map((f) => (
+                    <tr key={f} className="border-b border-border/40">
+                      <td className="px-4 py-2 font-mono text-xs">{EXCEL_FIELD_LABELS[f]}</td>
+                      <td className="px-4 py-2 text-muted-foreground">
+                        {REQUIRED_FIELDS.includes(f) ? (
+                          <span className="text-foreground font-medium">Obligatoria</span>
+                        ) : (
+                          "Opcional"
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
 
       <Card className="border-border/60 shadow-soft">
         <CardHeader>
@@ -219,40 +260,144 @@ export default function AdminImport() {
         <CardContent className="space-y-6">
           <InputFile onPick={(f) => void loadFile(f)} />
 
-          {parsed && (
+          {parsed && loadedFileName && (
             <>
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {FIELDS.map((field) => (
-                  <div key={field} className="grid gap-1.5">
-                    <Label className="text-xs uppercase tracking-wide text-muted-foreground">
-                      {EXCEL_FIELD_LABELS[field]}
-                    </Label>
-                    <Select
-                      value={mapping[field] ?? "__skip__"}
-                      onValueChange={(v) =>
-                        setMapping((m) => ({
-                          ...m,
-                          [field]: v === "__skip__" ? undefined : v,
-                        }))
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Ignorar" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="__skip__">— Ignorar —</SelectItem>
-                        {headerOptions.map((h) => (
-                          <SelectItem key={`${field}-${h}`} value={h}>
-                            {h}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+              <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-3">
+                <div className="flex flex-wrap items-center gap-2 gap-y-1">
+                  <span className="text-sm font-medium text-foreground">Archivo:</span>
+                  <span className="text-sm font-mono break-all">{loadedFileName}</span>
+                </div>
+                <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+                  <span>
+                    <strong className="text-foreground">{parsed.rows.length}</strong>{" "}
+                    <span className="text-muted-foreground">filas de datos</span>
+                  </span>
+                  <span>
+                    <strong className="text-foreground">{parsed.headers.filter(Boolean).length}</strong>{" "}
+                    <span className="text-muted-foreground">columnas detectadas</span>
+                  </span>
+                </div>
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-2">Encabezados detectados</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {parsed.headers.filter(Boolean).map((h) => (
+                      <Badge key={h} variant="secondary" className="font-normal text-xs max-w-full truncate" title={h}>
+                        {h}
+                      </Badge>
+                    ))}
                   </div>
-                ))}
+                </div>
               </div>
 
-              <div className="flex gap-3">
+              <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
+                <div className="space-y-2 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="text-sm font-semibold text-foreground">Vista previa (primeras {PREVIEW_ROWS} filas)</h3>
+                    <span className="text-xs text-muted-foreground">Según columnas del Excel</span>
+                  </div>
+                  <div className="overflow-x-auto rounded-lg border border-border/60 bg-muted/10">
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="border-b border-border bg-muted/40">
+                          <th className="sticky left-0 z-[1] bg-muted/90 px-2 py-2 text-left font-semibold whitespace-nowrap border-r border-border/60">
+                            #
+                          </th>
+                          {parsed.headers.map((h, idx) => (
+                            <th
+                              key={`h-${idx}-${h}`}
+                              className="px-2 py-2 text-left font-semibold whitespace-nowrap min-w-[7rem] max-w-[14rem]"
+                              title={h}
+                            >
+                              {h || `(vacío ${idx + 1})`}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {previewSlice.map((row, ri) => (
+                          <tr key={ri} className="border-b border-border/40 last:border-0">
+                            <td className="sticky left-0 z-[1] bg-background/95 px-2 py-1.5 font-mono text-muted-foreground border-r border-border/60">
+                              {ri + 2}
+                            </td>
+                            {parsed.headers.map((_, ci) => (
+                              <td
+                                key={ci}
+                                className="px-2 py-1.5 align-top text-foreground/90 max-w-[14rem]"
+                                title={String(row[ci] ?? "")}
+                              >
+                                <span className="line-clamp-2 break-words">{previewCell(row[ci])}</span>
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div className="space-y-5 min-w-0">
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground mb-1">Mapeo a campos del sistema</h3>
+                    <p className="text-xs text-muted-foreground leading-snug">
+                      Elegí qué columna del Excel corresponde a cada campo. <strong>Código</strong> y <strong>Descripción</strong> son obligatorios
+                      para crear filas nuevas.
+                    </p>
+                  </div>
+
+                  <div className="rounded-lg border-2 border-primary/35 bg-primary/5 p-4 space-y-4">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="default" className="text-[10px] uppercase tracking-wide">
+                        Obligatorias
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">Deben tener columna asignada para importar correctamente</span>
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      {REQUIRED_FIELDS.map((field) => (
+                        <MappingRow
+                          key={field}
+                          field={field}
+                          required
+                          headerOptions={headerOptions}
+                          value={mapping[field] ?? "__skip__"}
+                          onChange={(v) =>
+                            setMapping((m) => ({
+                              ...m,
+                              [field]: v === "__skip__" ? undefined : v,
+                            }))
+                          }
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="rounded-lg border border-border/70 bg-muted/20 p-4 space-y-4">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-[10px] uppercase tracking-wide">
+                        Opcionales
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">Precio, stock, categorías, etc.</span>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {OPTIONAL_FIELDS.map((field) => (
+                        <MappingRow
+                          key={field}
+                          field={field}
+                          headerOptions={headerOptions}
+                          value={mapping[field] ?? "__skip__"}
+                          onChange={(v) =>
+                            setMapping((m) => ({
+                              ...m,
+                              [field]: v === "__skip__" ? undefined : v,
+                            }))
+                          }
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-2">
                 <Button type="button" onClick={() => importMut.mutate()} disabled={importMut.isPending}>
                   {importMut.isPending ? "Importando…" : "Ejecutar importación"}
                 </Button>
@@ -261,6 +406,46 @@ export default function AdminImport() {
           )}
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+function MappingRow({
+  field,
+  required,
+  headerOptions,
+  value,
+  onChange,
+}: {
+  field: ExcelCanonicalField;
+  required?: boolean;
+  headerOptions: string[];
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className={`grid gap-1.5 ${required ? "" : ""}`}>
+      <Label className="flex flex-wrap items-center gap-2 text-xs font-medium text-foreground">
+        <span>{EXCEL_FIELD_LABELS[field]}</span>
+        {required && (
+          <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+            Obligatorio
+          </Badge>
+        )}
+      </Label>
+      <Select value={value} onValueChange={onChange}>
+        <SelectTrigger className={required && value === "__skip__" ? "border-amber-500/70 bg-amber-500/5" : undefined}>
+          <SelectValue placeholder="Sin columna" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="__skip__">— Ignorar —</SelectItem>
+          {headerOptions.map((h) => (
+            <SelectItem key={`${field}-${h}`} value={h}>
+              {h}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }
