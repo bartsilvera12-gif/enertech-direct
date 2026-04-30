@@ -44,7 +44,8 @@ async function syncGalleryColumn(productId: string, urls: string[]) {
   if (error) throw error;
 }
 
-async function replaceProductImages(productId: string, urls: string[]) {
+/** Sincroniza `gallery` en products + filas en product_images (uso admin e importación). */
+export async function replaceProductImages(productId: string, urls: string[]) {
   const cleaned = urls.map((u) => u.trim()).filter(Boolean);
   await syncGalleryColumn(productId, cleaned);
   const { error: delErr } = await supabase.from("product_images").delete().eq("product_id", productId);

@@ -96,4 +96,9 @@ export type ExcelCanonicalField =
   | "deposito"
   | "proveedor"
   | "tipo_articulo"
-  | "situacion";
+  | "situacion"
+  | "precio"
+  | "stock"
+  | "imagen"
+  | "destacado"
+  | "precio_tachado";

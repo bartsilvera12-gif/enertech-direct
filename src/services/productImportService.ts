@@ -3,6 +3,7 @@ import { supabase, assertSupabaseConfigured } from "@/lib/supabase";
 import { slugify } from "@/lib/slug";
 import type { ExcelCanonicalField } from "@/types";
 import { PRODUCT_EMBED } from "@/services/catalogService";
+import { replaceProductImages } from "@/services/adminProductService";
 import { mapProduct, type ProductRow } from "@/lib/mapEnertech";
 import type { Product } from "@/types";
 
@@ -21,6 +22,11 @@ export const EXCEL_FIELD_LABELS: Record<ExcelCanonicalField, string> = {
   proveedor: "Proveedor",
   tipo_articulo: "Tipo de Articulo",
   situacion: "Situacion",
+  precio: "Precio",
+  stock: "Stock",
+  imagen: "Imagen",
+  destacado: "Destacado",
+  precio_tachado: "Precio Tachado",
 };
 
 export type ColumnMapping = Partial<Record<ExcelCanonicalField, string>>;
@@ -69,6 +75,43 @@ function parseSituacionToActive(raw: string): boolean {
   if (/inactiv|baja|no\s*disp|agot|x\b|n\/a/.test(s)) return false;
   if (/activ|disp|stock|ok|si|sí|normal|vig/.test(s)) return true;
   return true;
+}
+
+/** Precio en Guaraníes: entero ≥ 0; admite separadores de miles. */
+function parsePriceGs(raw: string): number {
+  const n = parseMoneyInt(raw);
+  return n != null && n >= 0 ? n : 0;
+}
+
+function parseMoneyInt(raw: string): number | null {
+  const t = String(raw ?? "")
+    .trim()
+    .replace(/\s/g, "");
+  if (!t) return null;
+  const normalized = t.includes(",") && !t.includes(".") ? t.replace(",", ".") : t.replace(/\./g, "");
+  const x = Number(normalized);
+  if (!Number.isFinite(x)) return null;
+  return Math.max(0, Math.round(x));
+}
+
+function parseStock(raw: string): number {
+  const n = parseMoneyInt(raw);
+  return n != null ? Math.max(0, Math.round(n)) : 0;
+}
+
+/** Si, sí, true, 1, destacado (case insensitive); vacío o no → false. */
+function parseDestacado(raw: string): boolean {
+  const s = raw.trim().toLowerCase();
+  if (!s) return false;
+  if (/^(no|0|false|n)$/i.test(s)) return false;
+  return /^(1|sí|si|true|yes|destacado|\*|ok)$/i.test(s);
+}
+
+/** Solo URLs http(s) públicas. */
+function normalizePublicImageUrl(raw: string): string | null {
+  const u = raw.trim();
+  if (!u) return null;
+  return /^https?:\/\//i.test(u) ? u : null;
 }
 
 async function findOrCreateCategory(name: string, parentId: string | null): Promise<string> {
@@ -160,6 +203,20 @@ export async function importProductsFromExcel(
       const situacion = cell(row, h("situacion"));
       const rango = cell(row, h("rango"));
       const fecha = cell(row, h("fecha"));
+      const precioRaw = cell(row, h("precio"));
+      const stockRaw = cell(row, h("stock"));
+      const imagenRaw = cell(row, h("imagen"));
+      const destacadoRaw = cell(row, h("destacado"));
+      const precioTachadoRaw = cell(row, h("precio_tachado"));
+
+      const priceGs = parsePriceGs(precioRaw);
+      const stockVal = parseStock(stockRaw);
+      const compareFromExcel = parseMoneyInt(precioTachadoRaw);
+      const compareRounded = compareFromExcel != null ? compareFromExcel : null;
+      const featuredVal = parseDestacado(destacadoRaw);
+      const imageUrl = normalizePublicImageUrl(imagenRaw);
+      const imagenMapped = Boolean(h("imagen"));
+      const galleryUrls = imageUrl ? [imageUrl] : [DEFAULT_PRODUCT_CARD_IMAGE];
 
       let categoryId: string | null = null;
       let subcategoryId: string | null = null;
@@ -196,12 +253,15 @@ export async function importProductsFromExcel(
         range_label: rango || null,
         short_description: null as string | null,
         description: descripcion,
-        price: 0,
-        stock: 0,
-        gallery: [DEFAULT_PRODUCT_CARD_IMAGE],
+        price: priceGs,
+        stock: stockVal,
+        image_url: imageUrl,
+        gallery: galleryUrls,
+        compare_at_price: compareRounded,
+        compare_price: compareRounded,
         track_stock: true,
-        featured: false,
-        is_featured: false,
+        featured: featuredVal,
+        is_featured: featuredVal,
         is_active: isActive,
         specs,
       };
@@ -209,36 +269,41 @@ export async function importProductsFromExcel(
       const { data: existing } = await supabase.from("products").select("id").eq("code", codigo).maybeSingle();
 
       if (existing?.id) {
-        const { error } = await supabase
-          .from("products")
-          .update({
-            name: payload.name,
-            category_id: payload.category_id,
-            subcategory_id: payload.subcategory_id,
-            brand: payload.brand,
-            warehouse: payload.warehouse,
-            supplier: payload.supplier,
-            article_type: payload.article_type,
-            situation: payload.situation,
-            range_label: payload.range_label,
-            description: payload.description,
-            is_active: payload.is_active,
-            specs: payload.specs,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", existing.id);
+        const updateRow: Record<string, unknown> = {
+          name: payload.name,
+          category_id: payload.category_id,
+          subcategory_id: payload.subcategory_id,
+          brand: payload.brand,
+          warehouse: payload.warehouse,
+          supplier: payload.supplier,
+          article_type: payload.article_type,
+          situation: payload.situation,
+          range_label: payload.range_label,
+          description: payload.description,
+          price: payload.price,
+          stock: payload.stock,
+          compare_at_price: compareRounded,
+          compare_price: compareRounded,
+          featured: featuredVal,
+          is_featured: featuredVal,
+          is_active: payload.is_active,
+          specs: payload.specs,
+          updated_at: new Date().toISOString(),
+        };
+        if (imagenMapped) {
+          updateRow.image_url = imageUrl;
+        }
+        const { error } = await supabase.from("products").update(updateRow).eq("id", existing.id);
         if (error) throw error;
+        if (imagenMapped) {
+          await replaceProductImages(existing.id, imageUrl ? [imageUrl] : [DEFAULT_PRODUCT_CARD_IMAGE]);
+        }
         result.updated += 1;
       } else {
         const { data: ins, error } = await supabase.from("products").insert(payload).select("id").single();
         if (error) throw error;
         const pid = ins!.id as string;
-        await supabase.from("product_images").insert({
-          product_id: pid,
-          url: DEFAULT_PRODUCT_CARD_IMAGE,
-          sort_order: 0,
-          alt: descripcion,
-        });
+        await replaceProductImages(pid, galleryUrls);
         result.created += 1;
       }
     } catch (e) {
