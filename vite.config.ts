@@ -4,6 +4,8 @@ import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig(() => ({
+  // Raíz del proyecto (donde están `.env`, `.env.local`, etc.) — evita ambigüedad si el cwd difiere.
+  envDir: path.resolve(__dirname),
   server: {
     host: "::",
     port: 8080,

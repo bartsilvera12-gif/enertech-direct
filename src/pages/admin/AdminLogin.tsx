@@ -111,10 +111,15 @@ export default function AdminLogin() {
       <div className="flex-1 flex justify-center px-4 sm:px-6 pb-12 sm:pb-16 -mt-14 sm:-mt-16 relative z-10 surface-mesh">
         <div className="w-full max-w-md rounded-2xl border border-border/50 bg-card shadow-elevated p-8 sm:p-10">
           {!isSupabaseConfigured() ? (
-            <p className="text-sm text-destructive text-center mb-6">
-              Definí <code className="text-xs bg-muted px-1 rounded">VITE_SUPABASE_URL</code> y{" "}
-              <code className="text-xs bg-muted px-1 rounded">VITE_SUPABASE_ANON_KEY</code> en{" "}
-              <code className="text-xs bg-muted px-1 rounded">.env.local</code> y reiniciá <code className="text-xs bg-muted px-1 rounded">npm run dev</code>.
+            <p className="text-sm text-destructive text-center mb-6 leading-relaxed">
+              Creá o editá <code className="text-xs bg-muted px-1 rounded">.env.local</code> en la raíz del repo con{" "}
+              <code className="text-xs bg-muted px-1 rounded">VITE_SUPABASE_URL</code> y{" "}
+              <code className="text-xs bg-muted px-1 rounded">VITE_SUPABASE_ANON_KEY</code> (podés copiar desde{" "}
+              <code className="text-xs bg-muted px-1 rounded">.env.example</code>). Después{" "}
+              <strong className="font-semibold">detené y volvé a iniciar</strong>{" "}
+              <code className="text-xs bg-muted px-1 rounded">npm run dev</code>. En el sitio publicado, esas mismas
+              variables tienen que estar definidas <strong className="font-semibold">al ejecutar el build</strong> en tu
+              servidor o CI.
             </p>
           ) : null}
           <form onSubmit={handleLogin} className="space-y-5">
