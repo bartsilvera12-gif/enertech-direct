@@ -200,6 +200,7 @@ export async function importProductsFromExcel(
         stock: 0,
         gallery: [DEFAULT_PRODUCT_CARD_IMAGE],
         track_stock: true,
+        featured: false,
         is_featured: false,
         is_active: isActive,
         specs,

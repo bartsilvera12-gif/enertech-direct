@@ -68,6 +68,7 @@ function heroOrder(input: ProductUpsertInput): number | null {
 
 function buildInsertRow(input: ProductUpsertInput): Record<string, unknown> {
   const gallery = (input.image_urls ?? []).map((u) => u.trim()).filter(Boolean);
+  const compareRounded = input.compare_at_price != null ? Math.round(input.compare_at_price) : null;
   const row: Record<string, unknown> = {
     name: input.name.trim(),
     slug: input.slug.trim(),
@@ -86,9 +87,13 @@ function buildInsertRow(input: ProductUpsertInput): Record<string, unknown> {
     image_url: input.image_url?.trim() || null,
     gallery,
     price: Math.round(input.price),
-    compare_price: input.compare_at_price != null ? Math.round(input.compare_at_price) : null,
+    /** Legacy `compare_at_price` (schema 01) + `compare_price` (alineación 09) para mismo valor. */
+    compare_at_price: compareRounded,
+    compare_price: compareRounded,
     stock: Math.max(0, Math.round(input.stock)),
     track_stock: true,
+    /** Legacy `featured` + `is_featured` para que tienda y filtros vean el mismo destacado. */
+    featured: input.featured,
     is_featured: input.featured,
     is_active: input.is_active,
     specs: input.specs ?? {},
@@ -134,10 +139,15 @@ export async function updateProductAdmin(id: string, input: Partial<ProductUpser
   if (input.description !== undefined) patch.description = input.description;
   if (input.price !== undefined) patch.price = Math.round(input.price);
   if (input.compare_at_price !== undefined) {
-    patch.compare_price = input.compare_at_price != null ? Math.round(input.compare_at_price) : null;
+    const cr = input.compare_at_price != null ? Math.round(input.compare_at_price) : null;
+    patch.compare_at_price = cr;
+    patch.compare_price = cr;
   }
   if (input.stock !== undefined) patch.stock = Math.max(0, Math.round(input.stock));
-  if (input.featured !== undefined) patch.is_featured = input.featured;
+  if (input.featured !== undefined) {
+    patch.is_featured = input.featured;
+    patch.featured = input.featured;
+  }
   if (input.is_active !== undefined) patch.is_active = input.is_active;
   if (input.specs !== undefined) patch.specs = input.specs ?? {};
   if (input.seo_title !== undefined) patch.meta_title = input.seo_title;

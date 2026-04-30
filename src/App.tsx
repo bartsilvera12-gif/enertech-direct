@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -18,7 +18,21 @@ import AdminProducts from "./pages/admin/AdminProducts";
 import AdminCategories from "./pages/admin/AdminCategories";
 import AdminImport from "./pages/admin/AdminImport";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  queryCache: new QueryCache({
+    onError: (error, query) => {
+      console.error("[Enertech query]", query.queryKey, error);
+    },
+  }),
+  mutationCache: new MutationCache({
+    onError: (error, _v, _c, mutation) => {
+      console.error("[Enertech mutation]", mutation.options.mutationKey ?? mutation.meta, error);
+    },
+  }),
+  defaultOptions: {
+    queries: { retry: 1 },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>

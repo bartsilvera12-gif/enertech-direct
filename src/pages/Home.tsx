@@ -25,13 +25,26 @@ const TILE_FALLBACK = [
 ];
 
 const Home = () => {
-  const { data: categories = [] } = useQuery({ queryKey: ["categories"], queryFn: fetchCategories });
+  const {
+    data: categories = [],
+    isError: categoriesError,
+    error: categoriesErrorDetail,
+  } = useQuery({ queryKey: ["categories"], queryFn: fetchCategories });
   const roots = rootCategories(categories);
 
-  const { data: featured = [] } = useQuery({
+  const {
+    data: featured = [],
+    isError: featuredError,
+    error: featuredErrorDetail,
+  } = useQuery({
     queryKey: ["products", "featured"],
     queryFn: () => fetchProducts({ featuredOnly: true, sort: "newest" }),
   });
+
+  const catalogLoadError = categoriesError || featuredError;
+  const catalogErrorMessage =
+    (categoriesErrorDetail instanceof Error ? categoriesErrorDetail.message : String(categoriesErrorDetail ?? "")) ||
+    (featuredErrorDetail instanceof Error ? featuredErrorDetail.message : String(featuredErrorDetail ?? ""));
 
   const categoryTiles = (roots.length > 0 ? roots.slice(0, 8) : []).map((c) => {
     const fb = TILE_FALLBACK.find((t) => t.slug === c.slug);
@@ -53,6 +66,18 @@ const Home = () => {
   return (
     <>
       <HomeHero />
+
+      {catalogLoadError ? (
+        <div className="container max-w-3xl pt-6">
+          <div
+            role="alert"
+            className="rounded-xl border border-destructive/35 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+          >
+            <p className="font-semibold">No se pudo cargar el catálogo desde Supabase</p>
+            <p className="mt-1 opacity-90 break-words">{catalogErrorMessage || "Error desconocido"}</p>
+          </div>
+        </div>
+      ) : null}
 
       <section id="categorias" className="relative z-10 scroll-mt-28 -mt-[clamp(2rem,7vw,4rem)] pt-[clamp(2rem,7vw,4rem)] pb-16 md:pb-20 bg-background border-b border-border/50 rounded-t-[2rem] md:rounded-t-[2.25rem] shadow-[0_-12px_40px_-24px_rgba(0,0,0,0.08)]">
         <div className="container">

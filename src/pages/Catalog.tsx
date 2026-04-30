@@ -18,6 +18,7 @@ const Catalog = () => {
 
   const catSlug = params.get("cat") ?? undefined;
   const subSlug = params.get("sub") ?? undefined;
+  const featuredOnly = params.get("featured") === "1" || params.get("featured") === "true";
   const brand = params.get("brand") ?? undefined;
   const supplier = params.get("supplier") ?? undefined;
   const warehouse = params.get("warehouse") ?? undefined;
@@ -43,7 +44,11 @@ const Catalog = () => {
     return () => clearTimeout(t);
   }, [search]);
 
-  const { data: categories = [] } = useQuery({ queryKey: ["categories"], queryFn: fetchCategories });
+  const {
+    data: categories = [],
+    isError: categoriesQueryError,
+    error: categoriesErrDetail,
+  } = useQuery({ queryKey: ["categories"], queryFn: fetchCategories });
   const roots = rootCategories(categories);
 
   const subOptions = useMemo(() => {
@@ -56,7 +61,12 @@ const Catalog = () => {
     queryFn: fetchCatalogFacets,
   });
 
-  const { data: products = [], isLoading } = useQuery({
+  const {
+    data: products = [],
+    isLoading,
+    isError: productsQueryError,
+    error: productsErrDetail,
+  } = useQuery({
     queryKey: [
       "products",
       "catalog",
@@ -70,6 +80,7 @@ const Catalog = () => {
       rangeLabel,
       debouncedSearch,
       sort,
+      featuredOnly,
     ],
     queryFn: () =>
       fetchProducts({
@@ -83,8 +94,14 @@ const Catalog = () => {
         rangeLabel,
         search: debouncedSearch,
         sort,
+        featuredOnly,
       }),
   });
+
+  const catalogError = categoriesQueryError || productsQueryError;
+  const catalogErrorMsg =
+    (categoriesErrDetail instanceof Error ? categoriesErrDetail.message : String(categoriesErrDetail ?? "")) ||
+    (productsErrDetail instanceof Error ? productsErrDetail.message : String(productsErrDetail ?? ""));
 
   const setParam = (key: string, value: string | undefined) => {
     const next = new URLSearchParams(params);
@@ -108,6 +125,16 @@ const Catalog = () => {
           Filtrá por categoría, marca, depósito y más. Consultá disponibilidad por WhatsApp en cada ficha.
         </p>
       </header>
+
+      {catalogError ? (
+        <div
+          role="alert"
+          className="mb-8 rounded-xl border border-destructive/35 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+        >
+          <p className="font-semibold">Error al cargar datos del catálogo</p>
+          <p className="mt-1 break-words opacity-90">{catalogErrorMsg || "Revisá consola y políticas RLS en Supabase."}</p>
+        </div>
+      ) : null}
 
       <div className="flex flex-col lg:flex-row gap-10">
         {/* Sidebar filtros */}

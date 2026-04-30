@@ -1,4 +1,4 @@
-import { isSupabaseConfigured, supabase, assertSupabaseConfigured } from "@/lib/supabase";
+import { isSupabaseConfigured, supabase, assertSupabaseConfigured } from "@/integrations/supabase/client";
 import { mapCategory, mapProduct, type CategoryRow, type ProductRow } from "@/lib/mapEnertech";
 import type { Category, Product } from "@/types";
 import {
@@ -19,6 +19,7 @@ export const HERO_SLIDER_SELECT = `
   id,
   name,
   slug,
+  featured,
   is_featured,
   created_at,
   image_url,
@@ -26,6 +27,18 @@ export const HERO_SLIDER_SELECT = `
   hero_slide_order,
   product_images ( url, sort_order, alt )
 `;
+
+/** Destacados: acepta filas con `is_featured` y/o columna legacy `featured`. */
+const FEATURED_OR_FILTER = "is_featured.eq.true,featured.eq.true";
+
+let warnedMissingEnv = false;
+function warnIfSupabaseUnconfigured(): void {
+  if (warnedMissingEnv) return;
+  warnedMissingEnv = true;
+  console.warn(
+    "[Enertech] Supabase no configurado en este build (faltan VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY). La tienda mostrará catálogo vacío.",
+  );
+}
 
 export type CatalogSort = "newest" | "price_asc" | "price_desc" | "name_asc" | "code_asc";
 
@@ -45,7 +58,10 @@ export type CatalogFilters = {
 };
 
 export async function fetchCategories(): Promise<Category[]> {
-  if (!isSupabaseConfigured()) return [];
+  if (!isSupabaseConfigured()) {
+    warnIfSupabaseUnconfigured();
+    return [];
+  }
   assertSupabaseConfigured();
   const { data, error } = await supabase
     .from("categories")
@@ -78,6 +94,7 @@ export type CatalogFacets = {
 
 export async function fetchCatalogFacets(): Promise<CatalogFacets> {
   if (!isSupabaseConfigured()) {
+    warnIfSupabaseUnconfigured();
     return { brands: [], suppliers: [], warehouses: [], situations: [], articleTypes: [], rangeLabels: [] };
   }
   assertSupabaseConfigured();
@@ -113,12 +130,15 @@ export async function fetchCatalogFacets(): Promise<CatalogFacets> {
 }
 
 export async function fetchProducts(opts?: CatalogFilters): Promise<Product[]> {
-  if (!isSupabaseConfigured()) return [];
+  if (!isSupabaseConfigured()) {
+    warnIfSupabaseUnconfigured();
+    return [];
+  }
   assertSupabaseConfigured();
 
   let q = supabase.from("products").select(PRODUCT_EMBED).eq("is_active", true);
 
-  if (opts?.featuredOnly) q = q.eq("is_featured", true);
+  if (opts?.featuredOnly) q = q.or(FEATURED_OR_FILTER);
 
   let categoryId: string | undefined;
   let subcategoryId: string | undefined;
@@ -197,7 +217,10 @@ export async function fetchProducts(opts?: CatalogFilters): Promise<Product[]> {
 }
 
 export async function fetchProductBySlug(slug: string): Promise<Product | null> {
-  if (!isSupabaseConfigured()) return null;
+  if (!isSupabaseConfigured()) {
+    warnIfSupabaseUnconfigured();
+    return null;
+  }
   assertSupabaseConfigured();
   const { data, error } = await supabase
     .from("products")
@@ -211,7 +234,10 @@ export async function fetchProductBySlug(slug: string): Promise<Product | null> 
 }
 
 export async function fetchRelatedProducts(product: Product, limit = 4): Promise<Product[]> {
-  if (!isSupabaseConfigured()) return [];
+  if (!isSupabaseConfigured()) {
+    warnIfSupabaseUnconfigured();
+    return [];
+  }
   assertSupabaseConfigured();
   if (!product.categoryId && !product.subcategoryId) return [];
   let q = supabase
@@ -240,14 +266,17 @@ const withImage = (p: Product) => Boolean(p.mainImageUrl?.trim());
  * Ignora filas sin URL de imagen. No falla si hay menos de `limit` resultados.
  */
 export async function fetchHeroSliderProducts(limit = 5): Promise<Product[]> {
-  if (!isSupabaseConfigured()) return [];
+  if (!isSupabaseConfigured()) {
+    warnIfSupabaseUnconfigured();
+    return [];
+  }
   assertSupabaseConfigured();
   const cap = Math.max(limit * 10, 40);
   const { data: feat, error: e1 } = await supabase
     .from("products")
     .select(HERO_SLIDER_SELECT)
     .eq("is_active", true)
-    .eq("is_featured", true)
+    .or(FEATURED_OR_FILTER)
     .order("hero_slide_order", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: false })
     .limit(cap);
