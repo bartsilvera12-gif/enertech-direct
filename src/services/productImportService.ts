@@ -34,13 +34,20 @@ export type ColumnMapping = Partial<Record<ExcelCanonicalField, string>>;
 
 export type ParsedSheet = {
   headers: string[];
+  /** Filas de datos; cada fila es un objeto `{ [nombre columna]: valor }`. */
   rows: Record<string, string>[];
+  /** Número de fila en Excel (1-based), alineado con `rows[i]` (la fila 1 suele ser encabezados). */
+  sourceRowNumbers: number[];
 };
+
+function rowHasAnyVisibleValue(obj: Record<string, string>): boolean {
+  return Object.values(obj).some((v) => String(v ?? "").trim() !== "");
+}
 
 export function parseExcelToObjects(file: ArrayBuffer): ParsedSheet {
   const wb = XLSX.read(file, { type: "array" });
   const first = wb.SheetNames[0];
-  if (!first) return { headers: [], rows: [] };
+  if (!first) return { headers: [], rows: [], sourceRowNumbers: [] };
   const sheet = wb.Sheets[first];
   const matrix = XLSX.utils.sheet_to_json<(string | number | null)[]>(sheet, {
     header: 1,
@@ -48,9 +55,10 @@ export function parseExcelToObjects(file: ArrayBuffer): ParsedSheet {
     raw: false,
   }) as unknown;
   const rowsRaw = Array.isArray(matrix) ? matrix : [];
-  if (rowsRaw.length === 0) return { headers: [], rows: [] };
+  if (rowsRaw.length === 0) return { headers: [], rows: [], sourceRowNumbers: [] };
   const headers = (rowsRaw[0] ?? []).map((h) => String(h ?? "").trim());
   const rows: Record<string, string>[] = [];
+  const sourceRowNumbers: number[] = [];
   for (let i = 1; i < rowsRaw.length; i++) {
     const line = rowsRaw[i] as (string | number | null)[];
     if (!line || line.every((c) => c === "" || c == null)) continue;
@@ -60,9 +68,11 @@ export function parseExcelToObjects(file: ArrayBuffer): ParsedSheet {
       const cell = line[idx];
       obj[header] = cell === null || cell === undefined ? "" : String(cell).trim();
     });
+    if (!rowHasAnyVisibleValue(obj)) continue;
     rows.push(obj);
+    sourceRowNumbers.push(i + 1);
   }
-  return { headers, rows };
+  return { headers, rows, sourceRowNumbers };
 }
 
 function cell(row: Record<string, string>, headerName: string | undefined): string {
@@ -177,29 +187,82 @@ async function ensureUniqueProductSlug(base: string): Promise<string> {
 
 export type ImportResult = { created: number; updated: number; errors: string[] };
 
+export type ImportProductsExcelOptions = {
+  /** Índice Excel (1-based) por cada entrada de `rows`; si falta se usa `i + 2`. */
+  sourceRowNumbers?: number[];
+};
+
+/** Mensaje legible para errores de esquema/cache en `products` / precio tachado (evita PGRST204 crudo al usuario). */
+export function formatProductImportUserMessage(e: unknown): string {
+  const raw = formatPostgrestError(e);
+  if (
+    /could not find .*compare_at_price/i.test(raw) ||
+    /could not find .*compare_price/i.test(raw) ||
+    (/PGRST204/i.test(raw) && /products/i.test(raw))
+  ) {
+    return "No se pudo importar por una configuración pendiente en productos. Revisar columnas de precio tachado.";
+  }
+  return raw;
+}
+
+type ProductsCompareColumnSupport = {
+  compareAt: boolean;
+  comparePrice: boolean;
+};
+
+function isUnknownColumnError(error: { code?: string; message?: string } | null): boolean {
+  if (!error) return false;
+  if (error.code === "PGRST204") return true;
+  const m = error.message ?? "";
+  return /could not find .*column/i.test(m);
+}
+
+async function fetchProductsCompareColumnSupport(): Promise<ProductsCompareColumnSupport> {
+  assertSupabaseConfigured();
+  const at = await supabase.from("products").select("compare_at_price").limit(1);
+  const price = await supabase.from("products").select("compare_price").limit(1);
+  return {
+    compareAt: !isUnknownColumnError(at.error),
+    comparePrice: !isUnknownColumnError(price.error),
+  };
+}
+
+function appendComparePriceFields(
+  target: Record<string, unknown>,
+  compareRounded: number | null,
+  support: ProductsCompareColumnSupport,
+): void {
+  if (compareRounded == null) return;
+  if (support.comparePrice) target.compare_price = compareRounded;
+  if (support.compareAt) target.compare_at_price = compareRounded;
+}
+
 export async function importProductsFromExcel(
   rows: Record<string, string>[],
   mapping: ColumnMapping,
+  opts?: ImportProductsExcelOptions,
 ): Promise<ImportResult> {
   assertSupabaseConfigured();
   const result: ImportResult = { created: 0, updated: 0, errors: [] };
+  const compareSupport = await fetchProductsCompareColumnSupport();
 
   const h = (f: ExcelCanonicalField) => mapping[f];
 
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
+    const excelRow = opts?.sourceRowNumbers?.[i] ?? i + 2;
     const codigo = cell(row, h("codigo"));
     const descripcion = cell(row, h("descripcion"));
     if (!codigo && !descripcion) {
-      result.errors.push(`Fila ${i + 2}: falta Codigo y Descripcion`);
+      result.errors.push(`Fila ${excelRow}: falta Codigo y Descripcion`);
       continue;
     }
     if (!codigo) {
-      result.errors.push(`Fila ${i + 2}: falta Codigo`);
+      result.errors.push(`Fila ${excelRow}: falta Codigo`);
       continue;
     }
     if (!descripcion) {
-      result.errors.push(`Fila ${i + 2}: falta Descripcion`);
+      result.errors.push(`Fila ${excelRow}: falta Descripcion`);
       continue;
     }
 
@@ -247,7 +310,7 @@ export async function importProductsFromExcel(
       if (rango) specs.rango = rango;
       if (fecha) specs.fecha = fecha;
 
-      const payload = {
+      const insertPayload: Record<string, unknown> = {
         code: codigo,
         sku: codigo,
         name: descripcion,
@@ -266,42 +329,40 @@ export async function importProductsFromExcel(
         stock: stockVal,
         image_url: imageUrl,
         gallery: galleryUrls,
-        compare_at_price: compareRounded,
-        compare_price: compareRounded,
         track_stock: true,
         featured: featuredVal,
         is_featured: featuredVal,
         is_active: isActive,
         specs,
       };
+      appendComparePriceFields(insertPayload, compareRounded, compareSupport);
 
       const { data: existing } = await supabase.from("products").select("id").eq("code", codigo).maybeSingle();
 
       if (existing?.id) {
         const updateRow: Record<string, unknown> = {
-          name: payload.name,
-          category_id: payload.category_id,
-          subcategory_id: payload.subcategory_id,
-          brand: payload.brand,
-          warehouse: payload.warehouse,
-          supplier: payload.supplier,
-          article_type: payload.article_type,
-          situation: payload.situation,
-          range_label: payload.range_label,
-          description: payload.description,
-          price: payload.price,
-          stock: payload.stock,
-          compare_at_price: compareRounded,
-          compare_price: compareRounded,
+          name: descripcion,
+          category_id: categoryId,
+          subcategory_id: subcategoryId,
+          brand: marca || null,
+          warehouse: deposito || null,
+          supplier: proveedor || null,
+          article_type: tipoArticulo || null,
+          situation: situacion || null,
+          range_label: rango || null,
+          description: descripcion,
+          price: priceGs,
+          stock: stockVal,
           featured: featuredVal,
           is_featured: featuredVal,
-          is_active: payload.is_active,
-          specs: payload.specs,
+          is_active: isActive,
+          specs,
           updated_at: new Date().toISOString(),
         };
         if (imagenMapped) {
           updateRow.image_url = imageUrl;
         }
+        appendComparePriceFields(updateRow, compareRounded, compareSupport);
         const { error } = await supabase.from("products").update(updateRow).eq("id", existing.id);
         if (error) throw error;
         if (imagenMapped) {
@@ -309,14 +370,18 @@ export async function importProductsFromExcel(
         }
         result.updated += 1;
       } else {
-        const { data: ins, error } = await supabase.from("products").insert(payload).select("id").single();
+        const { data: ins, error } = await supabase
+          .from("products")
+          .insert(insertPayload as never)
+          .select("id")
+          .single();
         if (error) throw error;
         const pid = ins!.id as string;
         await replaceProductImages(pid, galleryUrls);
         result.created += 1;
       }
     } catch (e) {
-      result.errors.push(`Fila ${i + 2}: ${formatPostgrestError(e)}`);
+      result.errors.push(`Fila ${excelRow}: ${formatProductImportUserMessage(e)}`);
     }
   }
 

@@ -6,11 +6,11 @@ import * as XLSX from "xlsx";
 import type { ExcelCanonicalField } from "@/types";
 import {
   EXCEL_FIELD_LABELS,
+  formatProductImportUserMessage,
   importProductsFromExcel,
   parseExcelToObjects,
   type ColumnMapping,
 } from "@/services/productImportService";
-import { formatPostgrestError } from "@/lib/postgrestError";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -129,6 +129,29 @@ function previewCell(value: unknown): string {
   return s.length > 80 ? `${s.slice(0, 77)}…` : s;
 }
 
+/** Orden legible: primero columnas mapeadas a campos conocidos (Código, Descripción, Precio…), luego el resto. */
+function previewColumnOrder(
+  parsed: { headers: string[] },
+  mapping: ColumnMapping,
+): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const field of FIELD_ORDER) {
+    const col = mapping[field];
+    if (col && parsed.headers.includes(col) && !seen.has(col)) {
+      out.push(col);
+      seen.add(col);
+    }
+  }
+  for (const h of parsed.headers) {
+    if (h && !seen.has(h)) {
+      out.push(h);
+      seen.add(h);
+    }
+  }
+  return out;
+}
+
 export default function AdminImport() {
   const qc = useQueryClient();
   const [mapping, setMapping] = useState<ColumnMapping>({});
@@ -140,9 +163,18 @@ export default function AdminImport() {
     return parsed.headers.filter(Boolean);
   }, [parsed]);
 
+  const previewColumns = useMemo(
+    () => (parsed ? previewColumnOrder(parsed, mapping) : []),
+    [parsed, mapping],
+  );
+
   const previewSlice = useMemo(() => {
-    if (!parsed?.rows.length) return [];
-    return parsed.rows.slice(0, PREVIEW_ROWS);
+    if (!parsed?.rows.length) return { rows: [] as Record<string, string>[], lineNums: [] as number[] };
+    const n = Math.min(PREVIEW_ROWS, parsed.rows.length);
+    return {
+      rows: parsed.rows.slice(0, n),
+      lineNums: parsed.sourceRowNumbers.slice(0, n),
+    };
   }, [parsed]);
 
   const loadFile = async (file: File | null) => {
@@ -158,7 +190,9 @@ export default function AdminImport() {
   const importMut = useMutation({
     mutationFn: async () => {
       if (!parsed?.rows.length) throw new Error("Primero subí un Excel");
-      return importProductsFromExcel(parsed.rows, mapping);
+      return importProductsFromExcel(parsed.rows, mapping, {
+        sourceRowNumbers: parsed.sourceRowNumbers,
+      });
     },
     onSuccess: (res) => {
       qc.invalidateQueries({ queryKey: ["admin"] });
@@ -176,7 +210,7 @@ export default function AdminImport() {
         });
       }
     },
-    onError: (e: unknown) => toast.error(formatPostgrestError(e)),
+    onError: (e: unknown) => toast.error(formatProductImportUserMessage(e)),
   });
 
   return (
@@ -293,39 +327,41 @@ export default function AdminImport() {
                 <div className="space-y-2 min-w-0">
                   <div className="flex items-center justify-between gap-2">
                     <h3 className="text-sm font-semibold text-foreground">Vista previa (primeras {PREVIEW_ROWS} filas)</h3>
-                    <span className="text-xs text-muted-foreground">Según columnas del Excel</span>
+                    <span className="text-xs text-muted-foreground">
+                      Columnas ordenadas por mapeo (Código, Descripción, Precio, Stock, categorías…)
+                    </span>
                   </div>
                   <div className="overflow-x-auto rounded-lg border border-border/60 bg-muted/10">
                     <table className="w-full text-xs">
                       <thead>
                         <tr className="border-b border-border bg-muted/40">
                           <th className="sticky left-0 z-[1] bg-muted/90 px-2 py-2 text-left font-semibold whitespace-nowrap border-r border-border/60">
-                            #
+                            Fila Excel
                           </th>
-                          {parsed.headers.map((h, idx) => (
+                          {previewColumns.map((h) => (
                             <th
-                              key={`h-${idx}-${h}`}
+                              key={h}
                               className="px-2 py-2 text-left font-semibold whitespace-nowrap min-w-[7rem] max-w-[14rem]"
                               title={h}
                             >
-                              {h || `(vacío ${idx + 1})`}
+                              {h}
                             </th>
                           ))}
                         </tr>
                       </thead>
                       <tbody>
-                        {previewSlice.map((row, ri) => (
+                        {previewSlice.rows.map((row, ri) => (
                           <tr key={ri} className="border-b border-border/40 last:border-0">
                             <td className="sticky left-0 z-[1] bg-background/95 px-2 py-1.5 font-mono text-muted-foreground border-r border-border/60">
-                              {ri + 2}
+                              {previewSlice.lineNums[ri] ?? ri + 2}
                             </td>
-                            {parsed.headers.map((_, ci) => (
+                            {previewColumns.map((col) => (
                               <td
-                                key={ci}
+                                key={col}
                                 className="px-2 py-1.5 align-top text-foreground/90 max-w-[14rem]"
-                                title={String(row[ci] ?? "")}
+                                title={String(row[col] ?? "")}
                               >
-                                <span className="line-clamp-2 break-words">{previewCell(row[ci])}</span>
+                                <span className="line-clamp-2 break-words">{previewCell(row[col])}</span>
                               </td>
                             ))}
                           </tr>
