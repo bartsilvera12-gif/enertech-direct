@@ -185,24 +185,22 @@ async function ensureUniqueProductSlug(base: string): Promise<string> {
   throw new Error("No se pudo generar slug único");
 }
 
-export type ImportResult = { created: number; updated: number; errors: string[] };
+export type ImportResult = {
+  created: number;
+  updated: number;
+  errors: string[];
+  /** Avisos no bloqueantes (p. ej. precio tachado no persistido). */
+  warnings: string[];
+};
 
 export type ImportProductsExcelOptions = {
   /** Índice Excel (1-based) por cada entrada de `rows`; si falta se usa `i + 2`. */
   sourceRowNumbers?: number[];
 };
 
-/** Mensaje legible para errores de esquema/cache en `products` / precio tachado (evita PGRST204 crudo al usuario). */
+/** Mensajes de error para UI admin (importación); precio tachado no bloqueante se maneja con retry en servicio. */
 export function formatProductImportUserMessage(e: unknown): string {
-  const raw = formatPostgrestError(e);
-  if (
-    /could not find .*compare_at_price/i.test(raw) ||
-    /could not find .*compare_price/i.test(raw) ||
-    (/PGRST204/i.test(raw) && /products/i.test(raw))
-  ) {
-    return "No se pudo importar por una configuración pendiente en productos. Revisar columnas de precio tachado.";
-  }
-  return raw;
+  return formatPostgrestError(e);
 }
 
 type ProductsCompareColumnSupport = {
@@ -227,6 +225,21 @@ async function fetchProductsCompareColumnSupport(): Promise<ProductsCompareColum
   };
 }
 
+function stripComparePriceFields(target: Record<string, unknown>): void {
+  delete target.compare_price;
+  delete target.compare_at_price;
+}
+
+/** Error PostgREST por columna compare_* ausente o no expuesta (PGRST204 / schema cache). */
+function isCompareColumnPostgrestError(err: unknown): boolean {
+  if (!err || typeof err !== "object") return false;
+  const e = err as { code?: string; message?: string };
+  const m = (e.message ?? "").toLowerCase();
+  if (/compare_at_price|compare_price/.test(m)) return true;
+  if (e.code === "PGRST204" && /compare/.test(m)) return true;
+  return false;
+}
+
 function appendComparePriceFields(
   target: Record<string, unknown>,
   compareRounded: number | null,
@@ -237,14 +250,47 @@ function appendComparePriceFields(
   if (support.compareAt) target.compare_at_price = compareRounded;
 }
 
+async function insertProductWithCompareFallback(
+  insertPayload: Record<string, unknown>,
+  compareRounded: number | null,
+): Promise<{ id: string; tachadoDroppedOnRetry: boolean }> {
+  let tachadoDroppedOnRetry = false;
+  let r = await supabase.from("products").insert(insertPayload as never).select("id").single();
+  if (r.error && compareRounded != null && isCompareColumnPostgrestError(r.error)) {
+    stripComparePriceFields(insertPayload);
+    tachadoDroppedOnRetry = true;
+    r = await supabase.from("products").insert(insertPayload as never).select("id").single();
+  }
+  if (r.error) throw r.error;
+  return { id: r.data!.id as string, tachadoDroppedOnRetry };
+}
+
+async function updateProductWithCompareFallback(
+  id: string,
+  updateRow: Record<string, unknown>,
+  compareRounded: number | null,
+): Promise<{ tachadoDroppedOnRetry: boolean }> {
+  let tachadoDroppedOnRetry = false;
+  let { error } = await supabase.from("products").update(updateRow).eq("id", id);
+  if (error && compareRounded != null && isCompareColumnPostgrestError(error)) {
+    stripComparePriceFields(updateRow);
+    tachadoDroppedOnRetry = true;
+    ({ error } = await supabase.from("products").update(updateRow).eq("id", id));
+  }
+  if (error) throw error;
+  return { tachadoDroppedOnRetry };
+}
+
 export async function importProductsFromExcel(
   rows: Record<string, string>[],
   mapping: ColumnMapping,
   opts?: ImportProductsExcelOptions,
 ): Promise<ImportResult> {
   assertSupabaseConfigured();
-  const result: ImportResult = { created: 0, updated: 0, errors: [] };
+  const result: ImportResult = { created: 0, updated: 0, errors: [], warnings: [] };
   const compareSupport = await fetchProductsCompareColumnSupport();
+
+  let tachadoOmitidoFilas = 0;
 
   const h = (f: ExcelCanonicalField) => mapping[f];
 
@@ -363,26 +409,42 @@ export async function importProductsFromExcel(
           updateRow.image_url = imageUrl;
         }
         appendComparePriceFields(updateRow, compareRounded, compareSupport);
-        const { error } = await supabase.from("products").update(updateRow).eq("id", existing.id);
-        if (error) throw error;
+        const { tachadoDroppedOnRetry } = await updateProductWithCompareFallback(
+          existing.id,
+          updateRow,
+          compareRounded,
+        );
         if (imagenMapped) {
           await replaceProductImages(existing.id, imageUrl ? [imageUrl] : [DEFAULT_PRODUCT_CARD_IMAGE]);
         }
         result.updated += 1;
+        if (compareRounded != null) {
+          if (tachadoDroppedOnRetry) tachadoOmitidoFilas += 1;
+          else if (!compareSupport.comparePrice && !compareSupport.compareAt) tachadoOmitidoFilas += 1;
+        }
       } else {
-        const { data: ins, error } = await supabase
-          .from("products")
-          .insert(insertPayload as never)
-          .select("id")
-          .single();
-        if (error) throw error;
-        const pid = ins!.id as string;
+        const { id: pid, tachadoDroppedOnRetry } = await insertProductWithCompareFallback(
+          insertPayload,
+          compareRounded,
+        );
         await replaceProductImages(pid, galleryUrls);
         result.created += 1;
+        if (compareRounded != null) {
+          if (tachadoDroppedOnRetry) tachadoOmitidoFilas += 1;
+          else if (!compareSupport.comparePrice && !compareSupport.compareAt) tachadoOmitidoFilas += 1;
+        }
       }
     } catch (e) {
       result.errors.push(`Fila ${excelRow}: ${formatProductImportUserMessage(e)}`);
     }
+  }
+
+  if (tachadoOmitidoFilas > 0) {
+    result.warnings.push(
+      tachadoOmitidoFilas === 1
+        ? "Precio tachado omitido: la base no tiene columnas compatibles."
+        : `Precio tachado omitido en ${tachadoOmitidoFilas} filas: la base no tiene columnas compatibles.`,
+    );
   }
 
   return result;

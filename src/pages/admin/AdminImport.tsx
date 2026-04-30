@@ -199,6 +199,9 @@ export default function AdminImport() {
       qc.invalidateQueries({ queryKey: ["products"] });
       qc.invalidateQueries({ queryKey: ["categories"] });
       toast.success(`Importación: ${res.created} nuevos, ${res.updated} actualizados`);
+      if (res.warnings?.length) {
+        for (const w of res.warnings) toast.warning(w);
+      }
       if (res.errors.length) {
         const maxLines = 15;
         const lines = res.errors.slice(0, maxLines);
