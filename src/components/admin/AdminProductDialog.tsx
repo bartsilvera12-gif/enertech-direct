@@ -56,7 +56,6 @@ export function AdminProductDialog({ open, onOpenChange, categories, product, on
   const [active, setActive] = useState(true);
   const [heroSlideOrderStr, setHeroSlideOrderStr] = useState("");
   const [primaryImageUrl, setPrimaryImageUrl] = useState("");
-  const [specsJson, setSpecsJson] = useState("{}");
   const [imagesText, setImagesText] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -98,7 +97,6 @@ export function AdminProductDialog({ open, onOpenChange, categories, product, on
       setActive(product.isActive);
       setHeroSlideOrderStr(product.heroSlideOrder != null ? String(product.heroSlideOrder) : "");
       setPrimaryImageUrl(product.imageUrl?.trim() ?? "");
-      setSpecsJson(JSON.stringify(product.specs ?? {}, null, 2));
       setImagesText(product.gallery.join("\n"));
     } else {
       setName("");
@@ -122,7 +120,6 @@ export function AdminProductDialog({ open, onOpenChange, categories, product, on
       setActive(true);
       setHeroSlideOrderStr("");
       setPrimaryImageUrl("");
-      setSpecsJson("{}");
       setImagesText("");
     }
   }, [open, product, categories, roots]);
@@ -133,14 +130,7 @@ export function AdminProductDialog({ open, onOpenChange, categories, product, on
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    let specs: Record<string, string> = {};
-    try {
-      const parsed = JSON.parse(specsJson || "{}") as Record<string, unknown>;
-      specs = Object.fromEntries(Object.entries(parsed).map(([k, v]) => [k, String(v ?? "")]));
-    } catch {
-      toast.error("JSON de especificaciones inválido");
-      return;
-    }
+    const specs: Record<string, string> = product?.specs ?? {};
     const priceNum = Number(price);
     const stockNum = Number(stock);
     if (!name.trim() || !slug.trim()) {
@@ -399,18 +389,11 @@ export function AdminProductDialog({ open, onOpenChange, categories, product, on
                 placeholder="https://…"
                 className="text-xs"
               />
-              <p className="text-[11px] text-muted-foreground">
-                Se guarda en <code className="rounded bg-muted px-1">products.image_url</code>. Tiene prioridad sobre la primera URL de la galería.
-              </p>
             </div>
           </div>
           <div className="flex items-center justify-between rounded-lg border border-border/15 p-3">
             <Label htmlFor="p-act">Activo en tienda</Label>
             <Switch id="p-act" checked={active} onCheckedChange={setActive} />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="p-specs">Especificaciones (JSON objeto)</Label>
-            <Textarea id="p-specs" value={specsJson} onChange={(e) => setSpecsJson(e.target.value)} rows={4} className="font-mono text-xs" />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="p-img">Galería — URLs (una por línea)</Label>
