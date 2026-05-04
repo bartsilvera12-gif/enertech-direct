@@ -1,7 +1,5 @@
 import { Check, MessageCircle } from "lucide-react";
-
-const UPS_IMAGE_URL =
-  "https://images.unsplash.com/photo-1621905251918-48416bd8575a?auto=format&fit=crop&w=960&q=80";
+import upsApcService from "@/assets/ups-apc-service.png";
 
 const WA_SERVICE_URL = `https://wa.me/595971472716?text=${encodeURIComponent(
   "Hola, solicito servicio técnico para UPS.",
@@ -53,13 +51,13 @@ export function UpsTechnicalServiceSection() {
           </div>
 
           <div className="relative lg:justify-self-end w-full max-w-xl mx-auto lg:max-w-none">
-            <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-[0_24px_48px_-28px_rgba(0,0,0,0.22)] lg:rounded-3xl">
+            <div className="overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br from-muted/40 to-card p-6 shadow-[0_24px_48px_-28px_rgba(0,0,0,0.22)] sm:p-8 lg:rounded-3xl lg:p-10">
               <img
-                src={UPS_IMAGE_URL}
-                alt="Técnico especializado en sistemas eléctricos y respaldo energético"
-                className="aspect-[4/3] w-full object-cover md:aspect-[16/11]"
-                width={960}
-                height={660}
+                src={upsApcService}
+                alt="Equipos UPS APC: Smart-UPS torre, rack y modelo de respaldo energético"
+                className="mx-auto aspect-[4/3] w-full object-contain md:aspect-[16/11]"
+                width={1024}
+                height={1024}
                 loading="lazy"
                 decoding="async"
               />
