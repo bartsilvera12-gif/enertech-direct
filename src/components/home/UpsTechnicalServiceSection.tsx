@@ -51,11 +51,11 @@ export function UpsTechnicalServiceSection() {
           </div>
 
           <div className="relative lg:justify-self-end w-full max-w-xl mx-auto lg:max-w-none">
-            <div className="overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br from-muted/40 to-card p-6 shadow-[0_24px_48px_-28px_rgba(0,0,0,0.22)] sm:p-8 lg:rounded-3xl lg:p-10">
+            <div className="overflow-hidden rounded-2xl border border-border/60 bg-white shadow-[0_24px_48px_-28px_rgba(0,0,0,0.22)] lg:rounded-3xl">
               <img
                 src={upsApcService}
                 alt="Equipos UPS APC: Smart-UPS torre, rack y modelo de respaldo energético"
-                className="mx-auto aspect-[4/3] w-full object-contain md:aspect-[16/11]"
+                className="block aspect-square w-full object-cover"
                 width={1024}
                 height={1024}
                 loading="lazy"
