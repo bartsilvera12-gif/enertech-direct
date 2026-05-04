@@ -2,68 +2,14 @@ import { supabase, assertSupabaseConfigured } from "@/lib/supabase";
 import { mapProduct, type ProductRow } from "@/lib/mapEnertech";
 import { PRODUCT_EMBED } from "@/services/catalogService";
 import type { Product } from "@/types";
-
-/**
- * Compatibilidad con instancias que difieren en nombres de columna en `enertech.products`:
- *   - precio tachado: `compare_at_price` (schema 01) vs `compare_price` (alineación 09/10)
- *   - destacado:      `featured`         (schema 01) vs `is_featured`  (alineación 09/10)
- *
- * Detectamos qué columnas existen vía un único SELECT por operación. **No cacheamos** entre
- * operaciones a propósito: el caché top-level del módulo sobrevive a HMR de Vite y puede
- * mantener un estado obsoleto si el schema de la DB cambia. El probe es barato (~1 round-trip).
- *
- * Sin esta detección PostgREST devuelve PGRST204 ("Could not find column ... in schema cache").
- */
-type ProductsSchemaSupport = {
-  compareAt: boolean;
-  comparePrice: boolean;
-  featured: boolean;
-  isFeatured: boolean;
-};
-
-const COMPARE_COLUMNS = ["compare_at_price", "compare_price"] as const;
-const FEATURED_COLUMNS = ["featured", "is_featured"] as const;
-
-function isUnknownColumnPostgrestError(error: { code?: string; message?: string } | null): boolean {
-  if (!error) return false;
-  if (error.code === "PGRST204") return true;
-  const m = error.message ?? "";
-  return /could not find .*column/i.test(m);
-}
-
-function isMissingColumnError(err: unknown, columns: readonly string[]): boolean {
-  if (!err || typeof err !== "object") return false;
-  const e = err as { code?: string; message?: string };
-  const m = (e.message ?? "").toLowerCase();
-  if (e.code !== "PGRST204" && !/could not find .*column/i.test(e.message ?? "")) return false;
-  return columns.some((c) => m.includes(c));
-}
-
-async function probeColumnExists(name: string): Promise<boolean> {
-  const probe = await supabase.from("products").select(name, { head: true, count: "exact" }).limit(1);
-  return !isUnknownColumnPostgrestError(probe.error);
-}
-
-async function detectProductsSchemaSupport(): Promise<ProductsSchemaSupport> {
-  const [compareAt, comparePrice, featured, isFeatured] = await Promise.all([
-    probeColumnExists("compare_at_price"),
-    probeColumnExists("compare_price"),
-    probeColumnExists("featured"),
-    probeColumnExists("is_featured"),
-  ]);
-  const support: ProductsSchemaSupport = { compareAt, comparePrice, featured, isFeatured };
-  if (typeof window !== "undefined") {
-    const supportedNames = (Object.entries(support) as [keyof ProductsSchemaSupport, boolean][])
-      .filter(([, ok]) => ok)
-      .map(([k]) => k);
-    console.debug("[Enertech][admin] products schema support →", supportedNames.join(", ") || "(ninguna)");
-  }
-  return support;
-}
-
-function stripFields(target: Record<string, unknown>, fields: readonly string[]): void {
-  for (const f of fields) delete target[f];
-}
+import {
+  COMPARE_COLUMNS,
+  FEATURED_COLUMNS,
+  detectProductsSchemaSupport,
+  isMissingColumnError,
+  stripFields,
+  type ProductsSchemaSupport,
+} from "@/lib/productsSchemaSupport";
 
 function applyCompareFields(
   target: Record<string, unknown>,

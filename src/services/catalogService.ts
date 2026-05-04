@@ -5,6 +5,11 @@ import {
   rootCategoriesSorted,
   childrenOfParentSlug as nestedChildrenOfRootSlug,
 } from "@/lib/categoryHierarchy";
+import {
+  buildFeaturedOrFilter,
+  detectProductsSchemaSupport,
+  type ProductsSchemaSupport,
+} from "@/lib/productsSchemaSupport";
 
 /** Catálogo + categoría/subcategoría + filas en product_images (tras migración 09). */
 export const PRODUCT_EMBED = `
@@ -14,22 +19,19 @@ export const PRODUCT_EMBED = `
   product_images (*)
 `;
 
-/** Hero: featured + orden carrusel + imágenes. */
-export const HERO_SLIDER_SELECT = `
-  id,
-  name,
-  slug,
-  featured,
-  is_featured,
-  created_at,
-  image_url,
-  gallery,
-  hero_slide_order,
-  product_images ( url, sort_order, alt )
-`;
-
-/** Destacados: acepta filas con `is_featured` y/o columna legacy `featured`. */
-const FEATURED_OR_FILTER = "is_featured.eq.true,featured.eq.true";
+/**
+ * Hero: featured + orden carrusel + imágenes. Build dinámico según `support`
+ * para evitar PGRST204 cuando alguna columna legacy no existe en la instancia.
+ */
+function buildHeroSliderSelect(support: ProductsSchemaSupport): string {
+  const cols: string[] = ["id", "name", "slug", "created_at", "image_url"];
+  if (support.featured) cols.push("featured");
+  if (support.isFeatured) cols.push("is_featured");
+  if (support.gallery) cols.push("gallery");
+  if (support.heroSlideOrder) cols.push("hero_slide_order");
+  cols.push("product_images ( url, sort_order, alt )");
+  return cols.join(",\n");
+}
 
 let warnedMissingEnv = false;
 function warnIfSupabaseUnconfigured(): void {
@@ -138,7 +140,12 @@ export async function fetchProducts(opts?: CatalogFilters): Promise<Product[]> {
 
   let q = supabase.from("products").select(PRODUCT_EMBED).eq("is_active", true);
 
-  if (opts?.featuredOnly) q = q.or(FEATURED_OR_FILTER);
+  if (opts?.featuredOnly) {
+    const support = await detectProductsSchemaSupport();
+    const filter = buildFeaturedOrFilter(support);
+    if (!filter) return [];
+    q = q.or(filter);
+  }
 
   let categoryId: string | undefined;
   let subcategoryId: string | undefined;
@@ -271,23 +278,32 @@ export async function fetchHeroSliderProducts(limit = 5): Promise<Product[]> {
     return [];
   }
   assertSupabaseConfigured();
-  const cap = Math.max(limit * 10, 40);
-  const { data: feat, error: e1 } = await supabase
-    .from("products")
-    .select(HERO_SLIDER_SELECT)
-    .eq("is_active", true)
-    .or(FEATURED_OR_FILTER)
-    .order("hero_slide_order", { ascending: true, nullsFirst: false })
-    .order("created_at", { ascending: false })
-    .limit(cap);
-  if (e1) throw e1;
 
-  let out = (feat as ProductRow[]).map(mapProduct).filter(withImage);
-  if (out.length >= limit) return out.slice(0, limit);
+  const support = await detectProductsSchemaSupport();
+  const heroSelect = buildHeroSliderSelect(support);
+  const cap = Math.max(limit * 10, 40);
+
+  let featuredQuery = supabase.from("products").select(heroSelect).eq("is_active", true);
+
+  const filter = buildFeaturedOrFilter(support);
+  if (filter) featuredQuery = featuredQuery.or(filter);
+
+  if (support.heroSlideOrder) {
+    featuredQuery = featuredQuery.order("hero_slide_order", { ascending: true, nullsFirst: false });
+  }
+  featuredQuery = featuredQuery.order("created_at", { ascending: false }).limit(cap);
+
+  let out: Product[] = [];
+  if (filter) {
+    const { data: feat, error: e1 } = await featuredQuery;
+    if (e1) throw e1;
+    out = (feat as ProductRow[]).map(mapProduct).filter(withImage);
+    if (out.length >= limit) return out.slice(0, limit);
+  }
 
   const { data: recent, error: e2 } = await supabase
     .from("products")
-    .select(HERO_SLIDER_SELECT)
+    .select(heroSelect)
     .eq("is_active", true)
     .order("created_at", { ascending: false })
     .limit(cap);
