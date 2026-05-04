@@ -8,7 +8,10 @@ import {
 import {
   buildFeaturedOrFilter,
   detectProductsSchemaSupport,
+  isMissingColumnError,
+  resetProductsSchemaSupportCache,
   type ProductsSchemaSupport,
+  FEATURED_COLUMNS,
 } from "@/lib/productsSchemaSupport";
 
 /** Catálogo + categoría/subcategoría + filas en product_images (tras migración 09). */
@@ -139,12 +142,14 @@ export async function fetchProducts(opts?: CatalogFilters): Promise<Product[]> {
   assertSupabaseConfigured();
 
   let q = supabase.from("products").select(PRODUCT_EMBED).eq("is_active", true);
+  let appliedFeaturedFilter = false;
 
   if (opts?.featuredOnly) {
     const support = await detectProductsSchemaSupport();
     const filter = buildFeaturedOrFilter(support);
     if (!filter) return [];
     q = q.or(filter);
+    appliedFeaturedFilter = true;
   }
 
   let categoryId: string | undefined;
@@ -191,7 +196,32 @@ export async function fetchProducts(opts?: CatalogFilters): Promise<Product[]> {
   else q = q.order("created_at", { ascending: false });
 
   const { data, error } = await q;
-  if (error) throw error;
+  if (error) {
+    if (appliedFeaturedFilter && isMissingColumnError(error, FEATURED_COLUMNS)) {
+      console.warn(
+        "[Enertech] Filtro de destacados con columna inexistente; re-detectando schema y reintentando.",
+        error,
+      );
+      resetProductsSchemaSupportCache();
+      const support = await detectProductsSchemaSupport();
+      const filter = buildFeaturedOrFilter(support);
+      if (!filter) return [];
+      let qRetry = supabase.from("products").select(PRODUCT_EMBED).eq("is_active", true).or(filter);
+      if (categoryId) qRetry = qRetry.eq("category_id", categoryId);
+      if (subcategoryId) qRetry = qRetry.eq("subcategory_id", subcategoryId);
+      if (opts?.brand) qRetry = qRetry.eq("brand", opts.brand);
+      if (opts?.supplier) qRetry = qRetry.eq("supplier", opts.supplier);
+      if (opts?.warehouse) qRetry = qRetry.eq("warehouse", opts.warehouse);
+      if (opts?.articleType) qRetry = qRetry.eq("article_type", opts.articleType);
+      if (opts?.situation) qRetry = qRetry.eq("situation", opts.situation);
+      if (opts?.rangeLabel) qRetry = qRetry.eq("range_label", opts.rangeLabel);
+      qRetry = qRetry.order("created_at", { ascending: false });
+      const { data: data2, error: error2 } = await qRetry;
+      if (error2) throw error2;
+      return (data2 as ProductRow[]).map(mapProduct);
+    }
+    throw error;
+  }
   let list = (data as ProductRow[]).map(mapProduct);
 
   if (opts?.search) {

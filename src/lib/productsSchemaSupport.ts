@@ -10,9 +10,12 @@ import { supabase } from "@/lib/supabase";
  * con columnas inexistentes, o al filtrar con `.or("featured.eq.true,...")`
  * cuando una de las columnas no está expuesta.
  *
- * El probe es barato (HEAD request) y NO se cachea entre operaciones a
- * propósito: el caché top-level del módulo sobrevive a HMR de Vite y
- * puede mantener un estado obsoleto si el schema cambia.
+ * Estrategia: 1 sola request `SELECT * LIMIT 1` y leemos las keys del row real.
+ * Es 100% certero (refleja exactamente lo que PostgREST expone), más barato
+ * que probes individuales y no genera 400s en consola.
+ *
+ * Cache por instancia del módulo (vive lo que vive el bundle JS). Si el schema
+ * cambia, basta con un hard reload del navegador para refrescarlo.
  */
 export type ProductsSchemaSupport = {
   compareAt: boolean;
@@ -31,53 +34,100 @@ export function isUnknownColumnPostgrestError(
 ): boolean {
   if (!error) return false;
   if (error.code === "PGRST204") return true;
+  if (error.code === "42703") return true;
   const m = error.message ?? "";
-  return /could not find .*column/i.test(m);
+  return /could not find .*column/i.test(m) || /column .* does not exist/i.test(m);
 }
 
 export function isMissingColumnError(err: unknown, columns: readonly string[]): boolean {
   if (!err || typeof err !== "object") return false;
   const e = err as { code?: string; message?: string };
   const m = (e.message ?? "").toLowerCase();
-  if (e.code !== "PGRST204" && !/could not find .*column/i.test(e.message ?? "")) return false;
+  if (
+    e.code !== "PGRST204" &&
+    e.code !== "42703" &&
+    !/could not find .*column/i.test(e.message ?? "") &&
+    !/column .* does not exist/i.test(e.message ?? "")
+  ) {
+    return false;
+  }
   return columns.some((c) => m.includes(c));
 }
 
-async function probeColumnExists(name: string): Promise<boolean> {
-  const probe = await supabase.from("products").select(name, { head: true, count: "exact" }).limit(1);
-  return !isUnknownColumnPostgrestError(probe.error);
+/** Default conservador cuando no hay productos / falla la detección. */
+const FALLBACK_SUPPORT: ProductsSchemaSupport = {
+  compareAt: false,
+  comparePrice: true,
+  featured: false,
+  isFeatured: true,
+  heroSlideOrder: false,
+  gallery: false,
+};
+
+let supportPromise: Promise<ProductsSchemaSupport> | null = null;
+
+/** Resetea el cache (útil después de aplicar migraciones sin recargar la página). */
+export function resetProductsSchemaSupportCache(): void {
+  supportPromise = null;
 }
 
-/**
- * Detecta soporte de columnas para una operación. Hace 6 HEAD requests en paralelo
- * (~150ms total). Pensado para llamarse 1 vez por operación, sin cache top-level
- * para evitar problemas de HMR/desincronización con el schema cache de PostgREST.
- */
-export async function detectProductsSchemaSupport(): Promise<ProductsSchemaSupport> {
-  const [compareAt, comparePrice, featured, isFeatured, heroSlideOrder, gallery] =
-    await Promise.all([
-      probeColumnExists("compare_at_price"),
-      probeColumnExists("compare_price"),
-      probeColumnExists("featured"),
-      probeColumnExists("is_featured"),
-      probeColumnExists("hero_slide_order"),
-      probeColumnExists("gallery"),
-    ]);
+async function detectProductsSchemaSupportImpl(): Promise<ProductsSchemaSupport> {
+  const { data, error } = await supabase.from("products").select("*").limit(1);
+
+  if (error) {
+    console.warn(
+      "[Enertech] No se pudo detectar el schema de products, usando fallback conservador.",
+      error,
+    );
+    return FALLBACK_SUPPORT;
+  }
+
+  const row = (data && data[0]) as Record<string, unknown> | undefined;
+  if (!row) {
+    if (typeof window !== "undefined") {
+      console.debug(
+        "[Enertech] products vacío, schema support con fallback:",
+        FALLBACK_SUPPORT,
+      );
+    }
+    return FALLBACK_SUPPORT;
+  }
+
+  const cols = new Set(Object.keys(row));
   const support: ProductsSchemaSupport = {
-    compareAt,
-    comparePrice,
-    featured,
-    isFeatured,
-    heroSlideOrder,
-    gallery,
+    compareAt: cols.has("compare_at_price"),
+    comparePrice: cols.has("compare_price"),
+    featured: cols.has("featured"),
+    isFeatured: cols.has("is_featured"),
+    heroSlideOrder: cols.has("hero_slide_order"),
+    gallery: cols.has("gallery"),
   };
+
   if (typeof window !== "undefined") {
     const supportedNames = (Object.entries(support) as [keyof ProductsSchemaSupport, boolean][])
       .filter(([, ok]) => ok)
       .map(([k]) => k);
-    console.debug("[Enertech] products schema support →", supportedNames.join(", ") || "(ninguna)");
+    console.debug(
+      "[Enertech] products schema support →",
+      supportedNames.join(", ") || "(ninguna)",
+    );
   }
   return support;
+}
+
+/**
+ * Detecta soporte de columnas. Cacheado por instancia del módulo: 1 sola
+ * request por sesión. Llamá `resetProductsSchemaSupportCache()` si
+ * aplicaste migraciones y querés re-detectar sin recargar.
+ */
+export function detectProductsSchemaSupport(): Promise<ProductsSchemaSupport> {
+  if (!supportPromise) {
+    supportPromise = detectProductsSchemaSupportImpl().catch((e) => {
+      supportPromise = null;
+      throw e;
+    });
+  }
+  return supportPromise;
 }
 
 export function stripFields(target: Record<string, unknown>, fields: readonly string[]): void {
