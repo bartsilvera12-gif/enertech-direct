@@ -215,7 +215,7 @@ export function mapProduct(row: ProductRow): Product {
 
 
 
-  const featured = Boolean(row.featured ?? row.is_featured);
+  const featured = row.featured === true || row.is_featured === true;
 
   const compare =
 

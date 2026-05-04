@@ -95,10 +95,40 @@ export default function AdminProducts() {
   const patchMutation = useMutation({
     mutationFn: ({ id, patch }: { id: string; patch: Parameters<typeof updateProductAdmin>[1] }) =>
       updateProductAdmin(id, patch),
-    onSuccess: () => {
+    onMutate: async ({ id, patch }) => {
+      await queryClient.cancelQueries({ queryKey: ["admin", "products"] });
+      const previous = queryClient.getQueryData<Product[]>(["admin", "products"]);
+      if (previous) {
+        queryClient.setQueryData<Product[]>(
+          ["admin", "products"],
+          previous.map((row) =>
+            row.id === id
+              ? {
+                  ...row,
+                  ...(patch.is_active !== undefined ? { isActive: patch.is_active } : {}),
+                  ...(patch.featured !== undefined ? { featured: patch.featured } : {}),
+                  ...(patch.stock !== undefined ? { stock: patch.stock } : {}),
+                }
+              : row,
+          ),
+        );
+      }
+      return { previous };
+    },
+    onError: (e, _vars, ctx) => {
+      if (ctx?.previous) queryClient.setQueryData(["admin", "products"], ctx.previous);
+      toast.error(formatPostgrestError(e));
+    },
+    onSuccess: (_data, vars) => {
+      if (vars.patch.featured !== undefined) {
+        toast.success(vars.patch.featured ? "Marcado como destacado" : "Quitado de destacados");
+      } else if (vars.patch.is_active !== undefined) {
+        toast.success(vars.patch.is_active ? "Producto activado" : "Producto desactivado");
+      }
+    },
+    onSettled: () => {
       invalidateStore();
     },
-    onError: (e) => toast.error(formatPostgrestError(e)),
   });
 
   const openCreate = () => {
