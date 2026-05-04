@@ -149,10 +149,7 @@ export default function AdminLogin() {
               {submitting ? "Entrando…" : "Iniciar sesión"}
             </Button>
           </form>
-          <p className="text-xs text-muted-foreground text-center mt-8 leading-relaxed">
-            Acceso con Supabase Auth. El usuario debe existir en <code className="text-foreground/80 bg-muted/60 px-1 rounded">admin_profiles</code>.
-          </p>
-          <p className="text-center mt-6">
+          <p className="text-center mt-8">
             <Link to="/" className="text-sm font-medium text-primary hover:underline underline-offset-4">
               Volver a la tienda
             </Link>
