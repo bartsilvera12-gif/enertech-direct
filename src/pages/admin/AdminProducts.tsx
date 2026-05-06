@@ -1,10 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Search } from "lucide-react";
+import { Plus, Pencil, Search, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { formatPYG } from "@/services/storeService";
 import { fetchCategoriesAdmin } from "@/services/adminCategoryService";
-import { fetchProductsAdmin, updateProductAdmin } from "@/services/adminProductService";
+import {
+  deleteProductAdmin,
+  fetchProductsAdmin,
+  updateProductAdmin,
+} from "@/services/adminProductService";
 import type { Product } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,6 +23,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { AdminProductDialog } from "@/components/admin/AdminProductDialog";
 import { formatPostgrestError } from "@/lib/postgrestError";
 
@@ -57,6 +71,7 @@ export default function AdminProducts() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
 
   const { data: categories = [] } = useQuery({
     queryKey: ["admin", "categories"],
@@ -125,6 +140,32 @@ export default function AdminProducts() {
       } else if (vars.patch.is_active !== undefined) {
         toast.success(vars.patch.is_active ? "Producto activado" : "Producto desactivado");
       }
+    },
+    onSettled: () => {
+      invalidateStore();
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteProductAdmin(id),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["admin", "products"] });
+      const previous = queryClient.getQueryData<Product[]>(["admin", "products"]);
+      if (previous) {
+        queryClient.setQueryData<Product[]>(
+          ["admin", "products"],
+          previous.filter((row) => row.id !== id),
+        );
+      }
+      return { previous };
+    },
+    onError: (e, _id, ctx) => {
+      if (ctx?.previous) queryClient.setQueryData(["admin", "products"], ctx.previous);
+      toast.error(formatPostgrestError(e));
+    },
+    onSuccess: () => {
+      toast.success("Producto eliminado");
+      setDeleteTarget(null);
     },
     onSettled: () => {
       invalidateStore();
@@ -215,7 +256,7 @@ export default function AdminProducts() {
                   <TableHead className="w-[92px] text-right">Stock</TableHead>
                   <TableHead className="w-[72px]">Act.</TableHead>
                   <TableHead className="w-[72px]">Dest.</TableHead>
-                  <TableHead className="w-[88px]" />
+                  <TableHead className="w-[140px] text-right">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -277,11 +318,30 @@ export default function AdminProducts() {
                         onCheckedChange={(checked) => patchMutation.mutate({ id: p.id, patch: { featured: checked } })}
                       />
                     </TableCell>
-                    <TableCell>
-                      <Button type="button" variant="outline" size="sm" className="gap-1" onClick={() => openEdit(p)}>
-                        <Pencil className="size-3.5" />
-                        Editar
-                      </Button>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-1">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="gap-1"
+                          onClick={() => openEdit(p)}
+                        >
+                          <Pencil className="size-3.5" />
+                          Editar
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="size-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                          onClick={() => setDeleteTarget(p)}
+                          aria-label={`Eliminar ${p.name}`}
+                          title="Eliminar producto"
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -296,6 +356,47 @@ export default function AdminProducts() {
         <Badge variant="secondary">Activo / Inactivo según switch</Badge>
         <Badge className="bg-primary">Destacado</Badge>
       </div>
+
+      <AlertDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => {
+          if (!open && !deleteMutation.isPending) setDeleteTarget(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar este producto?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Vas a eliminar <span className="font-medium text-foreground">{deleteTarget?.name}</span>{" "}
+              de forma permanente. Esta acción también borra sus imágenes asociadas y no se puede
+              deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                if (deleteTarget) deleteMutation.mutate(deleteTarget.id);
+              }}
+              disabled={deleteMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteMutation.isPending ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" />
+                  Eliminando…
+                </>
+              ) : (
+                <>
+                  <Trash2 className="size-4" />
+                  Eliminar
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AdminProductDialog
         open={dialogOpen}

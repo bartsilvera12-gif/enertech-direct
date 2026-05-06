@@ -176,6 +176,19 @@ export async function createProductAdmin(input: ProductUpsertInput): Promise<Pro
   return mapProduct(row);
 }
 
+/**
+ * Elimina un producto y sus imágenes asociadas en `product_images`.
+ * El borrado de filas hijas se hace antes para respetar la FK aunque
+ * la instancia no tenga `ON DELETE CASCADE` configurado.
+ */
+export async function deleteProductAdmin(id: string): Promise<void> {
+  assertSupabaseConfigured();
+  const { error: imgErr } = await supabase.from("product_images").delete().eq("product_id", id);
+  if (imgErr && imgErr.code !== "PGRST116") throw imgErr;
+  const { error } = await supabase.from("products").delete().eq("id", id);
+  if (error) throw error;
+}
+
 export async function updateProductAdmin(id: string, input: Partial<ProductUpsertInput>): Promise<Product> {
   assertSupabaseConfigured();
   const support = await detectProductsSchemaSupport();
