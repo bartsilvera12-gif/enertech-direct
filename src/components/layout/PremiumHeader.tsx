@@ -254,7 +254,7 @@ export const PremiumHeader = () => {
               return (
                 <Link
                   key={item.label + item.to}
-                  to={item.label === "Categorías" ? "/#categorias" : item.to}
+                  to={item.to}
                   className={cn(
                     "px-3 py-2 rounded-lg text-sm font-medium transition-colors",
                     active || isHomeActive ? "text-primary" : "text-foreground/75 hover:text-primary hover:bg-muted/80",
@@ -278,7 +278,7 @@ export const PremiumHeader = () => {
               {navItems.map((item) => (
                 <Link
                   key={item.label}
-                  to={item.label === "Categorías" ? "/#categorias" : item.to}
+                  to={item.to}
                   onClick={() => setMobileOpen(false)}
                   className="text-sm py-2.5 px-2 rounded-lg hover:bg-muted"
                 >

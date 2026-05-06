@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, Package, Truck, Headphones } from "lucide-react";
-import { fetchCategories, fetchProducts, rootCategories } from "@/services/storeService";
+import { fetchProducts } from "@/services/storeService";
 import { ProductCardPremium } from "@/components/store/ProductCardPremium";
 import { HomeHero } from "@/components/home/HomeHero";
 import type { BrandLogoItem } from "@/components/home/BrandsMarquee";
@@ -17,21 +17,7 @@ const BRAND_LOGOS: BrandLogoItem[] = [
   { src: "https://res.cloudinary.com/dfxz2hxgr/image/upload/v1776953396/ea686df1-13f3-448e-9d30-a0c5a84d5fef.png", alt: "Acer" },
 ];
 
-const TILE_FALLBACK = [
-  { title: "Impresoras", slug: "impresoras", desc: "HP, Brother, Samsung y más." },
-  { title: "Insumos", slug: "insumos", desc: "Tóner, ribbon, refill y bobinas." },
-  { title: "Computación", slug: "computacion", desc: "Equipos y periféricos." },
-  { title: "Accesorios", slug: "accesorios", desc: "Cables, etiquetas y respaldo." },
-];
-
 const Home = () => {
-  const {
-    data: categories = [],
-    isError: categoriesError,
-    error: categoriesErrorDetail,
-  } = useQuery({ queryKey: ["categories"], queryFn: fetchCategories });
-  const roots = rootCategories(categories);
-
   const {
     data: featured = [],
     isError: featuredError,
@@ -41,33 +27,14 @@ const Home = () => {
     queryFn: () => fetchProducts({ featuredOnly: true, sort: "newest" }),
   });
 
-  const catalogLoadError = categoriesError || featuredError;
   const catalogErrorMessage =
-    (categoriesErrorDetail instanceof Error ? categoriesErrorDetail.message : String(categoriesErrorDetail ?? "")) ||
-    (featuredErrorDetail instanceof Error ? featuredErrorDetail.message : String(featuredErrorDetail ?? ""));
-
-  const categoryTiles = (roots.length > 0 ? roots.slice(0, 8) : []).map((c) => {
-    const fb = TILE_FALLBACK.find((t) => t.slug === c.slug);
-    return {
-      slug: c.slug,
-      title: c.name,
-      desc: fb?.desc ?? "Explorá productos disponibles.",
-      href: `/catalog?cat=${encodeURIComponent(c.slug)}`,
-    };
-  });
-
-  const fallbackTiles = TILE_FALLBACK.map((t) => ({
-    ...t,
-    href: `/catalog?q=${encodeURIComponent(t.title)}`,
-  }));
-
-  const tilesToRender = categoryTiles.length > 0 ? categoryTiles : fallbackTiles;
+    featuredErrorDetail instanceof Error ? featuredErrorDetail.message : String(featuredErrorDetail ?? "");
 
   return (
     <>
       <HomeHero />
 
-      {catalogLoadError ? (
+      {featuredError ? (
         <div className="container max-w-3xl pt-6">
           <div
             role="alert"
@@ -78,33 +45,6 @@ const Home = () => {
           </div>
         </div>
       ) : null}
-
-      <section id="categorias" className="relative z-10 scroll-mt-28 -mt-[clamp(2rem,7vw,4rem)] pt-[clamp(2rem,7vw,4rem)] pb-16 md:pb-20 bg-background border-b border-border/50 rounded-t-[2rem] md:rounded-t-[2.25rem] shadow-[0_-12px_40px_-24px_rgba(0,0,0,0.08)]">
-        <div className="container">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-primary font-semibold mb-2">Catálogo</p>
-              <h2 className="text-3xl font-semibold tracking-tight">Categorías principales</h2>
-            </div>
-            <Link to="/catalog" className="text-sm font-semibold text-primary inline-flex items-center gap-1 hover:gap-2 transition-all">
-              Ver todo <ArrowRight className="size-4" />
-            </Link>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {tilesToRender.map((c) => (
-              <Link
-                key={c.slug}
-                to={c.href}
-                className="group rounded-2xl border border-border bg-card p-8 shadow-sm hover:shadow-elevated hover:border-primary/30 transition-all"
-              >
-                <Package className="size-8 text-primary mb-5" />
-                <h3 className="text-lg font-semibold group-hover:text-primary transition-colors">{c.title}</h3>
-                <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{c.desc}</p>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
 
       <section className="py-16 md:py-20 bg-muted/30 border-b border-border/50">
         <div className="container">
