@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Secretos / variables de entorno (incluye credenciales Fastrax) — nunca versionar
+.env
+.env.*
+!.env.example
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

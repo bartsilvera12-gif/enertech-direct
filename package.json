@@ -21,7 +21,16 @@
     "db:migrate:15": "node scripts/db/run-sql-and-verify.mjs supabase/sql/15_store_contact_whatsapp.sql",
     "db:import:excel": "node scripts/db/import-enertech-excel.mjs",
     "db:validate:catalog": "node scripts/db/validate-enertech-catalog.mjs",
-    "e2e:import": "node scripts/e2e-validate-import.mjs"
+    "db:migrate:16": "node scripts/db/run-sql-and-verify.mjs supabase/sql/16_fastrax_integration.sql",
+    "e2e:import": "node scripts/e2e-validate-import.mjs",
+    "fastrax:health": "node scripts/fastrax/health.mjs",
+    "fastrax:list": "node scripts/fastrax/list-products.mjs",
+    "fastrax:sku": "node scripts/fastrax/product-by-sku.mjs",
+    "fastrax:sync": "node scripts/fastrax/sync-products.mjs",
+    "fastrax:stock": "node scripts/fastrax/sync-stock-price.mjs",
+    "fastrax:order": "node scripts/fastrax/create-order.mjs",
+    "fastrax:order-status": "node scripts/fastrax/order-status.mjs",
+    "server": "node server/index.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

@@ -2,6 +2,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import pg from "pg";
+import { loadMigrationPostgresUrl } from "./load-direct-url.mjs";
 
 const a2 = process.argv[2];
 const a3 = process.argv[3];
@@ -16,6 +17,15 @@ if (a2?.startsWith("postgresql://")) {
   url = a3 || process.env.DATABASE_URL?.trim() || process.env.SUPABASE_DB_URL?.trim();
 } else {
   url = process.env.DATABASE_URL?.trim() || process.env.SUPABASE_DB_URL?.trim();
+}
+
+// Fallback: tomar SUPABASE_DB_URL / DIRECT_POSTGRES_URL desde .env.local (igual que el resto de scripts DBA).
+if (!url?.startsWith("postgresql://")) {
+  try {
+    url = loadMigrationPostgresUrl();
+  } catch {
+    // se reporta abajo con el mensaje de uso.
+  }
 }
 
 if (!url?.startsWith("postgresql://")) {
