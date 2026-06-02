@@ -249,6 +249,7 @@ export default function AdminProducts() {
                   <TableHead className="w-11 text-muted-foreground font-normal">Nº</TableHead>
                   <TableHead>Producto</TableHead>
                   <TableHead className="hidden sm:table-cell">SKU</TableHead>
+                  <TableHead className="w-[90px]">Origen</TableHead>
                   <TableHead>Categoría</TableHead>
                   <TableHead className="hidden md:table-cell">Sub</TableHead>
                   <TableHead className="hidden md:table-cell text-right w-[72px]">Dto.</TableHead>
@@ -273,6 +274,13 @@ export default function AdminProducts() {
                       </button>
                     </TableCell>
                     <TableCell className="hidden sm:table-cell text-muted-foreground tabular-nums text-xs">{p.sku ?? "—"}</TableCell>
+                    <TableCell>
+                      {p.source === "fastrax" ? (
+                        <Badge className="bg-blue-600 hover:bg-blue-700 text-white">Fastrax</Badge>
+                      ) : (
+                        <Badge variant="secondary">Enertech</Badge>
+                      )}
+                    </TableCell>
                     <TableCell className="text-sm">
                       <span className="line-clamp-2">{p.category?.name ?? "—"}</span>
                       <span className="md:hidden mt-0.5 block text-[11px] text-muted-foreground">

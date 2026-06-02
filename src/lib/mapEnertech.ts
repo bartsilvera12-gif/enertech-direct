@@ -115,6 +115,10 @@ export type ProductRow = {
 
   hero_slide_order?: number | null;
 
+  product_source_type?: string | null;
+
+  external_provider?: string | null;
+
 };
 
 
@@ -298,6 +302,11 @@ export function mapProduct(row: ProductRow): Product {
     seoTitle: row.seo_title ?? row.meta_title ?? null,
 
     seoDescription: row.seo_description ?? row.meta_description ?? null,
+
+    source:
+      row.product_source_type === "fastrax" || row.external_provider === "fastrax"
+        ? "fastrax"
+        : "enertech",
 
   };
 

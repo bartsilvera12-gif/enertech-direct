@@ -47,6 +47,8 @@ export interface Product {
   specs: Record<string, string>;
   seoTitle?: string | null;
   seoDescription?: string | null;
+  /** Origen del producto: `enertech` (alta manual) o `fastrax` (importado del ERP). */
+  source: "enertech" | "fastrax";
 }
 
 export interface CartItem {
