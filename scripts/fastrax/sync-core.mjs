@@ -159,10 +159,10 @@ export async function runProductSync(opts = {}, onLog) {
               const slug = await ensureUniqueSlug(client, d.slug);
               await client.query(
                 `INSERT INTO products
-                   (name, slug, sku, description, price, stock, is_active, featured, is_featured,
+                   (name, slug, sku, description, price, stock, is_active, is_featured,
                     fastrax_sku, fastrax_enabled, fastrax_raw, fastrax_crc, fastrax_last_sync_at,
                     fastrax_stock, fastrax_price)
-                 VALUES ($1,$2,$3,$4,$5,0,false,false,false,$6,true,$7::jsonb,$8,now(),$9,$10)`,
+                 VALUES ($1,$2,$3,$4,$5,0,false,false,$6,true,$7::jsonb,$8,now(),$9,$10)`,
                 [d.name, slug, d.fastrax_sku, d.description, d.price ?? 0, d.fastrax_sku, JSON.stringify(d.raw), crcToken, d.stock, d.price],
               );
             }

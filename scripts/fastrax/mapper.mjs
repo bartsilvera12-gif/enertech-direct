@@ -4,6 +4,9 @@
  * Los importes se asumen PYG (enteros, sin decimales).
  */
 import crypto from "node:crypto";
+import { findFirstStringKeyDeep } from "./fastraxResponse.mjs";
+
+export const FASTRAX_SOURCE = "fastrax";
 
 const SKU_KEYS = ["sku", "SKU", "codigo", "cod_art", "CodArt", "COD_ART", "articulo", "codigo_articulo", "ref", "Ref"];
 const NAME_KEYS = ["nom", "nombre", "name", "titulo", "descripcion", "des"];
@@ -165,4 +168,48 @@ export function mapFastraxRowToProduct(raw) {
     crc,
     raw,
   };
+}
+
+// ============================================================================
+// ope=13: helpers para interpretar `sit` (estado del pedido en Fastrax).
+// ============================================================================
+
+const SIT_LABELS = {
+  1: "Emitido",
+  2: "Borrado",
+  3: "Pagado",
+  4: "Separando",
+  5: "Separado",
+  6: "Expedido",
+  7: "Entregado",
+  8: "RMA",
+  9: "Devuelto",
+};
+
+/** Convierte un sit numérico/textual a etiqueta humana. */
+export function sitToLabel(n, fallback = null) {
+  const s = n != null ? String(n).trim() : "";
+  const k = s.replace(/^0+/, "") || s;
+  const num = Number(k);
+  if (Number.isFinite(num) && SIT_LABELS[num]) return SIT_LABELS[num];
+  if (fallback) return fallback;
+  return s || "Desconocido";
+}
+
+/** Busca el código `sit` (o equivalentes) en la respuesta ope=13. */
+export function pickSitCode(parsed) {
+  if (parsed == null) return null;
+  if (!Array.isArray(parsed) && isPlainObject(parsed)) {
+    for (const k of ["sit", "Sit", "SIT", "estado", "est", "Est"]) {
+      if (parsed[k] != null && parsed[k] !== "") {
+        return typeof parsed[k] === "number" ? parsed[k] : String(parsed[k]).trim() || null;
+      }
+    }
+  }
+  const deep = findFirstStringKeyDeep(parsed, ["sit", "Sit", "SIT", "estado", "est", "Est"]);
+  if (deep) {
+    const n = Number(deep);
+    return Number.isFinite(n) ? n : deep;
+  }
+  return null;
 }

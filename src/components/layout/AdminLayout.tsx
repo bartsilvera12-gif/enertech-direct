@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Menu, Package, Store, X, LogOut, FolderTree, Upload, RefreshCw } from "lucide-react";
+import { LayoutDashboard, Menu, Package, Store, X, LogOut, FolderTree, Upload, RefreshCw, Search, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
@@ -15,6 +15,8 @@ const adminLinks = [
   { label: "Categorías", href: "/admin/categorias", icon: FolderTree },
   { label: "Importar Excel", href: "/admin/importar", icon: Upload },
   { label: "Sincronizar Fastrax", href: "/admin/fastrax", icon: RefreshCw },
+  { label: "Buscador Fastrax", href: "/admin/fastrax/buscar", icon: Search },
+  { label: "Pedidos Fastrax", href: "/admin/fastrax/pedidos", icon: ShoppingCart },
 ];
 
 export default function AdminLayout() {

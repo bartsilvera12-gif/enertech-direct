@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Imágenes Fastrax bajadas en runtime por ope=3 — artefactos del backend,
+# no versionar. Solo se preserva el .gitkeep para mantener la carpeta.
+server/public/fastrax-products/*
+!server/public/fastrax-products/.gitkeep
+
 # Secretos / variables de entorno (incluye credenciales Fastrax) — nunca versionar
 .env
 .env.*

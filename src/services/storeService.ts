@@ -12,7 +12,6 @@ export {
   rootCategories,
   childrenOfParentSlug,
   PRODUCT_EMBED,
-  HERO_SLIDER_SELECT,
   type CatalogFacets,
   type CatalogFilters,
   type CatalogSort,

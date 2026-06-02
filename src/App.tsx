@@ -18,6 +18,8 @@ import AdminProducts from "./pages/admin/AdminProducts";
 import AdminCategories from "./pages/admin/AdminCategories";
 import AdminImport from "./pages/admin/AdminImport";
 import AdminFastrax from "./pages/admin/AdminFastrax";
+import AdminFastraxSearch from "./pages/admin/AdminFastraxSearch";
+import AdminFastraxOrders from "./pages/admin/AdminFastraxOrders";
 
 const queryClient = new QueryClient({
   queryCache: new QueryCache({
@@ -60,6 +62,8 @@ const App = () => (
               <Route path="categorias" element={<AdminCategories />} />
               <Route path="importar" element={<AdminImport />} />
               <Route path="fastrax" element={<AdminFastrax />} />
+              <Route path="fastrax/buscar" element={<AdminFastraxSearch />} />
+              <Route path="fastrax/pedidos" element={<AdminFastraxOrders />} />
             </Route>
           </Route>
           <Route path="*" element={<NotFound />} />
