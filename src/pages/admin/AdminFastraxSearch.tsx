@@ -114,7 +114,7 @@ export default function AdminFastraxSearch() {
       <header className="space-y-1">
         <h1 className="text-2xl font-semibold">Buscador Fastrax</h1>
         <p className="text-sm text-muted-foreground">
-          Lectura ope=4 + detalles ope=2. Importación por SKUs seleccionados o por página completa.
+          Importación por SKUs seleccionados o por página completa.
           Los productos nuevos entran <strong>inactivos</strong> hasta revisión del admin.
         </p>
       </header>
