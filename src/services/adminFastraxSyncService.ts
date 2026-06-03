@@ -147,6 +147,10 @@ export type FastraxSearchResult = {
   page?: number;
   size?: number;
   total: number;
+  /** SKUs crudos devueltos por ope=4 antes de filtros — para decidir paginación. */
+  index_count?: number;
+  /** Backend marca true si la página cruda de Fastrax estaba llena (puede haber más). */
+  has_more?: boolean;
   items: FastraxSearchItem[];
   stats?: { skus: number; batches: number; ok_rows: number; missing: number; failed: number; duration_ms: number } | null;
   message?: string;

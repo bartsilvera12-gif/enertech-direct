@@ -163,7 +163,17 @@ export default function AdminFastraxSearch() {
               ← Anterior
             </Button>
             <span className="text-sm text-muted-foreground self-center px-2">Página {page}</span>
-            <Button variant="outline" disabled={loading || (result?.items?.length || 0) < size} onClick={() => runSearch(page + 1)}>
+            <Button
+              variant="outline"
+              disabled={
+                loading ||
+                // Backend nuevo: usar has_more (página cruda Fastrax llena → hay más).
+                // Fallback (backend viejo): items.length < size.
+                result?.has_more === false ||
+                (result?.has_more === undefined && (result?.items?.length || 0) < size)
+              }
+              onClick={() => runSearch(page + 1)}
+            >
               Siguiente →
             </Button>
           </div>

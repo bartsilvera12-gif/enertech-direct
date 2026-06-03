@@ -130,6 +130,10 @@ export async function searchFastraxReadonlyOpe4Ope2({ q, page, size, only_stock,
     page: pg,
     size: sz,
     total: items.length,
+    /** SKUs crudos devueltos por ope=4 antes de filtros (texto/stock). Sirve para paginación. */
+    index_count: skus.length,
+    /** Si Fastrax devolvió la página completa, asumimos que hay más páginas. */
+    has_more: skus.length >= sz,
     items,
     stats: b.stats,
   };
