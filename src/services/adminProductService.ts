@@ -31,9 +31,14 @@ function applyFeaturedFields(
   if (support.isFeatured) target.is_featured = featured;
 }
 
-export async function fetchProductsAdmin(): Promise<Product[]> {
+export async function fetchProductsAdmin(opts?: { includeArchived?: boolean }): Promise<Product[]> {
   assertSupabaseConfigured();
-  const { data, error } = await supabase.from("products").select(PRODUCT_EMBED).order("name", { ascending: true });
+  let q = supabase.from("products").select(PRODUCT_EMBED).order("name", { ascending: true });
+  if (!opts?.includeArchived) {
+    // archived_at IS NULL incluye filas viejas que no tienen la columna seteada.
+    q = q.is("archived_at", null);
+  }
+  const { data, error } = await q;
   if (error) throw error;
   return (data as ProductRow[]).map(mapProduct);
 }
@@ -177,15 +182,47 @@ export async function createProductAdmin(input: ProductUpsertInput): Promise<Pro
 }
 
 /**
- * Elimina un producto y sus imágenes asociadas en `product_images`.
- * El borrado de filas hijas se hace antes para respetar la FK aunque
- * la instancia no tenga `ON DELETE CASCADE` configurado.
+ * Elimina un producto. Para productos Fastrax hace soft-delete (archived_at =
+ * now, is_active = false) preservando imágenes, ediciones locales y vínculos
+ * con order_items. Para productos manuales (Enertech) hace borrado físico.
  */
 export async function deleteProductAdmin(id: string): Promise<void> {
   assertSupabaseConfigured();
+
+  // 1) Detectar origen del producto
+  const { data: row, error: readErr } = await supabase
+    .from("products")
+    .select("id, product_source_type, external_provider")
+    .eq("id", id)
+    .maybeSingle();
+  if (readErr) throw readErr;
+
+  const isFastrax =
+    (row?.product_source_type as string | undefined) === "fastrax" ||
+    (row?.external_provider as string | undefined) === "fastrax";
+
+  if (isFastrax) {
+    // 2a) Soft delete: archivar + desactivar. No tocamos product_images ni
+    //     order_items para preservar referencias.
+    const { error } = await supabase
+      .from("products")
+      .update({ archived_at: new Date().toISOString(), is_active: false })
+      .eq("id", id);
+    if (error) throw error;
+    return;
+  }
+
+  // 2b) Hard delete para productos manuales (igual que antes)
   const { error: imgErr } = await supabase.from("product_images").delete().eq("product_id", id);
   if (imgErr && imgErr.code !== "PGRST116") throw imgErr;
   const { error } = await supabase.from("products").delete().eq("id", id);
+  if (error) throw error;
+}
+
+/** Restaura un producto archivado (Fastrax). Limpia archived_at; deja is_active=false para que el admin lo revise. */
+export async function restoreProductAdmin(id: string): Promise<void> {
+  assertSupabaseConfigured();
+  const { error } = await supabase.from("products").update({ archived_at: null }).eq("id", id);
   if (error) throw error;
 }
 
