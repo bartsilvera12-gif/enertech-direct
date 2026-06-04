@@ -24,7 +24,6 @@
     "db:validate:catalog": "node scripts/db/validate-enertech-catalog.mjs",
     "db:migrate:16": "node scripts/db/run-sql-and-verify.mjs supabase/sql/16_fastrax_integration.sql",
     "db:migrate:17": "node scripts/db/run-sql-and-verify.mjs supabase/sql/17_fastrax_external_phase2.sql",
-    "db:migrate:18": "node scripts/db/run-sql-and-verify.mjs supabase/sql/18_products_archived_at.sql",
     "e2e:import": "node scripts/e2e-validate-import.mjs",
     "fastrax:health": "node scripts/fastrax/health.mjs",
     "fastrax:list": "node scripts/fastrax/list-products.mjs",

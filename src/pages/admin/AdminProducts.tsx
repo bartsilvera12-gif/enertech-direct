@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Search, Trash2, Loader2, ArchiveRestore } from "lucide-react";
+import { Plus, Pencil, Search, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { formatPYG } from "@/services/storeService";
 import { fetchCategoriesAdmin } from "@/services/adminCategoryService";
 import {
   deleteProductAdmin,
   fetchProductsAdmin,
-  restoreProductAdmin,
   updateProductAdmin,
 } from "@/services/adminProductService";
 import type { Product } from "@/types";
@@ -73,7 +72,6 @@ export default function AdminProducts() {
   const [editing, setEditing] = useState<Product | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
-  const [showArchived, setShowArchived] = useState(false);
 
   const { data: categories = [] } = useQuery({
     queryKey: ["admin", "categories"],
@@ -86,8 +84,8 @@ export default function AdminProducts() {
     isError,
     error: productsError,
   } = useQuery({
-    queryKey: ["admin", "products", { archived: showArchived }],
-    queryFn: () => fetchProductsAdmin({ includeArchived: showArchived }),
+    queryKey: ["admin", "products"],
+    queryFn: fetchProductsAdmin,
     retry: 1,
   });
 
@@ -142,19 +140,6 @@ export default function AdminProducts() {
       } else if (vars.patch.is_active !== undefined) {
         toast.success(vars.patch.is_active ? "Producto activado" : "Producto desactivado");
       }
-    },
-    onSettled: () => {
-      invalidateStore();
-    },
-  });
-
-  const restoreMutation = useMutation({
-    mutationFn: (id: string) => restoreProductAdmin(id),
-    onSuccess: () => {
-      toast.success("Producto restaurado. Revisalo y activalo cuando esté listo.");
-    },
-    onError: (e) => {
-      toast.error(formatPostgrestError(e));
     },
     onSettled: () => {
       invalidateStore();
@@ -223,26 +208,20 @@ export default function AdminProducts() {
                       : `${rows.length} referencias`}
               </CardTitle>
             </div>
-            <div className="flex items-center gap-3 w-full lg:max-w-md shrink-0">
-              <div className="relative flex-1">
-                <Search
-                  className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground pointer-events-none"
-                  aria-hidden
-                />
-                <Input
-                  type="search"
-                  placeholder="Buscar por nombre, SKU, código…"
-                  className="pl-9"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  disabled={isLoading}
-                  aria-label="Buscar productos en el inventario cargado"
-                />
-              </div>
-              <label className="flex items-center gap-2 text-xs text-muted-foreground shrink-0 cursor-pointer whitespace-nowrap">
-                <Switch checked={showArchived} onCheckedChange={setShowArchived} />
-                Ver archivados
-              </label>
+            <div className="relative w-full lg:max-w-sm shrink-0">
+              <Search
+                className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground pointer-events-none"
+                aria-hidden
+              />
+              <Input
+                type="search"
+                placeholder="Buscar por nombre, SKU, código, categoría, marca…"
+                className="pl-9"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                disabled={isLoading}
+                aria-label="Buscar productos en el inventario cargado"
+              />
             </div>
           </div>
         </CardHeader>
@@ -296,16 +275,11 @@ export default function AdminProducts() {
                     </TableCell>
                     <TableCell className="hidden sm:table-cell text-muted-foreground tabular-nums text-xs">{p.sku ?? "—"}</TableCell>
                     <TableCell>
-                      <div className="flex flex-col gap-1 items-start">
-                        {p.source === "fastrax" ? (
-                          <Badge className="bg-blue-600 hover:bg-blue-700 text-white">Fastrax</Badge>
-                        ) : (
-                          <Badge variant="secondary">Enertech</Badge>
-                        )}
-                        {p.archivedAt ? (
-                          <Badge variant="outline" className="text-[10px] py-0">Archivado</Badge>
-                        ) : null}
-                      </div>
+                      {p.source === "fastrax" ? (
+                        <Badge className="bg-blue-600 hover:bg-blue-700 text-white">Fastrax</Badge>
+                      ) : (
+                        <Badge variant="secondary">Enertech</Badge>
+                      )}
                     </TableCell>
                     <TableCell className="text-sm">
                       <span className="line-clamp-2">{p.category?.name ?? "—"}</span>
@@ -364,31 +338,17 @@ export default function AdminProducts() {
                           <Pencil className="size-3.5" />
                           Editar
                         </Button>
-                        {p.archivedAt ? (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="size-8 text-muted-foreground hover:bg-primary/10 hover:text-primary"
-                            onClick={() => restoreMutation.mutate(p.id)}
-                            aria-label={`Restaurar ${p.name}`}
-                            title="Restaurar producto archivado"
-                          >
-                            <ArchiveRestore className="size-4" />
-                          </Button>
-                        ) : (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="size-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                            onClick={() => setDeleteTarget(p)}
-                            aria-label={p.source === "fastrax" ? `Archivar ${p.name}` : `Eliminar ${p.name}`}
-                            title={p.source === "fastrax" ? "Archivar producto" : "Eliminar producto"}
-                          >
-                            <Trash2 className="size-4" />
-                          </Button>
-                        )}
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="size-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                          onClick={() => setDeleteTarget(p)}
+                          aria-label={`Eliminar ${p.name}`}
+                          title="Eliminar producto"
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -413,24 +373,11 @@ export default function AdminProducts() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>
-              {deleteTarget?.source === "fastrax" ? "¿Archivar este producto?" : "¿Eliminar este producto?"}
-            </AlertDialogTitle>
+            <AlertDialogTitle>¿Eliminar este producto?</AlertDialogTitle>
             <AlertDialogDescription>
-              {deleteTarget?.source === "fastrax" ? (
-                <>
-                  Vas a archivar <span className="font-medium text-foreground">{deleteTarget?.name}</span>.
-                  El producto deja de mostrarse en el listado y queda inactivo en la tienda,
-                  pero <strong>sus imágenes, edición local y vínculo con pedidos viejos se conservan</strong>.
-                  Lo podés restaurar desde "Ver archivados".
-                </>
-              ) : (
-                <>
-                  Vas a eliminar <span className="font-medium text-foreground">{deleteTarget?.name}</span>{" "}
-                  de forma permanente. Esta acción también borra sus imágenes asociadas y no se puede
-                  deshacer.
-                </>
-              )}
+              Vas a eliminar <span className="font-medium text-foreground">{deleteTarget?.name}</span>{" "}
+              de forma permanente. Esta acción también borra sus imágenes asociadas y no se puede
+              deshacer.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -441,21 +388,17 @@ export default function AdminProducts() {
                 if (deleteTarget) deleteMutation.mutate(deleteTarget.id);
               }}
               disabled={deleteMutation.isPending}
-              className={
-                deleteTarget?.source === "fastrax"
-                  ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                  : "bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              }
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {deleteMutation.isPending ? (
                 <>
                   <Loader2 className="size-4 animate-spin" />
-                  {deleteTarget?.source === "fastrax" ? "Archivando…" : "Eliminando…"}
+                  Eliminando…
                 </>
               ) : (
                 <>
                   <Trash2 className="size-4" />
-                  {deleteTarget?.source === "fastrax" ? "Archivar" : "Eliminar"}
+                  Eliminar
                 </>
               )}
             </AlertDialogAction>

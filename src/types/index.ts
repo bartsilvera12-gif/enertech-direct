@@ -49,8 +49,6 @@ export interface Product {
   seoDescription?: string | null;
   /** Origen del producto: `enertech` (alta manual) o `fastrax` (importado del ERP). */
   source: "enertech" | "fastrax";
-  /** Si está seteado, el producto está archivado (soft-delete). Solo aplica a Fastrax. */
-  archivedAt?: string | null;
 }
 
 export interface CartItem {

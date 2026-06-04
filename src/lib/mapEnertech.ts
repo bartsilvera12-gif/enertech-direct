@@ -119,8 +119,6 @@ export type ProductRow = {
 
   external_provider?: string | null;
 
-  archived_at?: string | null;
-
 };
 
 
@@ -309,8 +307,6 @@ export function mapProduct(row: ProductRow): Product {
       row.product_source_type === "fastrax" || row.external_provider === "fastrax"
         ? "fastrax"
         : "enertech",
-
-    archivedAt: row.archived_at ?? null,
 
   };
 
