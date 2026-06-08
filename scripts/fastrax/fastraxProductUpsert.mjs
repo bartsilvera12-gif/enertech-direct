@@ -41,6 +41,45 @@ async function ensureUniqueSlug(client, base) {
 }
 
 /**
+ * Devuelve el UUID de una categoría top-level cuyo nombre coincide (case-insensitive).
+ * Si no existe, la crea como categoría principal (parent_id NULL, is_active=true).
+ * Fallback: si `name` viene vacío, usa "Fastrax" como nombre default — así todos
+ * los productos importados sin categoría quedan agrupados, no sueltos.
+ */
+async function ensureCategoryByName(client, rawName) {
+  const name = String(rawName ?? "").trim() || "Fastrax";
+  // Buscar top-level por nombre (case-insensitive, trim).
+  const found = await client.query(
+    `SELECT id FROM categories
+      WHERE lower(trim(name)) = lower(trim($1))
+        AND parent_id IS NULL
+      LIMIT 1`,
+    [name],
+  );
+  if (found.rows[0]?.id) return found.rows[0].id;
+
+  // No existe → crearla (resiliente a colisiones de slug por UNIQUE).
+  const baseSlug = slugify(name) || "categoria";
+  for (let i = 0; i < 300; i += 1) {
+    const slug = i === 0 ? baseSlug : `${baseSlug}-${i}`;
+    try {
+      const r = await client.query(
+        `INSERT INTO categories (name, slug, parent_id, is_active, sort_order)
+         VALUES ($1, $2, NULL, true, 0)
+         RETURNING id`,
+        [name, slug],
+      );
+      console.info(`[fastrax/upsert] categoría auto-creada: "${name}" (slug=${slug})`);
+      return r.rows[0].id;
+    } catch (e) {
+      if (e && e.code === "23505") continue; // colisión de slug → próximo
+      throw e;
+    }
+  }
+  throw new Error(`No se pudo crear categoría "${name}" (slug agotado).`);
+}
+
+/**
  * Cache de columnas reales de `enertech.products`. Cuando el caller hace upsert
  * por primera vez, leemos `information_schema.columns` y guardamos el set; el
  * resto del proceso reusa esa lectura sin volver a pegarle a la DB.
@@ -314,6 +353,15 @@ export async function upsertFastraxMappedRow(client, m) {
     const slug = await ensureUniqueSlug(client, slugify(`${m.name}-${sku}`, sku));
     const allowedCols = await getProductColumns(client);
 
+    // Resolver categoría: usar el nombre que viene de Fastrax o "Fastrax" como
+    // fallback. Si la categoría no existe en enertech.categories, se crea.
+    let resolvedCategoryId = null;
+    try {
+      resolvedCategoryId = await ensureCategoryByName(client, params.category);
+    } catch (e) {
+      console.warn(`[fastrax/upsert] no se pudo resolver categoría para sku=${sku}: ${e instanceof Error ? e.message : e}`);
+    }
+
     const candidate = {
       // Campos curados base — solo se setean en el INSERT (creación nueva).
       name: params.name,
@@ -324,6 +372,7 @@ export async function upsertFastraxMappedRow(client, m) {
       stock: 0,
       is_active: false,
       is_featured: false,
+      category_id: resolvedCategoryId,
       // Source type para distinguir filas Fastrax de las curadas.
       product_source_type: FASTRAX_SOURCE,
       // Capa external_* (SQL 17).
