@@ -119,6 +119,10 @@ export type ProductRow = {
 
   external_provider?: string | null;
 
+  external_image_url?: string | null;
+
+  external_images?: unknown;
+
 };
 
 
@@ -177,6 +181,27 @@ function galleryFromJsonb(raw: unknown): string[] {
 
 
 
+/**
+ * Resuelve rutas relativas de imágenes Fastrax (`/fastrax-products/...`) contra
+ * el host del backend Node. URLs absolutas pasan tal cual. Necesario porque las
+ * imágenes Fastrax viven en el VPS (api.enertechcde.com), no en Hostinger Horizons.
+ */
+const FASTRAX_BACKEND_URL = (
+  (import.meta as { env?: Record<string, string | undefined> }).env?.VITE_FASTRAX_BACKEND_URL?.trim() || ""
+).replace(/\/+$/, "");
+
+function resolveExternalImageUrl(raw: string | null | undefined): string | null {
+  const s = (raw ?? "").trim();
+  if (!s) return null;
+  if (/^https?:\/\//i.test(s)) return s;
+  if (s.startsWith("/fastrax-products/") && FASTRAX_BACKEND_URL) {
+    return `${FASTRAX_BACKEND_URL}${s}`;
+  }
+  return s;
+}
+
+
+
 export function mapProduct(row: ProductRow): Product {
 
   const rawImages = row.product_images;
@@ -189,11 +214,28 @@ export function mapProduct(row: ProductRow): Product {
 
   const galleryFromColumn = galleryFromJsonb(row.gallery);
 
-  const gallery = galleryFromRelation.length > 0 ? galleryFromRelation : galleryFromColumn;
+  // Imágenes provenientes de Fastrax (external_images jsonb). Se resuelven
+  // contra el backend Node (VITE_FASTRAX_BACKEND_URL) para convertir rutas
+  // relativas "/fastrax-products/..." en URLs absolutas accesibles desde el SPA.
+  const galleryFromExternal = galleryFromJsonb(row.external_images)
+    .map((u) => resolveExternalImageUrl(u))
+    .filter((u): u is string => Boolean(u));
+
+  const gallery =
+    galleryFromRelation.length > 0
+      ? galleryFromRelation
+      : galleryFromColumn.length > 0
+        ? galleryFromColumn
+        : galleryFromExternal;
 
 
 
   const primaryFromColumn = row.image_url?.trim() || null;
+
+  // Fallback Fastrax: cuando no hay imagen curada local, usamos la imagen
+  // que el ERP devuelve. Evita que productos importados queden con la imagen
+  // vieja de una fila curada con el mismo SKU.
+  const primaryFromExternal = resolveExternalImageUrl(row.external_image_url);
 
   const specsRaw = row.specs && typeof row.specs === "object" && !Array.isArray(row.specs) ? row.specs : {};
 
@@ -287,11 +329,11 @@ export function mapProduct(row: ProductRow): Product {
 
     isActive: row.is_active,
 
-    imageUrl: primaryFromColumn,
+    imageUrl: primaryFromColumn ?? primaryFromExternal,
 
     heroSlideOrder: row.hero_slide_order ?? null,
 
-    mainImageUrl: (primaryFromColumn || gallery[0]) ?? null,
+    mainImageUrl: (primaryFromColumn || gallery[0] || primaryFromExternal) ?? null,
 
     gallery,
 
