@@ -1,21 +1,12 @@
-import { X, Minus, Plus, Trash2, ShoppingBag, MessageCircle } from "lucide-react";
+import { X, Minus, Plus, Trash2, ShoppingBag, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { useCart } from "@/store/cart";
 import { formatPYG } from "@/services/storeService";
-import { buildCartWhatsAppUrl, DEFAULT_STORE_WHATSAPP_DIGITS } from "@/lib/cartWhatsApp";
-import { useStoreWhatsappDigits } from "@/hooks/useStoreWhatsappHref";
 
 export const CartDrawer = () => {
   const { isOpen, close, items, setQuantity, remove, subtotal, clear } = useCart();
   const total = subtotal();
-
-  const { data: waDigitsSetting } = useStoreWhatsappDigits();
-  const whatsappDigits = waDigitsSetting?.replace(/\D/g, "") || DEFAULT_STORE_WHATSAPP_DIGITS;
-  const whatsappHref = useMemo(
-    () => (items.length ? buildCartWhatsAppUrl(whatsappDigits, items, total) : "#"),
-    [whatsappDigits, items, total],
-  );
 
   useEffect(() => {
     if (!isOpen) return;
@@ -124,16 +115,16 @@ export const CartDrawer = () => {
                 <span className="text-xs uppercase tracking-widest text-muted-foreground">Total estimado</span>
                 <span className="text-xl font-semibold text-primary price-tabular">{formatPYG(total)}</span>
               </div>
-              <a
-                href={whatsappHref}
-                target="_blank"
-                rel="noopener noreferrer"
+              {/* "Finalizar compra" lleva a /cart, donde el usuario revisa el
+                  resumen y dispara WhatsApp con el botón único de esa página. */}
+              <Link
+                to="/cart"
                 onClick={close}
-                className="flex w-full items-center justify-center gap-2 text-center text-sm font-semibold tracking-wide px-6 py-3.5 rounded-xl bg-[#25D366] text-white hover:bg-[#1ebe5a] transition-colors"
+                className="flex w-full items-center justify-center gap-2 text-center text-sm font-semibold tracking-wide px-6 py-3.5 rounded-xl bg-primary text-primary-foreground hover:bg-primary-deep transition-colors"
               >
-                <MessageCircle className="size-5 shrink-0" aria-hidden />
-                Comprar por WhatsApp
-              </a>
+                Finalizar compra
+                <ArrowRight className="size-4 shrink-0" aria-hidden />
+              </Link>
               <button
                 type="button"
                 onClick={clear}

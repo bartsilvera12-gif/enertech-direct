@@ -9,6 +9,7 @@ import Catalog from "./pages/Catalog";
 import ProductDetail from "./pages/ProductDetail";
 import Contact from "./pages/Contact";
 import Nosotros from "./pages/Nosotros";
+import Cart from "./pages/Cart";
 import NotFound from "./pages/NotFound.tsx";
 import { ProtectedAdminRoute } from "@/components/admin/ProtectedAdminRoute";
 import AdminLayout from "@/components/layout/AdminLayout";
@@ -50,8 +51,9 @@ const App = () => (
             <Route path="/product/:slug" element={<ProductDetail />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/nosotros" element={<Nosotros />} />
-            <Route path="/cart" element={<Navigate to="/catalog" replace />} />
-            <Route path="/checkout" element={<Navigate to="/catalog" replace />} />
+            <Route path="/cart" element={<Cart />} />
+            {/* /checkout y /order/sent siguen redirigidos: el pedido se cierra por WhatsApp desde /cart. */}
+            <Route path="/checkout" element={<Navigate to="/cart" replace />} />
             <Route path="/order/sent" element={<Navigate to="/catalog" replace />} />
           </Route>
           <Route path="/admin/login" element={<AdminLogin />} />
