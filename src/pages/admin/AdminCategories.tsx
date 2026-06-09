@@ -42,6 +42,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type DialogMode =
   | null
@@ -54,6 +64,9 @@ export default function AdminCategories() {
   const qc = useQueryClient();
   const [dialog, setDialog] = useState<DialogMode>(null);
   const [search, setSearch] = useState("");
+  // Categoría candidata a eliminar. Cuando es != null se muestra el AlertDialog
+  // integrado en vez del confirm() nativo del browser.
+  const [pendingDelete, setPendingDelete] = useState<Category | null>(null);
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["admin", "categories"],
@@ -71,9 +84,13 @@ export default function AdminCategories() {
     mutationFn: deleteCategoryAdmin,
     onSuccess: () => {
       toast.success("Eliminada");
+      setPendingDelete(null);
       invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => {
+      toast.error(e.message);
+      setPendingDelete(null);
+    },
   });
 
   const subsCountForRoot = (rootId: string) =>
@@ -85,8 +102,8 @@ export default function AdminCategories() {
       toast.error("Eliminá primero las subcategorías de esta categoría principal.");
       return;
     }
-    if (!confirm(`¿Eliminar "${c.name}"? Esta acción puede fallar si hay productos vinculados.`)) return;
-    delMut.mutate(c.id);
+    // Abre AlertDialog integrado en vez del confirm() nativo.
+    setPendingDelete(c);
   };
 
   const filteredRoots = useMemo(() => {
@@ -213,6 +230,45 @@ export default function AdminCategories() {
           setDialog(null);
         }}
       />
+
+      <AlertDialog
+        open={pendingDelete != null}
+        onOpenChange={(o) => {
+          if (!o && !delMut.isPending) setPendingDelete(null);
+        }}
+      >
+        <AlertDialogContent className="rounded-2xl">
+          <AlertDialogHeader>
+            <div className="flex items-center gap-2.5">
+              <div className="size-9 rounded-lg bg-destructive/[0.10] text-destructive grid place-items-center ring-1 ring-inset ring-destructive/20">
+                <Trash2 className="size-4" />
+              </div>
+              <AlertDialogTitle className="text-lg">
+                Eliminar “{pendingDelete?.name}”
+              </AlertDialogTitle>
+            </div>
+            <AlertDialogDescription>
+              Esta acción puede fallar si la categoría tiene productos vinculados. Los
+              productos no se borran, pero quedarán sin categoría asignada.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2">
+            <AlertDialogCancel className="rounded-lg" disabled={delMut.isPending}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={delMut.isPending}
+              onClick={(e) => {
+                e.preventDefault();
+                if (pendingDelete) delMut.mutate(pendingDelete.id);
+              }}
+            >
+              {delMut.isPending ? "Eliminando…" : "Eliminar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
