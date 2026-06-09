@@ -16,6 +16,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -71,6 +78,7 @@ export default function AdminProducts() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [sourceFilter, setSourceFilter] = useState<"all" | "enertech" | "fastrax">("all");
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
 
   const { data: categories = [] } = useQuery({
@@ -97,9 +105,23 @@ export default function AdminProducts() {
 
   const filteredRows = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    if (!q) return rows;
-    return rows.filter((p) => productSearchHaystack(p).includes(q));
-  }, [rows, searchQuery]);
+    return rows.filter((p) => {
+      if (sourceFilter !== "all" && p.source !== sourceFilter) return false;
+      if (q && !productSearchHaystack(p).includes(q)) return false;
+      return true;
+    });
+  }, [rows, searchQuery, sourceFilter]);
+
+  // Conteos por origen para badges en el selector. Recorre rows una sola vez.
+  const sourceCounts = useMemo(() => {
+    let enertech = 0;
+    let fastrax = 0;
+    for (const p of rows) {
+      if (p.source === "fastrax") fastrax += 1;
+      else enertech += 1;
+    }
+    return { all: rows.length, enertech, fastrax };
+  }, [rows]);
 
   const invalidateStore = () => {
     queryClient.invalidateQueries({ queryKey: ["admin"] });
@@ -203,25 +225,44 @@ export default function AdminProducts() {
                   ? "Inventario"
                   : isError
                     ? "Error al cargar"
-                    : searchQuery.trim()
+                    : searchQuery.trim() || sourceFilter !== "all"
                       ? `${filteredRows.length} de ${rows.length} referencias`
                       : `${rows.length} referencias`}
               </CardTitle>
             </div>
-            <div className="relative w-full lg:max-w-sm shrink-0">
-              <Search
-                className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground pointer-events-none"
-                aria-hidden
-              />
-              <Input
-                type="search"
-                placeholder="Buscar por nombre, SKU, código, categoría, marca…"
-                className="pl-9"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+            <div className="flex w-full flex-col gap-2 sm:flex-row lg:max-w-xl shrink-0">
+              <Select
+                value={sourceFilter}
+                onValueChange={(v) => setSourceFilter(v as typeof sourceFilter)}
                 disabled={isLoading}
-                aria-label="Buscar productos en el inventario cargado"
-              />
+              >
+                <SelectTrigger
+                  className="w-full sm:w-[180px]"
+                  aria-label="Filtrar por origen del producto"
+                >
+                  <SelectValue placeholder="Origen" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos ({sourceCounts.all})</SelectItem>
+                  <SelectItem value="enertech">Enertech ({sourceCounts.enertech})</SelectItem>
+                  <SelectItem value="fastrax">Fastrax ({sourceCounts.fastrax})</SelectItem>
+                </SelectContent>
+              </Select>
+              <div className="relative w-full">
+                <Search
+                  className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground pointer-events-none"
+                  aria-hidden
+                />
+                <Input
+                  type="search"
+                  placeholder="Buscar por nombre, SKU, código, categoría, marca…"
+                  className="pl-9"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  disabled={isLoading}
+                  aria-label="Buscar productos en el inventario cargado"
+                />
+              </div>
             </div>
           </div>
         </CardHeader>
@@ -240,7 +281,9 @@ export default function AdminProducts() {
             <div className="py-12 text-center text-muted-foreground text-sm">
               {rows.length === 0
                 ? "No hay productos todavía."
-                : "Ningún producto coincide con la búsqueda."}
+                : sourceFilter !== "all" && !searchQuery.trim()
+                  ? `No hay productos con origen "${sourceFilter === "fastrax" ? "Fastrax" : "Enertech"}".`
+                  : "Ningún producto coincide con los filtros aplicados."}
             </div>
           ) : (
             <Table>
