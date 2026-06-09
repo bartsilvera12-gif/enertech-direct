@@ -73,29 +73,47 @@ function deriveCategoryFromName(rawName) {
 }
 
 /**
- * Devuelve el UUID de una categoría top-level cuyo nombre coincide (case-insensitive).
- * Si no existe, la crea como categoría principal (parent_id NULL, is_active=true).
+ * Resuelve la categoría/subcategoría para un producto Fastrax.
  *
  * Orden de preferencia para el nombre:
  *  1. `rawName` (de Fastrax) si no es vacío ni un ID numérico.
  *  2. Primer token alfabético del nombre del producto (ej. "UPS", "TONER").
  *  3. "Fastrax" como último recurso.
+ *
+ * Match (case-insensitive, trim) contra TODAS las categorías:
+ *  - Si matchea una subcategoría (parent_id NOT NULL) → la usa como
+ *    subcategoría y hereda su padre como categoría principal. Esto evita
+ *    crear un duplicado top-level "UPS" cuando "UPS" ya existe como sub.
+ *  - Si matchea una top-level → la usa como categoría principal, sub null.
+ *  - Si no existe ninguna → crea una top-level con ese nombre.
+ *
+ * Devuelve { categoryId, subcategoryId } (subcategoryId puede ser null).
  */
 async function ensureCategoryByName(client, rawName, productName = "") {
   const fastraxName = !looksLikeNumericId(rawName) ? String(rawName).trim() : "";
   const derived = fastraxName ? "" : deriveCategoryFromName(productName) || "";
   const name = fastraxName || derived || "Fastrax";
-  // Buscar top-level por nombre (case-insensitive, trim).
+
+  // Buscar match en todas las categorías. Si hay sub y root con el mismo
+  // nombre, preferimos la sub (más específica) — por eso ORDER BY parent_id
+  // NULLS LAST (rows con parent_id no nulo van primero).
   const found = await client.query(
-    `SELECT id FROM categories
+    `SELECT id, parent_id FROM categories
       WHERE lower(trim(name)) = lower(trim($1))
-        AND parent_id IS NULL
+      ORDER BY parent_id NULLS LAST
       LIMIT 1`,
     [name],
   );
-  if (found.rows[0]?.id) return found.rows[0].id;
+  const match = found.rows[0];
+  if (match) {
+    if (match.parent_id) {
+      // Es una subcategoría: asignamos sub + heredamos su padre.
+      return { categoryId: match.parent_id, subcategoryId: match.id };
+    }
+    return { categoryId: match.id, subcategoryId: null };
+  }
 
-  // No existe → crearla (resiliente a colisiones de slug por UNIQUE).
+  // No existe → crear como top-level (resiliente a colisiones de slug por UNIQUE).
   const baseSlug = slugify(name) || "categoria";
   for (let i = 0; i < 300; i += 1) {
     const slug = i === 0 ? baseSlug : `${baseSlug}-${i}`;
@@ -107,7 +125,7 @@ async function ensureCategoryByName(client, rawName, productName = "") {
         [name, slug],
       );
       console.info(`[fastrax/upsert] categoría auto-creada: "${name}" (slug=${slug})`);
-      return r.rows[0].id;
+      return { categoryId: r.rows[0].id, subcategoryId: null };
     } catch (e) {
       if (e && e.code === "23505") continue; // colisión de slug → próximo
       throw e;
@@ -390,13 +408,16 @@ export async function upsertFastraxMappedRow(client, m) {
     const slug = await ensureUniqueSlug(client, slugify(`${m.name}-${sku}`, sku));
     const allowedCols = await getProductColumns(client);
 
-    // Resolver categoría: usar el nombre que viene de Fastrax o "Fastrax" como
-    // fallback. Si la categoría no existe en enertech.categories, se crea.
+    // Resolver categoría: usa nombre Fastrax (si textual), o deriva del nombre
+    // del producto ("UPS", "TONER"...), o cae a "Fastrax". Matchea también
+    // contra subcategorías existentes — si "UPS" ya es una sub bajo otro root,
+    // asigna sub + hereda padre en vez de crear una root duplicada.
     let resolvedCategoryId = null;
+    let resolvedSubcategoryId = null;
     try {
-      // Pasamos el nombre del producto para que ensureCategoryByName pueda
-      // derivar "UPS"/"TONER"/etc. si Fastrax no manda categoría textual.
-      resolvedCategoryId = await ensureCategoryByName(client, params.category, m.name);
+      const r = await ensureCategoryByName(client, params.category, m.name);
+      resolvedCategoryId = r.categoryId;
+      resolvedSubcategoryId = r.subcategoryId;
     } catch (e) {
       console.warn(`[fastrax/upsert] no se pudo resolver categoría para sku=${sku}: ${e instanceof Error ? e.message : e}`);
     }
@@ -414,6 +435,7 @@ export async function upsertFastraxMappedRow(client, m) {
       is_active: false,
       is_featured: false,
       category_id: resolvedCategoryId,
+      subcategory_id: resolvedSubcategoryId,
       // Source type para distinguir filas Fastrax de las curadas.
       product_source_type: FASTRAX_SOURCE,
       // Capa external_* (SQL 17).
