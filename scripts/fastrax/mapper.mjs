@@ -19,7 +19,11 @@ const BRAND_KEYS = ["mar", "marca", "brand"];
 // es puramente numérico, descartamos para que el upsert use el fallback "Fastrax".
 const CATEGORY_KEYS = ["categoria", "cate", "caw", "cat", "rubro"];
 
-/** Descarta valores que parecen IDs (solo dígitos). */
+/**
+ * Descarta valores que parecen IDs: solo dígitos / separadores ("12",
+ * "24,23,206", "12.345", "1-2-3"). En esos casos devolvemos "" para que el
+ * upsert derive el nombre del producto o caiga al fallback "Fastrax".
+ */
 function pickCategoryName(row) {
   if (!isPlainObject(row)) return "";
   for (const k of CATEGORY_KEYS) {
@@ -27,7 +31,7 @@ function pickCategoryName(row) {
     if (v == null) continue;
     const s = String(v).trim();
     if (!s) continue;
-    if (/^\d+$/.test(s)) continue; // ID numérico → no usar como nombre
+    if (/^[\d,.\-\s/]+$/.test(s)) continue; // ID numérico → no usar como nombre
     return s;
   }
   return "";

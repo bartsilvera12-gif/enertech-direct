@@ -41,17 +41,50 @@ async function ensureUniqueSlug(client, base) {
 }
 
 /**
+ * ¿Es el string un "ID-like" que Fastrax suele devolver como categoría?
+ * Cubre: "12", "150", "24,23,206", "12.345", "1-2-3", "12 34". Cualquier cosa
+ * compuesta solo por dígitos / separadores se descarta como nombre.
+ */
+function looksLikeNumericId(s) {
+  const t = String(s ?? "").trim();
+  if (!t) return true;
+  return /^[\d,.\-\s/]+$/.test(t);
+}
+
+/**
+ * Deriva un nombre de categoría a partir del nombre del producto.
+ *  - "UPS FTX 220V..."   → "UPS"
+ *  - "TONER HP 05A..."   → "TONER"
+ *  - "1000VA UPS..."     → "UPS" (saltea tokens que parecen códigos/medidas)
+ * Si no encuentra ningún token alfabético razonable, devuelve null.
+ */
+function deriveCategoryFromName(rawName) {
+  const t = String(rawName ?? "").trim();
+  if (!t) return null;
+  // Tokens separados por espacio o por símbolos típicos de SKU/medidas.
+  const tokens = t.split(/[\s/_\-–—]+/u).filter(Boolean);
+  for (const tok of tokens) {
+    // Solo letras (incluye acentos). Descarta "1000VA", "220V", "FTXO1000".
+    if (/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]{2,}$/.test(tok)) {
+      return tok.toUpperCase();
+    }
+  }
+  return null;
+}
+
+/**
  * Devuelve el UUID de una categoría top-level cuyo nombre coincide (case-insensitive).
  * Si no existe, la crea como categoría principal (parent_id NULL, is_active=true).
- * Fallback: si `name` viene vacío, usa "Fastrax" como nombre default — así todos
- * los productos importados sin categoría quedan agrupados, no sueltos.
+ *
+ * Orden de preferencia para el nombre:
+ *  1. `rawName` (de Fastrax) si no es vacío ni un ID numérico.
+ *  2. Primer token alfabético del nombre del producto (ej. "UPS", "TONER").
+ *  3. "Fastrax" como último recurso.
  */
-async function ensureCategoryByName(client, rawName) {
-  // Cinturón: si lo que llegó es vacío o un ID numérico (ej. "12"), usamos
-  // "Fastrax" como fallback. Evita que el catálogo termine con categorías
-  // llamadas "12" o "150".
-  const trimmed = String(rawName ?? "").trim();
-  const name = trimmed && !/^\d+$/.test(trimmed) ? trimmed : "Fastrax";
+async function ensureCategoryByName(client, rawName, productName = "") {
+  const fastraxName = !looksLikeNumericId(rawName) ? String(rawName).trim() : "";
+  const derived = fastraxName ? "" : deriveCategoryFromName(productName) || "";
+  const name = fastraxName || derived || "Fastrax";
   // Buscar top-level por nombre (case-insensitive, trim).
   const found = await client.query(
     `SELECT id FROM categories
@@ -361,7 +394,9 @@ export async function upsertFastraxMappedRow(client, m) {
     // fallback. Si la categoría no existe en enertech.categories, se crea.
     let resolvedCategoryId = null;
     try {
-      resolvedCategoryId = await ensureCategoryByName(client, params.category);
+      // Pasamos el nombre del producto para que ensureCategoryByName pueda
+      // derivar "UPS"/"TONER"/etc. si Fastrax no manda categoría textual.
+      resolvedCategoryId = await ensureCategoryByName(client, params.category, m.name);
     } catch (e) {
       console.warn(`[fastrax/upsert] no se pudo resolver categoría para sku=${sku}: ${e instanceof Error ? e.message : e}`);
     }
@@ -436,13 +471,13 @@ export async function upsertFastraxFromImportItem(client, item) {
     stock,
     brand: str(rawDetail.mar ?? rawDetail.Mar ?? rawDetail.marca) || null,
     // Misma lógica que mapper.mjs: priorizar campos textuales y descartar IDs
-    // numéricos. Si todo lo encontrado es numérico, ensureCategoryByName aplica
-    // el fallback "Fastrax".
+    // numéricos (incluyendo "24,23,206"). Si todo lo encontrado es numérico,
+    // ensureCategoryByName deriva del nombre del producto o aplica "Fastrax".
     category: (() => {
       const candidates = [rawDetail.categoria, rawDetail.cate, rawDetail.caw, rawDetail.cat, rawDetail.rubro];
       for (const c of candidates) {
         const s = str(c);
-        if (s && !/^\d+$/.test(s)) return s;
+        if (s && !looksLikeNumericId(s)) return s;
       }
       return null;
     })(),
