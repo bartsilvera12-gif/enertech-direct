@@ -27,7 +27,10 @@ export const CartDrawer = () => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex">
+    // z-[70] para quedar por encima del header sticky de PremiumHeader
+    // (utility bar z-[60], nav z-40). Antes era z-50 y la barra superior
+    // se encimaba sobre los items del carrito.
+    <div className="fixed inset-0 z-[70] flex">
       <div className="flex-1 bg-background/80 backdrop-blur-sm animate-fade-in" onClick={close} aria-hidden />
       <aside className="w-full max-w-md bg-surface border-l border-border/60 flex flex-col animate-fade-up shadow-elevated">
         <header className="flex items-center justify-between p-5 border-b border-border/60">
