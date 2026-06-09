@@ -14,7 +14,24 @@ const PROMO_PRICE_KEYS = ["precopromo", "promo", "prm", "pre_pro", "prepro", "pr
 const PRICE_KEYS = ["pre", "precio", "price", "pvp", "pre_vta"];
 const STOCK_KEYS = ["sal", "saldo", "stock", "disponible", "existencia"];
 const BRAND_KEYS = ["mar", "marca", "brand"];
-const CATEGORY_KEYS = ["caw", "cat", "rubro", "categoria", "cate"];
+// Orden: primero campos textuales ("categoria", "cate", "caw"), después los que
+// Fastrax suele devolver como ID numérico ("cat", "rubro"). Si todo lo encontrado
+// es puramente numérico, descartamos para que el upsert use el fallback "Fastrax".
+const CATEGORY_KEYS = ["categoria", "cate", "caw", "cat", "rubro"];
+
+/** Descarta valores que parecen IDs (solo dígitos). */
+function pickCategoryName(row) {
+  if (!isPlainObject(row)) return "";
+  for (const k of CATEGORY_KEYS) {
+    const v = row[k];
+    if (v == null) continue;
+    const s = String(v).trim();
+    if (!s) continue;
+    if (/^\d+$/.test(s)) continue; // ID numérico → no usar como nombre
+    return s;
+  }
+  return "";
+}
 const IMAGE_KEYS = ["img", "imagen", "image", "foto", "url_img", "urlimg"];
 const ACTIVE_KEYS = ["act", "activo", "habilitado", "est", "estado"];
 const CRC_KEYS = ["crc", "CRC", "checksum", "hash"];
@@ -160,7 +177,7 @@ export function mapFastraxRowToProduct(raw) {
     price: price == null ? null : Math.max(0, Math.floor(price)),
     stock,
     brand: pickStr(raw, BRAND_KEYS) || null,
-    category: pickStr(raw, CATEGORY_KEYS) || null,
+    category: pickCategoryName(raw) || null,
     description: urlDecode(pickStr(raw, ["descripcion", "detalle", "description", "des"])) || null,
     image,
     image_count: imageCount,

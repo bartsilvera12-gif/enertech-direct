@@ -47,7 +47,11 @@ async function ensureUniqueSlug(client, base) {
  * los productos importados sin categoría quedan agrupados, no sueltos.
  */
 async function ensureCategoryByName(client, rawName) {
-  const name = String(rawName ?? "").trim() || "Fastrax";
+  // Cinturón: si lo que llegó es vacío o un ID numérico (ej. "12"), usamos
+  // "Fastrax" como fallback. Evita que el catálogo termine con categorías
+  // llamadas "12" o "150".
+  const trimmed = String(rawName ?? "").trim();
+  const name = trimmed && !/^\d+$/.test(trimmed) ? trimmed : "Fastrax";
   // Buscar top-level por nombre (case-insensitive, trim).
   const found = await client.query(
     `SELECT id FROM categories
@@ -369,7 +373,9 @@ export async function upsertFastraxMappedRow(client, m) {
       sku,
       description: formattedDesc,
       price: params.price,
-      stock: 0,
+      // Stock real de Fastrax. Antes estaba hardcodeado a 0; eso hacía que la
+      // ficha del admin mostrara "sin stock" hasta editar manualmente.
+      stock: params.stock ?? 0,
       is_active: false,
       is_featured: false,
       category_id: resolvedCategoryId,
@@ -429,7 +435,17 @@ export async function upsertFastraxFromImportItem(client, item) {
     price,
     stock,
     brand: str(rawDetail.mar ?? rawDetail.Mar ?? rawDetail.marca) || null,
-    category: str(rawDetail.cat ?? rawDetail.caw ?? rawDetail.rubro) || null,
+    // Misma lógica que mapper.mjs: priorizar campos textuales y descartar IDs
+    // numéricos. Si todo lo encontrado es numérico, ensureCategoryByName aplica
+    // el fallback "Fastrax".
+    category: (() => {
+      const candidates = [rawDetail.categoria, rawDetail.cate, rawDetail.caw, rawDetail.cat, rawDetail.rubro];
+      for (const c of candidates) {
+        const s = str(c);
+        if (s && !/^\d+$/.test(s)) return s;
+      }
+      return null;
+    })(),
     description: str(rawDetail.des ?? rawDetail.descripcion ?? rawDetail.bre) || null,
     image: null,
     image_count: 0,
