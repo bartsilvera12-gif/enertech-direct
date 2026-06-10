@@ -61,7 +61,7 @@ export const ProductCardPremium = ({ product, className }: Props) => {
               "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] uppercase font-semibold tracking-wide shadow-sm",
               inStock
                 ? "bg-emerald-600/95 text-white"
-                : "bg-neutral-700/90 text-white",
+                : "bg-red-600/95 text-white",
             )}
             aria-label={inStock ? "Producto en stock" : "Producto sin stock"}
           >
