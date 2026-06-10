@@ -25,6 +25,7 @@ export const ProductCardPremium = ({ product, className }: Props) => {
 
   const img = product.mainImageUrl || PLACEHOLDER_IMG;
   const discount = product.discountPercent;
+  const inStock = (product.stock ?? 0) > 0;
 
   const onProductLinkClick = () => {
     void recordProductEvent(product.id, "click");
@@ -53,11 +54,32 @@ export const ProductCardPremium = ({ product, className }: Props) => {
             −{discount}%
           </div>
         )}
-        {product.featured && (
-          <div className="absolute top-3 left-3 z-[2] bg-primary text-primary-foreground px-2 py-1 rounded-md text-[10px] uppercase font-semibold tracking-wide">
-            Destacado
-          </div>
-        )}
+        {/* Badges top-left stackeados: stock arriba, "Destacado" debajo. */}
+        <div className="absolute top-3 left-3 z-[2] flex flex-col items-start gap-1.5">
+          <span
+            className={cn(
+              "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] uppercase font-semibold tracking-wide shadow-sm",
+              inStock
+                ? "bg-emerald-600/95 text-white"
+                : "bg-neutral-700/90 text-white",
+            )}
+            aria-label={inStock ? "Producto en stock" : "Producto sin stock"}
+          >
+            <span
+              className={cn(
+                "size-1.5 rounded-full",
+                inStock ? "bg-white" : "bg-white/70",
+              )}
+              aria-hidden
+            />
+            {inStock ? "En stock" : "Sin stock"}
+          </span>
+          {product.featured && (
+            <span className="bg-primary text-primary-foreground px-2 py-1 rounded-md text-[10px] uppercase font-semibold tracking-wide shadow-sm">
+              Destacado
+            </span>
+          )}
+        </div>
       </Link>
 
       <div className="p-4 flex flex-col gap-2 flex-1">
