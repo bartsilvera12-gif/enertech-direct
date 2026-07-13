@@ -40,6 +40,9 @@ export async function createWhatsAppOrder(
   const lines = items.map((it) => ({
     product_id: it.productId,
     product_name: it.name,
+    product_slug: it.slug,
+    sku: it.sku,
+    image_url: it.imageUrl,
     quantity: it.quantity,
     unit_price: it.price,
   }));
@@ -59,7 +62,8 @@ export async function createWhatsAppOrder(
 
   if (rpcErr) throw rpcErr;
   const payload = rpcData as { order_id?: string; order_number?: string } | null;
-  const orderNumber = payload?.order_number ?? "ENT-000000";
+  // order_number es un bigint autoincremental; lo mostramos con prefijo de marca.
+  const orderNumber = payload?.order_number ? `ENT-${payload.order_number}` : "ENT-000000";
   const orderId = payload?.order_id ?? crypto.randomUUID();
 
   const whatsappDigits = await getStoreWhatsappE164();

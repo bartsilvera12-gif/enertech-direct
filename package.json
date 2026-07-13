@@ -25,6 +25,7 @@
     "db:migrate:16": "node scripts/db/run-sql-and-verify.mjs supabase/sql/16_fastrax_integration.sql",
     "db:migrate:17": "node scripts/db/run-sql-and-verify.mjs supabase/sql/17_fastrax_external_phase2.sql",
     "db:migrate:18": "node scripts/db/run-sql-and-verify.mjs supabase/sql/18_checkout_customer_fields.sql",
+    "db:migrate:19": "node scripts/db/run-sql-and-verify.mjs supabase/sql/19_fix_create_guest_order_real_schema.sql",
     "e2e:import": "node scripts/e2e-validate-import.mjs",
     "fastrax:health": "node scripts/fastrax/health.mjs",
     "fastrax:list": "node scripts/fastrax/list-products.mjs",

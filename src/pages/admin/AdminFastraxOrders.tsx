@@ -31,11 +31,11 @@ import {
 
 type AdminOrder = {
   id: string;
-  order_number: string;
+  order_number: number;
   status: string;
-  total_amount: number;
+  total: number | string;
   created_at: string;
-  customer_id: string | null;
+  customer_name: string | null;
 };
 
 type ConfirmTarget =
@@ -57,7 +57,7 @@ export default function AdminFastraxOrders() {
     try {
       const { data, error } = await supabase
         .from("orders")
-        .select("id, order_number, status, total_amount, created_at, customer_id")
+        .select("id, order_number, status, total, created_at, customer_name")
         .order("created_at", { ascending: false })
         .limit(50);
       if (error) throw error;
@@ -165,7 +165,8 @@ export default function AdminFastraxOrders() {
     if (!q) return orders;
     return orders.filter(
       (o) =>
-        o.order_number.toLowerCase().includes(q) ||
+        String(o.order_number).includes(q) ||
+        (o.customer_name?.toLowerCase().includes(q) ?? false) ||
         o.id.toLowerCase().includes(q) ||
         o.status.toLowerCase().includes(q),
     );
@@ -228,14 +229,19 @@ export default function AdminFastraxOrders() {
                     const cf = canFulfillMap[o.id];
                     return (
                       <TableRow key={o.id}>
-                        <TableCell className="font-mono text-xs">{o.order_number}</TableCell>
+                        <TableCell className="text-xs">
+                          <div className="font-mono">ENT-{o.order_number}</div>
+                          {o.customer_name ? (
+                            <div className="text-muted-foreground mt-0.5">{o.customer_name}</div>
+                          ) : null}
+                        </TableCell>
                         <TableCell className="text-xs text-muted-foreground">
                           {new Date(o.created_at).toLocaleString("es-PY")}
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline">{o.status}</Badge>
                         </TableCell>
-                        <TableCell className="text-right tabular-nums">{formatPYG(o.total_amount)}</TableCell>
+                        <TableCell className="text-right tabular-nums">{formatPYG(Number(o.total))}</TableCell>
                         <TableCell>
                           {hasMap ? (
                             <div className="text-xs space-y-0.5">
@@ -268,7 +274,7 @@ export default function AdminFastraxOrders() {
                                   toast.error("El pedido no tiene líneas Fastrax.");
                                   return;
                                 }
-                                setConfirm({ kind: "create", orderId: o.id, orderNumber: o.order_number });
+                                setConfirm({ kind: "create", orderId: o.id, orderNumber: `ENT-${o.order_number}` });
                               }}
                             >
                               <Send className="size-3.5 mr-1" />
@@ -287,7 +293,7 @@ export default function AdminFastraxOrders() {
                               variant="outline"
                               size="sm"
                               disabled={busy === o.id || !hasMap}
-                              onClick={() => setConfirm({ kind: "invoice", orderId: o.id, orderNumber: o.order_number })}
+                              onClick={() => setConfirm({ kind: "invoice", orderId: o.id, orderNumber: `ENT-${o.order_number}` })}
                             >
                               <FileText className="size-3.5 mr-1" />
                               Facturar
