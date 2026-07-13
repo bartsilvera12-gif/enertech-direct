@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, MessageCircle, Loader2, ShieldCheck } from "lucide-react";
 import { useCart } from "@/store/cart";
+import { CityCombobox } from "@/components/store/CityCombobox";
 import { createWhatsAppOrder, formatPYG } from "@/services/storeService";
 import type { CheckoutCustomer, OrderConfirmation } from "@/types";
 import { toast } from "sonner";
@@ -93,6 +94,13 @@ const Checkout = () => {
                     placeholder={f.placeholder}
                     rows={3}
                     className="w-full bg-background hairline rounded-xl px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 resize-none"
+                  />
+                ) : f.key === "city" ? (
+                  <CityCombobox
+                    id="city"
+                    value={form.city}
+                    onChange={(v) => update("city", v)}
+                    placeholder={f.placeholder ?? "Elegí tu ciudad"}
                   />
                 ) : (
                   <input
