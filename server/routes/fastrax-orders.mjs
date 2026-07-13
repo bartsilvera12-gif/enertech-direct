@@ -126,7 +126,12 @@ export async function handleFastraxOrders(req, res, pathname) {
     const r = await withDb((client) =>
       createFastraxOrderForInternalOrder(client, orderId, { context: "admin", force: body?.force === true }),
     );
-    return json(res, r.ok ? 200 : r.error ? 502 : 400, r);
+    // Un rechazo de Fastrax (estatus/cestatus) es un error de negocio, NO una caída
+    // de gateway: exponer el motivo real y usar 422 (no 502, que confunde con nginx).
+    if (!r.ok && !r.message) {
+      r.message = r.cestatus || r.error || "Fastrax no aceptó el pedido.";
+    }
+    return json(res, r.ok ? 200 : 422, r);
   }
 
   if (action === "invoice" && req.method === "POST") {
