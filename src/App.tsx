@@ -1,5 +1,5 @@
 import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,6 +10,8 @@ import ProductDetail from "./pages/ProductDetail";
 import Contact from "./pages/Contact";
 import Nosotros from "./pages/Nosotros";
 import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
+import OrderSent from "./pages/OrderSent";
 import NotFound from "./pages/NotFound.tsx";
 import { ProtectedAdminRoute } from "@/components/admin/ProtectedAdminRoute";
 import AdminLayout from "@/components/layout/AdminLayout";
@@ -52,9 +54,11 @@ const App = () => (
             <Route path="/contact" element={<Contact />} />
             <Route path="/nosotros" element={<Nosotros />} />
             <Route path="/cart" element={<Cart />} />
-            {/* /checkout y /order/sent siguen redirigidos: el pedido se cierra por WhatsApp desde /cart. */}
-            <Route path="/checkout" element={<Navigate to="/cart" replace />} />
-            <Route path="/order/sent" element={<Navigate to="/catalog" replace />} />
+            {/* Checkout persistido: crea el pedido en `orders` (RPC create_guest_order),
+                abre WhatsApp y —server-side— dispara el envío a Fastrax de las líneas
+                Fastrax. Ver server/fastrax-order-dispatcher.mjs. */}
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/order/sent" element={<OrderSent />} />
           </Route>
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route element={<ProtectedAdminRoute />}>

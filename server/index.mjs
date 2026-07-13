@@ -44,6 +44,7 @@ import { verifyAdmin } from "./fastrax-auth.mjs";
 import { json, readBody } from "./index-helpers.mjs";
 import { handleFastraxCatalog, mountedCatalogPaths } from "./routes/fastrax-catalog.mjs";
 import { handleFastraxOrders, mountedOrderPaths } from "./routes/fastrax-orders.mjs";
+import { startFastraxOrderDispatcher } from "./fastrax-order-dispatcher.mjs";
 
 loadFastraxEnv();
 
@@ -266,4 +267,6 @@ server.listen(PORT, () => {
   console.log(`[enertech-server] Fastrax configurado: ${fastraxConfigured()}`);
   console.log(`[enertech-server] static /fastrax-products → ${STATIC_ROOT}/fastrax-products`);
   console.log(`[enertech-server] frontend dist → ${HAS_DIST ? DIST_ROOT : "(ausente, solo /api disponible)"}`);
+  // Despacho automático de pedidos a Fastrax (gated por FASTRAX_AUTO_DISPATCH).
+  startFastraxOrderDispatcher();
 });

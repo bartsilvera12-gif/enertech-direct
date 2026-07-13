@@ -1,27 +1,18 @@
 import { Link } from "react-router-dom";
-import { useMemo } from "react";
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, MessageCircle } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from "lucide-react";
 import { useCart } from "@/store/cart";
 import { formatPYG } from "@/services/storeService";
 import { recordProductEvent } from "@/services/productEventService";
-import { buildCartWhatsAppUrl, DEFAULT_STORE_WHATSAPP_DIGITS } from "@/lib/cartWhatsApp";
-import { useStoreWhatsappDigits } from "@/hooks/useStoreWhatsappHref";
 
 /**
- * Página /cart — vista de "Carrito de compras" estilo checkout, con resumen
- * a la derecha y un único CTA "Comprar por WhatsApp" (no hay pasarela interna).
- * Es el destino del botón "Finalizar compra" del CartDrawer.
+ * Página /cart — vista de "Carrito de compras" con resumen a la derecha.
+ * El CTA "Continuar compra" lleva a /checkout, donde se toman los datos del
+ * cliente, se persiste el pedido (RPC create_guest_order) y se abre WhatsApp.
+ * Persistir el pedido es lo que permite el envío automático a Fastrax.
  */
 const Cart = () => {
   const { items, setQuantity, remove, subtotal, clear } = useCart();
   const total = subtotal();
-
-  const { data: waDigitsSetting } = useStoreWhatsappDigits();
-  const whatsappDigits = waDigitsSetting?.replace(/\D/g, "") || DEFAULT_STORE_WHATSAPP_DIGITS;
-  const whatsappHref = useMemo(
-    () => (items.length ? buildCartWhatsAppUrl(whatsappDigits, items, total) : "#"),
-    [whatsappDigits, items, total],
-  );
 
   if (items.length === 0) {
     return (
@@ -124,7 +115,7 @@ const Cart = () => {
           ))}
         </div>
 
-        {/* Resumen + CTA WhatsApp único */}
+        {/* Resumen + CTA "Continuar compra" (lleva al checkout persistido) */}
         <aside className="rounded-2xl bg-card border border-border/60 shadow-soft p-6 lg:sticky lg:top-24 space-y-5">
           <h2 className="text-xl font-semibold tracking-tight">Resumen</h2>
 
@@ -140,15 +131,13 @@ const Cart = () => {
             </span>
           </div>
 
-          <a
-            href={whatsappHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex w-full items-center justify-center gap-2 text-center text-sm font-semibold tracking-wide px-6 py-3.5 rounded-xl bg-[#25D366] text-white hover:bg-[#1ebe5a] transition-colors shadow-sm"
+          <Link
+            to="/checkout"
+            className="flex w-full items-center justify-center gap-2 text-center text-sm font-semibold tracking-wide px-6 py-3.5 rounded-xl bg-primary text-primary-foreground hover:shadow-glow transition-all shadow-sm"
           >
-            <MessageCircle className="size-5 shrink-0" aria-hidden />
-            Comprar por WhatsApp
-          </a>
+            Continuar compra
+            <ArrowRight className="size-5 shrink-0" aria-hidden />
+          </Link>
 
           <button
             onClick={clear}

@@ -38,7 +38,7 @@ npm run fastrax:health | :list | :sku | :sync | :stock | :order | :order-status
 
 ### Two-surface app
 
-- **Public storefront** (`src/pages/Home|Catalog|ProductDetail|Contact|Nosotros`) under `StoreLayout`. `/cart`, `/checkout`, `/order/sent` are intentionally redirected to `/catalog` (orders flow through WhatsApp via `src/lib/cartWhatsApp.ts` + `useStoreWhatsappHref`, not an internal checkout).
+- **Public storefront** (`src/pages/Home|Catalog|ProductDetail|Contact|Nosotros`) under `StoreLayout`. Flow: `/cart` → `/checkout` (captures customer data, persists the order via the `create_guest_order` RPC, opens WhatsApp with the summary) → `/order/sent`. There is no online payment — WhatsApp coordinates pago/entrega. Persisting the order is what enables auto-fulfilment: `server/fastrax-order-dispatcher.mjs` polls new orders with Fastrax lines and sends them to the ERP (ope=12), gated by `FASTRAX_AUTO_DISPATCH` + `FASTRAX_CREATE_REMOTE_ORDERS`.
 - **Admin** (`src/pages/admin/*`) under `AdminLayout`, gated by `ProtectedAdminRoute` + `useAdminGate`. Routes: `/admin` (Dashboard), `productos`, `categorias`, `importar`, `fastrax`.
 
 Routing is declared in [src/App.tsx](src/App.tsx); the QueryClient there installs global `QueryCache`/`MutationCache` error logging — don't replace it with a bare `new QueryClient()`.

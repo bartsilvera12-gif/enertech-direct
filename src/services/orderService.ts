@@ -22,6 +22,8 @@ function buildWhatsAppMessage(orderNumber: string, items: CartItem[], customer: 
   lines.push("Datos del cliente:");
   lines.push(`- Nombre: ${customer.fullName}`);
   lines.push(`- Teléfono: ${customer.phone}`);
+  if (customer.document) lines.push(`- Documento (CI/RUC): ${customer.document}`);
+  if (customer.email) lines.push(`- Email: ${customer.email}`);
   lines.push(`- Ciudad: ${customer.city}`);
   lines.push(`- Dirección: ${customer.address}`);
   if (customer.reference) lines.push(`- Referencia: ${customer.reference}`);
@@ -51,6 +53,8 @@ export async function createWhatsAppOrder(
     p_observations: customer.observations?.trim() ?? "",
     p_lines: lines,
     p_total: Math.round(total),
+    p_email: customer.email?.trim() ?? "",
+    p_document: customer.document?.trim() ?? "",
   });
 
   if (rpcErr) throw rpcErr;

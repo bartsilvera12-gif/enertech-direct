@@ -9,6 +9,8 @@ import { toast } from "sonner";
 const fields: { key: keyof CheckoutCustomer; label: string; required: boolean; type?: string; textarea?: boolean; placeholder?: string }[] = [
   { key: "fullName", label: "Nombre completo", required: true, placeholder: "Juan Pérez" },
   { key: "phone", label: "Teléfono", required: true, type: "tel", placeholder: "0991 000 000" },
+  { key: "document", label: "Documento (CI / RUC)", required: true, placeholder: "1234567 o 80012345-6" },
+  { key: "email", label: "Email (opcional)", required: false, type: "email", placeholder: "juan@correo.com" },
   { key: "city", label: "Ciudad", required: true, placeholder: "Asunción" },
   { key: "address", label: "Dirección", required: true, placeholder: "Av. Ejemplo 123" },
   { key: "reference", label: "Referencia (opcional)", required: false, placeholder: "Casa gris portón negro" },
@@ -20,7 +22,7 @@ const Checkout = () => {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState<CheckoutCustomer>({
-    fullName: "", phone: "", city: "", address: "", reference: "", observations: "",
+    fullName: "", phone: "", document: "", email: "", city: "", address: "", reference: "", observations: "",
   });
 
   const total = subtotal();

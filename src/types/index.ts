@@ -65,6 +65,8 @@ export interface CartItem {
 export interface CheckoutCustomer {
   fullName: string;
   phone: string;
+  document: string;
+  email: string;
   city: string;
   address: string;
   reference?: string;

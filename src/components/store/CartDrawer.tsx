@@ -115,8 +115,8 @@ export const CartDrawer = () => {
                 <span className="text-xs uppercase tracking-widest text-muted-foreground">Total estimado</span>
                 <span className="text-xl font-semibold text-primary price-tabular">{formatPYG(total)}</span>
               </div>
-              {/* "Finalizar compra" lleva a /cart, donde el usuario revisa el
-                  resumen y dispara WhatsApp con el botón único de esa página. */}
+              {/* "Finalizar compra" lleva a /cart (revisar resumen) → /checkout
+                  (datos + persistir pedido) → WhatsApp. */}
               <Link
                 to="/cart"
                 onClick={close}
