@@ -1,11 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { Loader2, RefreshCw, Send, FileText, Check, X, Eye } from "lucide-react";
+import { Loader2, RefreshCw, Send, FileText, Check, X, Inbox } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   AlertDialog,
@@ -20,6 +18,7 @@ import {
 import { supabase } from "@/lib/supabase";
 import { formatPYG } from "@/services/storeService";
 import { formatPostgrestError } from "@/lib/postgrestError";
+import { cn } from "@/lib/utils";
 import {
   createOrderInFastrax,
   fetchOrderCanFulfillFastrax,
@@ -42,6 +41,52 @@ type ConfirmTarget =
   | { kind: "create"; orderId: string; orderNumber: string }
   | { kind: "invoice"; orderId: string; orderNumber: string }
   | null;
+
+const ORDER_STATUS: Record<string, { label: string; className: string }> = {
+  pending: { label: "Pendiente", className: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20" },
+  sent_whatsapp: { label: "WhatsApp", className: "bg-primary/10 text-primary border-primary/20" },
+  confirmed: { label: "Confirmado", className: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20" },
+  delivered: { label: "Entregado", className: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20" },
+  cancelled: { label: "Cancelado", className: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20" },
+  draft: { label: "Borrador", className: "bg-muted text-muted-foreground border-transparent" },
+};
+
+function OrderStatusBadge({ status }: { status: string }) {
+  const s = ORDER_STATUS[status] ?? { label: status, className: "bg-muted text-muted-foreground border-transparent" };
+  return (
+    <span className={cn("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium whitespace-nowrap", s.className)}>
+      {s.label}
+    </span>
+  );
+}
+
+type FxTone = "idle" | "success" | "error" | "pending";
+
+/** Deriva una vista limpia del estado en Fastrax a partir del tracking. */
+function fastraxView(t: FastraxOrderTracking | null | undefined): {
+  tone: FxTone;
+  label: string;
+  detail?: string;
+  error?: string;
+} {
+  if (!t || (!t.fastrax_pdc && !t.fastrax_ped && !t.error)) return { tone: "idle", label: "Sin enviar" };
+  if (t.error) return { tone: "error", label: "Rechazado", detail: t.fastrax_ped ? `ped ${t.fastrax_ped}` : undefined, error: t.error };
+  if (t.fastrax_pdc) return { tone: "success", label: t.status_label || "En Fastrax", detail: `pdc ${t.fastrax_pdc}` };
+  return { tone: "pending", label: t.status_label || "En proceso", detail: t.fastrax_ped ? `ped ${t.fastrax_ped}` : undefined };
+}
+
+const FX_DOT: Record<FxTone, string> = {
+  idle: "bg-muted-foreground/40",
+  success: "bg-emerald-500",
+  error: "bg-red-500",
+  pending: "bg-amber-500",
+};
+const FX_TEXT: Record<FxTone, string> = {
+  idle: "text-muted-foreground",
+  success: "text-emerald-600 dark:text-emerald-400",
+  error: "text-red-600 dark:text-red-400",
+  pending: "text-amber-600 dark:text-amber-400",
+};
 
 export default function AdminFastraxOrders() {
   const [orders, setOrders] = useState<AdminOrder[]>([]);
@@ -204,20 +249,23 @@ export default function AdminFastraxOrders() {
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>#</TableHead>
-                  <TableHead>Fecha</TableHead>
-                  <TableHead>Estado</TableHead>
-                  <TableHead className="text-right">Total</TableHead>
-                  <TableHead>Fastrax</TableHead>
-                  <TableHead>Acciones</TableHead>
+                <TableRow className="hover:bg-transparent border-border/60">
+                  <TableHead className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Pedido</TableHead>
+                  <TableHead className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Fecha</TableHead>
+                  <TableHead className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Estado</TableHead>
+                  <TableHead className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground text-right">Total</TableHead>
+                  <TableHead className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Fastrax</TableHead>
+                  <TableHead className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground text-right">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredOrders.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                      Sin pedidos.
+                  <TableRow className="hover:bg-transparent">
+                    <TableCell colSpan={6} className="py-16">
+                      <div className="flex flex-col items-center gap-3 text-muted-foreground">
+                        <Inbox className="size-9 opacity-30" />
+                        <span className="text-sm">Sin pedidos por ahora.</span>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -225,45 +273,46 @@ export default function AdminFastraxOrders() {
                     const t = trackingMap[o.id];
                     const hasMap = Boolean(t && (t.fastrax_pdc || t.fastrax_ped));
                     const cf = canFulfillMap[o.id];
+                    const fx = fastraxView(t);
                     return (
-                      <TableRow key={o.id}>
-                        <TableCell className="text-xs">
-                          <div className="font-mono">ENT-{o.order_number}</div>
+                      <TableRow key={o.id} className="align-top border-border/60">
+                        <TableCell className="py-3.5">
+                          <div className="font-mono text-sm font-medium">ENT-{o.order_number}</div>
                           {o.customer_name ? (
-                            <div className="text-muted-foreground mt-0.5">{o.customer_name}</div>
+                            <div className="text-xs text-muted-foreground mt-0.5">{o.customer_name}</div>
                           ) : null}
                         </TableCell>
-                        <TableCell className="text-xs text-muted-foreground">
-                          {new Date(o.created_at).toLocaleString("es-PY")}
+                        <TableCell className="py-3.5 text-xs whitespace-nowrap">
+                          <div className="text-foreground/80">{new Date(o.created_at).toLocaleDateString("es-PY")}</div>
+                          <div className="text-muted-foreground mt-0.5">
+                            {new Date(o.created_at).toLocaleTimeString("es-PY", { hour: "2-digit", minute: "2-digit" })}
+                          </div>
                         </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{o.status}</Badge>
+                        <TableCell className="py-3.5">
+                          <OrderStatusBadge status={o.status} />
                         </TableCell>
-                        <TableCell className="text-right tabular-nums">{formatPYG(Number(o.total))}</TableCell>
-                        <TableCell>
-                          {hasMap ? (
-                            <div className="text-xs space-y-0.5">
-                              <div>
-                                pdc: <span className="font-mono">{t?.fastrax_pdc || "—"}</span>
-                              </div>
-                              <div>
-                                ped: <span className="font-mono">{t?.fastrax_ped || "—"}</span>
-                              </div>
-                              <div>
-                                <Badge variant={t?.status_code === 7 ? "secondary" : "outline"}>
-                                  {t?.status_label || "—"}
-                                </Badge>
-                                {t?.error ? <span className="text-destructive ml-2">{t.error.slice(0, 60)}</span> : null}
-                              </div>
-                            </div>
-                          ) : (
-                            <span className="text-muted-foreground text-xs">sin mapa</span>
-                          )}
+                        <TableCell className="py-3.5 text-right tabular-nums font-medium whitespace-nowrap">
+                          {formatPYG(Number(o.total))}
                         </TableCell>
-                        <TableCell>
-                          <div className="flex flex-wrap gap-1.5">
+                        <TableCell className="py-3.5">
+                          <div className="flex flex-col gap-1 max-w-[240px]">
+                            <span className={cn("inline-flex items-center gap-1.5 text-xs font-medium", FX_TEXT[fx.tone])}>
+                              <span className={cn("size-1.5 rounded-full shrink-0", FX_DOT[fx.tone])} />
+                              {fx.label}
+                            </span>
+                            {fx.detail ? (
+                              <span className="text-[11px] text-muted-foreground font-mono">{fx.detail}</span>
+                            ) : null}
+                            {fx.error ? (
+                              <span className="text-[11px] text-red-600 dark:text-red-400 leading-snug" title={fx.error}>
+                                {fx.error}
+                              </span>
+                            ) : null}
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-3.5">
+                          <div className="flex items-center justify-end gap-1.5">
                             <Button
-                              variant="outline"
                               size="sm"
                               disabled={busy === o.id}
                               onClick={async () => {
@@ -275,30 +324,38 @@ export default function AdminFastraxOrders() {
                                 setConfirm({ kind: "create", orderId: o.id, orderNumber: `ENT-${o.order_number}` });
                               }}
                             >
-                              <Send className="size-3.5 mr-1" />
+                              {busy === o.id ? (
+                                <Loader2 className="size-3.5 mr-1 animate-spin" />
+                              ) : (
+                                <Send className="size-3.5 mr-1" />
+                              )}
                               Enviar
                             </Button>
                             <Button
                               variant="outline"
-                              size="sm"
+                              size="icon"
+                              className="size-8"
+                              title="Sincronizar estado"
+                              aria-label="Sincronizar estado"
                               disabled={busy === o.id || !hasMap}
                               onClick={() => void doSyncStatus(o.id)}
                             >
-                              <RefreshCw className="size-3.5 mr-1" />
-                              Estado
+                              <RefreshCw className="size-3.5" />
                             </Button>
                             <Button
                               variant="outline"
-                              size="sm"
+                              size="icon"
+                              className="size-8"
+                              title="Facturar"
+                              aria-label="Facturar"
                               disabled={busy === o.id || !hasMap}
                               onClick={() => setConfirm({ kind: "invoice", orderId: o.id, orderNumber: `ENT-${o.order_number}` })}
                             >
-                              <FileText className="size-3.5 mr-1" />
-                              Facturar
+                              <FileText className="size-3.5" />
                             </Button>
                           </div>
                           {cf === false ? (
-                            <div className="text-[11px] text-muted-foreground mt-1">Sin líneas Fastrax.</div>
+                            <div className="text-[11px] text-muted-foreground mt-1.5 text-right">Sin líneas Fastrax.</div>
                           ) : null}
                         </TableCell>
                       </TableRow>
