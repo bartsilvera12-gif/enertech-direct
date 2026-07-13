@@ -64,6 +64,16 @@ FASTRAX_PASS=__tu_password__
 FASTRAX_SSL_INSECURE=1
 FASTRAX_REQUEST_TIMEOUT_MS=90000
 
+# --- Pedidos a Fastrax (ope=12) ---
+FASTRAX_PGT=3
+FASTRAX_AUTO_INVOICE=0
+# 1 = habilita el envío REAL de pedidos (ope=12) desde el botón "Enviar" del admin.
+#     0 = dry-run (no manda nada aunque se confirme).
+FASTRAX_CREATE_REMOTE_ORDERS=0
+# 1 = despacho AUTOMÁTICO: el server hace polling de pedidos nuevos con líneas
+#     Fastrax y los envía solo. Requiere también FASTRAX_CREATE_REMOTE_ORDERS=1.
+FASTRAX_AUTO_DISPATCH=0
+
 # --- Postgres directo (mismo que usan los scripts DBA) ---
 SUPABASE_DB_URL=postgresql://USER:PASS@HOST:PORT/postgres?sslmode=disable
 
@@ -80,6 +90,11 @@ FASTRAX_BACKEND_CORS_ORIGINS=https://enertechcde.com,https://www.enertechcde.com
 
 > Puerto **8788**: el 8787 ya lo usa el server de Tradexpar en esta VPS. Si hay otro, elegí uno libre.
 > `chmod 600 .env`.
+>
+> **Importante:** estas variables se leen **una sola vez al arrancar** el proceso. Después de
+> editar el `.env`, aplicá el cambio con `pm2 restart enertech-api --update-env` (sin
+> `--update-env`, PM2 reusa las variables viejas). Editar la variable en el panel de
+> Hostinger **no sirve**: ese panel es del frontend; el backend (esta VPS) lee este `.env`.
 
 ## 3. Levantar con PM2
 
