@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, MessageCircle, Loader2 } from "lucide-react";
+import { ArrowLeft, MessageCircle, Loader2, ShieldCheck } from "lucide-react";
 import { useCart } from "@/store/cart";
 import { createWhatsAppOrder, formatPYG } from "@/services/storeService";
 import type { CheckoutCustomer, OrderConfirmation } from "@/types";
@@ -26,6 +26,7 @@ const Checkout = () => {
   });
 
   const total = subtotal();
+  const itemCount = items.reduce((sum, it) => sum + it.quantity, 0);
 
   if (items.length === 0) {
     return (
@@ -108,33 +109,58 @@ const Checkout = () => {
           </div>
         </div>
 
-        <aside className="rounded-3xl bg-surface hairline p-6 lg:sticky lg:top-24 space-y-5">
-          <h2 className="text-xs uppercase tracking-widest text-muted-foreground">Resumen</h2>
-          <ul className="space-y-3 text-sm max-h-72 overflow-y-auto pr-1">
+        <aside className="rounded-3xl bg-surface hairline p-6 lg:sticky lg:top-24 space-y-5 shadow-soft">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold tracking-tight">Resumen del pedido</h2>
+            <span className="text-[11px] font-medium px-2.5 py-1 rounded-full bg-muted text-muted-foreground shrink-0">
+              {itemCount} {itemCount === 1 ? "ítem" : "ítems"}
+            </span>
+          </div>
+
+          <ul className="space-y-3 max-h-80 overflow-y-auto -mr-2 pr-2">
             {items.map((it) => (
-              <li key={it.productId} className="flex justify-between gap-3">
-                <span className="truncate text-foreground/90">
-                  {it.name} <span className="text-muted-foreground">×{it.quantity}</span>
+              <li key={it.productId} className="flex items-center gap-3">
+                <div className="size-12 rounded-xl bg-muted/50 border border-border/60 overflow-hidden shrink-0">
+                  {it.imageUrl && (
+                    <img src={it.imageUrl} alt={it.name} className="w-full h-full object-contain" loading="lazy" />
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium leading-snug line-clamp-2">{it.name}</p>
+                  <p className="text-xs text-muted-foreground price-tabular mt-0.5">
+                    {formatPYG(it.price)} <span className="opacity-60">×</span> {it.quantity}
+                  </p>
+                </div>
+                <span className="text-sm font-semibold price-tabular shrink-0">
+                  {formatPYG(it.price * it.quantity)}
                 </span>
-                <span className="price-tabular shrink-0">{formatPYG(it.price * it.quantity)}</span>
               </li>
             ))}
           </ul>
-          <div className="border-t border-white/5 pt-4 flex justify-between items-baseline">
-            <span className="text-sm uppercase tracking-widest">Total</span>
-            <span className="text-2xl font-semibold text-primary price-tabular">{formatPYG(total)}</span>
+
+          <div className="flex justify-between text-sm text-muted-foreground border-t border-border pt-4">
+            <span>Subtotal</span>
+            <span className="price-tabular">{formatPYG(total)}</span>
           </div>
+
+          <div className="rounded-2xl bg-primary/10 border border-primary/20 px-4 py-3.5 flex items-center justify-between">
+            <span className="text-sm font-semibold uppercase tracking-wide">Total</span>
+            <span className="text-2xl font-bold text-primary price-tabular">{formatPYG(total)}</span>
+          </div>
+
           <button
             type="submit"
             disabled={submitting}
-            className="w-full inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-7 py-3.5 text-sm font-semibold rounded-full hover:shadow-glow transition-all disabled:opacity-50"
+            className="w-full inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-7 py-4 text-sm font-semibold rounded-2xl hover:shadow-glow hover:brightness-105 active:scale-[0.99] transition-all disabled:opacity-50 disabled:pointer-events-none"
           >
             {submitting ? <Loader2 className="size-4 animate-spin" /> : <MessageCircle className="size-4" />}
             Confirmar por WhatsApp
           </button>
-          <p className="text-[11px] text-muted-foreground text-center leading-relaxed">
-            Sin pagos online. Te abrimos WhatsApp con el resumen prellenado.
-          </p>
+
+          <div className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground text-center leading-relaxed">
+            <ShieldCheck className="size-3.5 shrink-0 text-primary/70" />
+            Sin pagos online · coordinás pago y entrega por WhatsApp
+          </div>
         </aside>
       </form>
     </div>

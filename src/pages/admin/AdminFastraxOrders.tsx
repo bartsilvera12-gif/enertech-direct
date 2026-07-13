@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/lib/supabase";
 import { formatPYG } from "@/services/storeService";
+import { formatPostgrestError } from "@/lib/postgrestError";
 import {
   createOrderInFastrax,
   fetchOrderCanFulfillFastrax,
@@ -82,7 +83,8 @@ export default function AdminFastraxOrders() {
         // silencio — backend Fastrax puede no estar arriba
       }
     } catch (e) {
-      toast.error("No se pudieron cargar pedidos", { description: e instanceof Error ? e.message : String(e) });
+      console.error("[AdminFastraxOrders] loadOrders falló:", e);
+      toast.error("No se pudieron cargar pedidos", { description: formatPostgrestError(e) });
     } finally {
       setLoading(false);
     }
@@ -114,7 +116,7 @@ export default function AdminFastraxOrders() {
       }
       await refreshTracking(id);
     } catch (e) {
-      toast.error("Error al enviar a Fastrax", { description: e instanceof Error ? e.message : String(e) });
+      toast.error("Error al enviar a Fastrax", { description: formatPostgrestError(e) });
     } finally {
       setBusy(null);
     }
@@ -128,7 +130,7 @@ export default function AdminFastraxOrders() {
       if (r.ok) toast.success(`Estado actualizado: ${r.tracking?.status_label || "—"}`);
       else toast.error("ope=13 falló", { description: r.reason || "—" });
     } catch (e) {
-      toast.error("Sincronización falló", { description: e instanceof Error ? e.message : String(e) });
+      toast.error("Sincronización falló", { description: formatPostgrestError(e) });
     } finally {
       setBusy(null);
     }
@@ -143,7 +145,7 @@ export default function AdminFastraxOrders() {
       else toast.error("Facturación falló", { description: r.message });
       await refreshTracking(id);
     } catch (e) {
-      toast.error("Facturación falló", { description: e instanceof Error ? e.message : String(e) });
+      toast.error("Facturación falló", { description: formatPostgrestError(e) });
     } finally {
       setBusy(null);
     }
