@@ -101,7 +101,13 @@ export async function handleFastraxOrders(req, res, pathname) {
       const map = await loadMap(client, orderId);
       return { ...s, order_id: orderId, has_map: Boolean(map), map, tracking: buildTrackingFromMap(map) };
     });
-    const status = r.ok ? 200 : r.reason === "no_map" ? 404 : r.reason === "not_configured" ? 503 : 502;
+    // Fallo de negocio (ej. pedido no existe en Fastrax) → mensaje real + 422, no 502.
+    if (!r.ok && !r.message) {
+      r.message = r.error || (r.reason === "no_map"
+        ? "El pedido todavía no fue enviado a Fastrax."
+        : `No se pudo consultar el estado en Fastrax (${r.reason || "error"}).`);
+    }
+    const status = r.ok ? 200 : r.reason === "no_map" ? 404 : r.reason === "not_configured" ? 503 : 422;
     return json(res, status, r);
   }
 
@@ -140,7 +146,10 @@ export async function handleFastraxOrders(req, res, pathname) {
       return json(res, 400, { ok: false, reason: "confirm_required", message: "Falta confirm:true en el body." });
     }
     const r = await withDb((client) => runFastraxInvoiceForMap(client, orderId));
-    return json(res, r.ok ? 200 : 502, r);
+    if (!r.ok && !r.message) {
+      r.message = r.error || r.cestatus || "Fastrax no aceptó la facturación.";
+    }
+    return json(res, r.ok ? 200 : 422, r);
   }
 
   return json(res, 405, { ok: false, message: "Método no permitido." });
