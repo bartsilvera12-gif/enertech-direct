@@ -177,9 +177,7 @@ export default function AdminFastraxOrders() {
       <header className="space-y-1">
         <h1 className="text-2xl font-semibold">Pedidos Fastrax</h1>
         <p className="text-sm text-muted-foreground">
-          Disparo manual de <code>ope=12</code> (enviar pedido), <code>ope=13</code> (sincronizar estado) y{" "}
-          <code>ope=15</code> (facturar). Doble cerrojo: requiere <code>FASTRAX_CREATE_REMOTE_ORDERS=1</code> +
-          confirmación.
+          Enviá pedidos al sistema Fastrax, consultá su estado y generá facturas. Cada acción pide confirmación.
         </p>
       </header>
 
@@ -321,8 +319,8 @@ export default function AdminFastraxOrders() {
             </AlertDialogTitle>
             <AlertDialogDescription>
               {confirm?.kind === "invoice"
-                ? `Esto ejecutará ope=15 sobre el pedido ${confirm?.orderNumber}. La acción crea una factura en Fastrax.`
-                : `Esto ejecutará ope=12 sobre el pedido ${confirm?.orderNumber}. Requiere FASTRAX_CREATE_REMOTE_ORDERS=1 en el server.`}
+                ? `Se generará la factura del pedido ${confirm?.orderNumber} en Fastrax.`
+                : `Se enviará el pedido ${confirm?.orderNumber} al sistema Fastrax para su preparación. Esta acción no se puede deshacer.`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
