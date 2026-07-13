@@ -66,6 +66,10 @@ FASTRAX_REQUEST_TIMEOUT_MS=90000
 
 # --- Pedidos a Fastrax (ope=12) ---
 FASTRAX_PGT=3
+# Código de cliente registrado en Fastrax (campo `cli`). OBLIGATORIO para que
+# Fastrax autorice la venta; sin él responde "venda não autorizada" (err 73/74).
+# Es el "consumidor final" de la cuenta — pedíselo a tu proveedor Fastrax.
+FASTRAX_CLI=
 FASTRAX_AUTO_INVOICE=0
 # 1 = habilita el envío REAL de pedidos (ope=12) desde el botón "Enviar" del admin.
 #     0 = dry-run (no manda nada aunque se confirme).

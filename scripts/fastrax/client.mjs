@@ -69,6 +69,16 @@ export function fastraxPgt() {
   return Number.isFinite(n) && n > 0 ? n : 3;
 }
 
+/**
+ * Código de cliente por defecto para ope=12 (`cli`). Fastrax exige un cliente
+ * registrado para autorizar la venta (errores 73/74). Este suele ser el
+ * "consumidor final" de la cuenta. Vacío = no se envía `cli` (Fastrax puede
+ * rechazar con "venda não autorizada"). Setear FASTRAX_CLI con el código real.
+ */
+export function fastraxCliDefault() {
+  return envTrim("FASTRAX_CLI");
+}
+
 export function fastraxTimeoutMs() {
   return Math.min(180_000, Math.max(5_000, Number(process.env.FASTRAX_REQUEST_TIMEOUT_MS || 90_000) || 90_000));
 }

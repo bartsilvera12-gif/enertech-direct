@@ -16,6 +16,7 @@
  */
 import {
   createFastraxRemoteOrder12,
+  fastraxCliDefault,
   fastraxConfigured,
   fastraxEnabled,
   fastraxInvoiceOrder15,
@@ -171,7 +172,10 @@ export async function createFastraxOrderForInternalOrder(client, orderId, option
 
   let orderRow;
   try {
-    const r = await client.query("SELECT id, order_number FROM orders WHERE id = $1 LIMIT 1", [oid]);
+    const r = await client.query(
+      "SELECT id, order_number, notes, customer_document FROM orders WHERE id = $1 LIMIT 1",
+      [oid],
+    );
     orderRow = r.rows[0] || null;
   } catch (e) {
     return { ok: false, order_id: oid, error: e instanceof Error ? e.message : String(e) };
@@ -230,6 +234,13 @@ export async function createFastraxOrderForInternalOrder(client, orderId, option
     gra: buildGra(skus),
     pgt: fastraxPgt(),
   };
+  // Fastrax exige un cliente registrado (`cli`) para autorizar la venta (ope=12);
+  // sin él responde "venda não autorizada" (errores 73/74). Se toma de FASTRAX_CLI
+  // (cliente por defecto de la cuenta, ej. consumidor final). `obs` = notas del pedido.
+  const cli = fastraxCliDefault();
+  if (cli) payload.cli = cli;
+  const obs = str(orderRow.notes).trim();
+  if (obs) payload.obs = obs.slice(0, 200);
 
   const ts0 = new Date().toISOString();
   await upsertMap(client, {
