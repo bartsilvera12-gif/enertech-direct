@@ -54,10 +54,10 @@ export const PremiumFooter = () => {
             <div>
               <div className="text-xs md:text-sm uppercase tracking-[0.18em] text-white/65 mb-5 font-semibold">Empresa</div>
               <ul className="space-y-4 text-base md:text-lg text-white/90">
-                <li>Asunción, Paraguay</li>
+                <li>Ciudad del Este, Paraguay</li>
                 <li>
-                  <a href="mailto:hola@enertech.py" className="hover:text-white underline-offset-4 hover:underline">
-                    hola@enertech.py
+                  <a href="mailto:victorzarza@enertechcde.com" className="hover:text-white underline-offset-4 hover:underline">
+                    victorzarza@enertechcde.com
                   </a>
                 </li>
               </ul>
