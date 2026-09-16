@@ -134,6 +134,50 @@ export async function fetchCatalogFacets(): Promise<CatalogFacets> {
   };
 }
 
+/** Columnas base (no embebidas) sobre las que corre la búsqueda de texto libre. */
+const SEARCH_COLUMNS = [
+  "name",
+  "slug",
+  "sku",
+  "code",
+  "brand",
+  "supplier",
+  "warehouse",
+  "article_type",
+  "situation",
+  "range_label",
+  "short_description",
+  "description",
+] as const;
+
+/**
+ * Sanitiza un término para incrustarlo en un filtro `.or()` de PostgREST: quita
+ * los caracteres que rompen su sintaxis (`, ( ) * \ %`) y colapsa espacios. El
+ * comodín de ilike es `*`, así que no debe venir en el texto del usuario.
+ */
+function sanitizeSearchTerm(raw: string): string {
+  return raw.replace(/[,()*\\%]/g, " ").replace(/\s+/g, " ").trim();
+}
+
+/**
+ * Búsqueda de texto server-side. Divide el término en palabras y exige que CADA
+ * palabra matchee (ilike, case-insensitive) al menos una de las columnas base;
+ * así "toner hp" encuentra "toner" en el nombre y "hp" en la marca. Si el término
+ * queda vacío tras sanitizar, devuelve el query sin tocar.
+ *
+ * Reemplaza el filtrado client-side previo, que sólo veía la primera página que
+ * PostgREST devolvía (tope de filas) y por eso "casi nunca" encontraba nada.
+ */
+function applyProductSearch<Q extends { or(filter: string): Q }>(query: Q, rawSearch: string): Q {
+  const clean = sanitizeSearchTerm(rawSearch);
+  if (!clean) return query;
+  let q = query;
+  for (const token of clean.split(" ")) {
+    q = q.or(SEARCH_COLUMNS.map((col) => `${col}.ilike.*${token}*`).join(","));
+  }
+  return q;
+}
+
 export async function fetchProducts(opts?: CatalogFilters): Promise<Product[]> {
   if (!isSupabaseConfigured()) {
     warnIfSupabaseUnconfigured();
@@ -188,6 +232,11 @@ export async function fetchProducts(opts?: CatalogFilters): Promise<Product[]> {
   if (opts?.situation) q = q.eq("situation", opts.situation);
   if (opts?.rangeLabel) q = q.eq("range_label", opts.rangeLabel);
 
+  // Búsqueda de texto server-side. Antes se traían todos los productos y se
+  // filtraba en el navegador, lo que fallaba si PostgREST recortaba el resultado
+  // por su tope de filas (buscador "intermitente").
+  if (opts?.search?.trim()) q = applyProductSearch(q, opts.search);
+
   const sort = opts?.sort ?? "newest";
   if (sort === "price_asc") q = q.order("price", { ascending: true });
   else if (sort === "price_desc") q = q.order("price", { ascending: false });
@@ -215,6 +264,7 @@ export async function fetchProducts(opts?: CatalogFilters): Promise<Product[]> {
       if (opts?.articleType) qRetry = qRetry.eq("article_type", opts.articleType);
       if (opts?.situation) qRetry = qRetry.eq("situation", opts.situation);
       if (opts?.rangeLabel) qRetry = qRetry.eq("range_label", opts.rangeLabel);
+      if (opts?.search?.trim()) qRetry = applyProductSearch(qRetry, opts.search);
       qRetry = qRetry.order("created_at", { ascending: false });
       const { data: data2, error: error2 } = await qRetry;
       if (error2) throw error2;
@@ -222,35 +272,7 @@ export async function fetchProducts(opts?: CatalogFilters): Promise<Product[]> {
     }
     throw error;
   }
-  let list = (data as ProductRow[]).map(mapProduct);
-
-  if (opts?.search) {
-    const s = opts.search.toLowerCase().trim();
-    list = list.filter((p) => {
-      const hay = [
-        p.name,
-        p.slug,
-        p.sku,
-        p.code,
-        p.brand,
-        p.supplier,
-        p.warehouse,
-        p.articleType,
-        p.situation,
-        p.rangeLabel,
-        p.shortDescription,
-        p.description,
-        p.category?.name,
-        p.subcategory?.name,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-      return hay.includes(s);
-    });
-  }
-
-  return list;
+  return (data as ProductRow[]).map(mapProduct);
 }
 
 export async function fetchProductBySlug(slug: string): Promise<Product | null> {
@@ -259,15 +281,20 @@ export async function fetchProductBySlug(slug: string): Promise<Product | null> 
     return null;
   }
   assertSupabaseConfigured();
+  // .limit(1) en vez de .maybeSingle(): si por un problema de datos hubiera dos
+  // filas activas con el mismo slug, maybeSingle() lanzaría error (PGRST116) y la
+  // ficha quedaría en blanco. Tomamos la primera (la más reciente) y no rompemos.
   const { data, error } = await supabase
     .from("products")
     .select(PRODUCT_EMBED)
     .eq("slug", slug)
     .eq("is_active", true)
-    .maybeSingle();
+    .order("created_at", { ascending: false })
+    .limit(1);
   if (error) throw error;
-  if (!data) return null;
-  return mapProduct(data as ProductRow);
+  const row = Array.isArray(data) ? data[0] : data;
+  if (!row) return null;
+  return mapProduct(row as ProductRow);
 }
 
 export async function fetchRelatedProducts(product: Product, limit = 4): Promise<Product[]> {
