@@ -42,6 +42,9 @@ export default function AdminFastraxSearch() {
   const [importing, setImporting] = useState(false);
   const [lastImport, setLastImport] = useState<FastraxImportResult | null>(null);
   const [confirmImportPage, setConfirmImportPage] = useState(false);
+  // La paginación (y "Importar página") solo aplican al navegar el catálogo.
+  // En búsqueda por texto (global) o SKU exacto no hay páginas ope=4 correlativas.
+  const [pageable, setPageable] = useState(false);
 
   const items: FastraxSearchItem[] = useMemo(() => result?.items ?? [], [result]);
 
@@ -49,15 +52,54 @@ export default function AdminFastraxSearch() {
     setLoading(true);
     setSelected(new Set());
     try {
-      const r = await searchFastraxProducts({
-        q: q.trim() || undefined,
-        sku: skuQuery.trim() || undefined,
-        page: nextPage,
-        size,
-        only_stock: onlyStock,
-      });
+      const sku = skuQuery.trim();
+      const text = q.trim();
+      let r: FastraxSearchResult;
+      if (sku) {
+        // SKU exacto → ope=2 directo (una fila). Tiene precedencia sobre el texto.
+        r = await searchFastraxProducts({ sku, only_stock: onlyStock });
+        setPageable(false);
+        setPage(1);
+      } else if (text) {
+        // Búsqueda por texto: Fastrax ope=4 no filtra por término, así que el
+        // /search de una sola página solo "encontraba" si el match caía en esa
+        // página. Acá recorremos varias páginas con /search (que enriquece cada
+        // fila con ope=2, por eso sí trae nombre/marca/desc para matchear) y
+        // acumulamos coincidencias. `has_more` corta cuando la página ope=4 vino
+        // incompleta (última página).
+        const MAX_PAGES = 20;
+        const MAX_HITS = 100;
+        const seen = new Set<string>();
+        const acc: FastraxSearchItem[] = [];
+        let scanned = 0;
+        for (let p = 1; p <= MAX_PAGES; p += 1) {
+          const rp = await searchFastraxProducts({ q: text, page: p, size: 20, only_stock: onlyStock });
+          scanned = p;
+          for (const it of rp.items ?? []) {
+            if (seen.has(it.fastrax_sku)) continue;
+            seen.add(it.fastrax_sku);
+            acc.push(it);
+          }
+          if (acc.length >= MAX_HITS) break;
+          if (rp.has_more !== true) break; // página incompleta → no hay más catálogo
+        }
+        const capped = acc.length >= MAX_HITS || scanned >= MAX_PAGES;
+        r = {
+          ok: true,
+          ope: "scan",
+          total: acc.length,
+          items: acc.slice(0, MAX_HITS),
+          message: `Escaneadas ${scanned} pág.${capped ? " (tope alcanzado — refiná el término o usá SKU exacto)" : ""}`,
+        };
+        setPageable(false);
+        setPage(1);
+      } else {
+        // Sin filtros → navegación paginada del catálogo (ope=4 + ope=2 por página).
+        r = await searchFastraxProducts({ page: nextPage, size, only_stock: onlyStock });
+        setPageable(true);
+        setPage(nextPage);
+      }
       setResult(r);
-      setPage(nextPage);
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       toast.error("Búsqueda Fastrax falló", { description: msg });
@@ -159,7 +201,7 @@ export default function AdminFastraxSearch() {
               {loading ? <Loader2 className="size-4 mr-2 animate-spin" /> : <Search className="size-4 mr-2" />}
               Buscar
             </Button>
-            <Button variant="outline" disabled={loading || page <= 1} onClick={() => runSearch(page - 1)}>
+            <Button variant="outline" disabled={loading || !pageable || page <= 1} onClick={() => runSearch(page - 1)}>
               ← Anterior
             </Button>
             <span className="text-sm text-muted-foreground self-center px-2">Página {page}</span>
@@ -167,6 +209,7 @@ export default function AdminFastraxSearch() {
               variant="outline"
               disabled={
                 loading ||
+                !pageable ||
                 // Backend nuevo: usar has_more (página cruda Fastrax llena → hay más).
                 // Fallback (backend viejo): items.length < size.
                 result?.has_more === false ||
@@ -186,7 +229,7 @@ export default function AdminFastraxSearch() {
             <CardTitle className="text-base">Resultados</CardTitle>
             <CardDescription>
               {result?.total != null
-                ? `${result.total} item${result.total === 1 ? "" : "s"}.${result.stats ? ` ope=2 batch: ${result.stats.ok_rows} ok / ${result.stats.missing} missing / ${result.stats.failed} failed.` : ""}`
+                ? `${result.total} item${result.total === 1 ? "" : "s"}.${result.stats ? ` ope=2 batch: ${result.stats.ok_rows} ok / ${result.stats.missing} missing / ${result.stats.failed} failed.` : ""}${result.message ? ` ${result.message}` : ""}`
                 : "Hacé una búsqueda para ver resultados."}
             </CardDescription>
           </div>
@@ -195,7 +238,12 @@ export default function AdminFastraxSearch() {
               {importing ? <Loader2 className="size-4 mr-2 animate-spin" /> : <Download className="size-4 mr-2" />}
               Importar selección ({selected.size})
             </Button>
-            <Button variant="default" disabled={importing || items.length === 0} onClick={() => setConfirmImportPage(true)}>
+            <Button
+              variant="default"
+              disabled={importing || items.length === 0 || !pageable}
+              title={!pageable ? "Disponible al navegar el catálogo (sin filtro de texto/SKU)" : undefined}
+              onClick={() => setConfirmImportPage(true)}
+            >
               <Download className="size-4 mr-2" />
               Importar página
             </Button>
