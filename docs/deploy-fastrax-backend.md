@@ -10,7 +10,7 @@ propio subdominio HTTPS — exactamente el mismo patrón que el `server/` de Tra
 navegador (https://enertechcde.com, en Hostinger)
    │  fetch(VITE_FASTRAX_BACKEND_URL + /api/fastrax/*)  con JWT de Supabase
    ▼
-https://enertech-api.neura.com.py        ← nginx (SSL Let's Encrypt)
+https://api.enertechcde.com        ← nginx (SSL Let's Encrypt)
    │  proxy_pass
    ▼
 127.0.0.1:8788                            ← Node server/ (PM2)  [pg → Postgres, fetch → Fastrax]
@@ -21,7 +21,7 @@ Valores reales de este deploy:
 | | |
 |---|---|
 | Frontend (Hostinger) | `https://enertechcde.com` |
-| Backend (VPS) | `https://enertech-api.neura.com.py` |
+| Backend (VPS) | `https://api.enertechcde.com` |
 | IP de la VPS | `187.77.247.54` (misma que `payments.neura.com.py`) |
 | Puerto Node | `8788` (el 8787 lo usa Tradexpar) |
 
@@ -35,7 +35,7 @@ En el panel DNS de `neura.com.py`, crear un **A record**:
 enertech-api   A   187.77.247.54   (DNS only / sin proxy, igual que payments.neura.com.py)
 ```
 
-Esperá a que resuelva (`nslookup enertech-api.neura.com.py` → 187.77.247.54) antes del paso 4 (certbot).
+Esperá a que resuelva (`nslookup api.enertechcde.com` → 187.77.247.54) antes del paso 4 (certbot).
 
 ---
 
@@ -128,10 +128,10 @@ upstream enertech_node {
 
 server {
     listen 443 ssl http2;
-    server_name enertech-api.neura.com.py;
+    server_name api.enertechcde.com;
 
-    ssl_certificate     /etc/letsencrypt/live/enertech-api.neura.com.py/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/enertech-api.neura.com.py/privkey.pem;
+    ssl_certificate     /etc/letsencrypt/live/api.enertechcde.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/api.enertechcde.com/privkey.pem;
     ssl_protocols TLSv1.2 TLSv1.3;
 
     server_tokens off;
@@ -156,7 +156,7 @@ server {
 
 server {
     listen 80;
-    server_name enertech-api.neura.com.py;
+    server_name api.enertechcde.com;
     return 301 https://$host$request_uri;
 }
 ```
@@ -165,12 +165,12 @@ Activar + certificado:
 
 ```bash
 ln -s /etc/nginx/sites-available/enertech-api.conf /etc/nginx/sites-enabled/
-certbot --nginx -d enertech-api.neura.com.py      # emite/renueva SSL
+certbot --nginx -d api.enertechcde.com      # emite/renueva SSL
 nginx -t && systemctl reload nginx
-curl -s https://enertech-api.neura.com.py/api/health
+curl -s https://api.enertechcde.com/api/health
 ```
 
-> El DNS de `enertech-api.neura.com.py` debe apuntar (A/AAAA) a la IP de la VPS antes de correr certbot.
+> El DNS de `api.enertechcde.com` debe apuntar (A/AAAA) a la IP de la VPS antes de correr certbot.
 
 ## 5. Apuntar el frontend (Hostinger) al backend
 
@@ -179,7 +179,7 @@ En las **environment variables del deployment de Hostinger** (porque `.env.local
 ```ini
 VITE_SUPABASE_URL=https://api.neura.com.py
 VITE_SUPABASE_ANON_KEY=__anon_key__
-VITE_FASTRAX_BACKEND_URL=https://enertech-api.neura.com.py
+VITE_FASTRAX_BACKEND_URL=https://api.enertechcde.com
 ```
 
 Redeploy en Hostinger → el botón **Sincronizar Fastrax** ya pega al backend de la VPS,
@@ -188,6 +188,6 @@ con HTTPS, sin `localhost` ni problemas de CORS.
 ## Checklist de verificación
 
 - [ ] `pm2 logs enertech-api` muestra "escuchando en http://127.0.0.1:8788" y "Fastrax configurado: true"
-- [ ] `curl https://enertech-api.neura.com.py/api/health` → `ok:true`
+- [ ] `curl https://api.enertechcde.com/api/health` → `ok:true`
 - [ ] En el sitio de Hostinger, **Sincronizar Fastrax → Probar conexión** responde la versión Fastrax
 - [ ] **Vista previa (dry-run)** lista productos; **Aplicar** recién cuando lo decidas
