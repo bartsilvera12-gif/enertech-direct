@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   searchFastraxProducts,
-  searchFastraxGlobal,
   importFastraxSkus,
   importFastraxPage,
   type FastraxSearchItem,
@@ -62,10 +61,36 @@ export default function AdminFastraxSearch() {
         setPageable(false);
         setPage(1);
       } else if (text) {
-        // Búsqueda por texto → catálogo COMPLETO (multi-página ope=4 hasta el tope).
-        // ope=4 no filtra por término, así que el endpoint de una sola página solo
-        // "encontraba" si el match caía en esa página; global recorre varias.
-        r = await searchFastraxGlobal({ q: text, only_stock: onlyStock });
+        // Búsqueda por texto: Fastrax ope=4 no filtra por término, así que el
+        // /search de una sola página solo "encontraba" si el match caía en esa
+        // página. Acá recorremos varias páginas con /search (que enriquece cada
+        // fila con ope=2, por eso sí trae nombre/marca/desc para matchear) y
+        // acumulamos coincidencias. `has_more` corta cuando la página ope=4 vino
+        // incompleta (última página).
+        const MAX_PAGES = 20;
+        const MAX_HITS = 100;
+        const seen = new Set<string>();
+        const acc: FastraxSearchItem[] = [];
+        let scanned = 0;
+        for (let p = 1; p <= MAX_PAGES; p += 1) {
+          const rp = await searchFastraxProducts({ q: text, page: p, size: 20, only_stock: onlyStock });
+          scanned = p;
+          for (const it of rp.items ?? []) {
+            if (seen.has(it.fastrax_sku)) continue;
+            seen.add(it.fastrax_sku);
+            acc.push(it);
+          }
+          if (acc.length >= MAX_HITS) break;
+          if (rp.has_more !== true) break; // página incompleta → no hay más catálogo
+        }
+        const capped = acc.length >= MAX_HITS || scanned >= MAX_PAGES;
+        r = {
+          ok: true,
+          ope: "scan",
+          total: acc.length,
+          items: acc.slice(0, MAX_HITS),
+          message: `Escaneadas ${scanned} pág.${capped ? " (tope alcanzado — refiná el término o usá SKU exacto)" : ""}`,
+        };
         setPageable(false);
         setPage(1);
       } else {
@@ -204,7 +229,7 @@ export default function AdminFastraxSearch() {
             <CardTitle className="text-base">Resultados</CardTitle>
             <CardDescription>
               {result?.total != null
-                ? `${result.total} item${result.total === 1 ? "" : "s"}.${result.stats ? ` ope=2 batch: ${result.stats.ok_rows} ok / ${result.stats.missing} missing / ${result.stats.failed} failed.` : ""}`
+                ? `${result.total} item${result.total === 1 ? "" : "s"}.${result.stats ? ` ope=2 batch: ${result.stats.ok_rows} ok / ${result.stats.missing} missing / ${result.stats.failed} failed.` : ""}${result.message ? ` ${result.message}` : ""}`
                 : "Hacé una búsqueda para ver resultados."}
             </CardDescription>
           </div>
